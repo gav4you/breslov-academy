@@ -25,10 +25,10 @@ export default function Layout({ children, currentPageName }) {
 
   const navigation = [
     { name: 'Dashboard', path: 'Dashboard', icon: BookOpen },
-    { name: 'Courses', path: 'Marketplace', icon: GraduationCap },
     { name: 'Talmud', path: 'TalmudStudy', icon: BookOpen },
+    { name: 'Torah', path: 'TorahStudy', icon: Menu },
     { name: 'Kabbalah', path: 'KabbalahStudy', icon: Crown },
-    { name: 'Leaderboard', path: 'Leaderboard', icon: Trophy },
+    { name: 'Halacha', path: 'HalachaGuide', icon: Menu },
   ];
 
   return (

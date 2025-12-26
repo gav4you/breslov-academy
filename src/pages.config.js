@@ -36,6 +36,8 @@ import Subscription from './pages/Subscription';
 import Tournaments from './pages/Tournaments';
 import TalmudStudy from './pages/TalmudStudy';
 import KabbalahStudy from './pages/KabbalahStudy';
+import HalachaGuide from './pages/HalachaGuide';
+import TorahStudy from './pages/TorahStudy';
 import __Layout from './Layout.jsx';
 
 
@@ -78,6 +80,8 @@ export const PAGES = {
     "Tournaments": Tournaments,
     "TalmudStudy": TalmudStudy,
     "KabbalahStudy": KabbalahStudy,
+    "HalachaGuide": HalachaGuide,
+    "TorahStudy": TorahStudy,
 }
 
 export const pagesConfig = {
