@@ -47,7 +47,7 @@ export default function Layout({ children, currentPageName }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Link to={createPageUrl('Dashboard')} className="flex items-center space-x-3 group">
+            <Link to={createPageUrl(user?.role === 'admin' ? 'InstructorDashboard' : 'Dashboard')} className="flex items-center space-x-3 group">
               <motion.div 
                 whileHover={{ scale: 1.1, rotate: 6 }}
                 whileTap={{ scale: 0.95 }}

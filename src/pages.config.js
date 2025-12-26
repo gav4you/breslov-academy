@@ -59,6 +59,8 @@ import TorahStudy from './pages/TorahStudy';
 import Tournaments from './pages/Tournaments';
 import Webinars from './pages/Webinars';
 import SederPaths from './pages/SederPaths';
+import StudentLogin from './pages/StudentLogin';
+import TeacherLogin from './pages/TeacherLogin';
 import __Layout from './Layout.jsx';
 
 
@@ -124,6 +126,8 @@ export const PAGES = {
     "Tournaments": Tournaments,
     "Webinars": Webinars,
     "SederPaths": SederPaths,
+    "StudentLogin": StudentLogin,
+    "TeacherLogin": TeacherLogin,
 }
 
 export const pagesConfig = {
