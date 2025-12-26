@@ -68,9 +68,12 @@ export default function KviusEngine({ userEmail, streak }) {
   return (
     <Card className="glass-effect border-0 premium-shadow-lg rounded-[2rem]">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 font-serif">
+        <CardTitle className="flex items-center gap-3 font-serif">
           <Clock className="w-5 h-5 text-blue-600" />
-          Kvius - Fixed Study Times
+          <div>
+            <div className="text-2xl font-black text-slate-900">Kvius Itim LaTorah</div>
+            <div className="text-sm text-slate-600 font-normal" dir="rtl">קביעות עתים לתורה</div>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">

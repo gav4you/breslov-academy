@@ -62,7 +62,11 @@ export default function RebbeDashboard({ instructorEmail, students, courses }) {
       {/* Personal Messages - "Tish" Communication */}
       <Card className="glass-effect border-0 premium-shadow-lg rounded-[2rem]">
         <CardContent className="p-8">
-          <h3 className="text-2xl font-black text-slate-900 mb-6 font-serif">The Rebbe's Tish - Personal Guidance</h3>
+          <div className="mb-6">
+            <h3 className="text-3xl font-black text-slate-900 font-serif mb-2">The Rebbe's Tish</h3>
+            <p className="text-amber-700 font-serif" dir="rtl">טיש של הרבי - הדרכה אישית</p>
+            <p className="text-slate-600 mt-2">Personal guidance and connection with your Talmidim</p>
+          </div>
           
           <div className="grid md:grid-cols-2 gap-6">
             {/* Student Selection */}

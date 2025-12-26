@@ -278,14 +278,14 @@ export default function LessonViewer() {
               {renderPanel(activePanel)}
             </div>
 
-            {/* Study Tool Palette - Academic Style */}
-            <div className="flex items-center justify-center gap-3">
+            {/* Torah Study Palette - Beis Medrash Style */}
+            <div className="flex items-center justify-center gap-3 flex-wrap">
               {[
-                { id: 'video', label: 'Lecture', icon: Maximize2, enabled: !!lesson.video_url },
-                { id: 'text', label: 'Source Text', icon: BookOpen, enabled: !!(sourceText?.hebrew || sourceText?.english) },
-                { id: 'notes', label: 'Notes', icon: FileText, enabled: true },
+                { id: 'video', label: 'Shiur Video', icon: Maximize2, enabled: !!lesson.video_url },
+                { id: 'text', label: 'Mekor (Source)', icon: BookOpen, enabled: !!(sourceText?.hebrew || sourceText?.english) },
+                { id: 'notes', label: 'Chidushim', icon: FileText, enabled: true },
                 { id: 'chavruta', label: 'Chavruta AI', icon: Users, enabled: true },
-                { id: 'discussion', label: 'Forum', icon: MessageSquare, enabled: true }
+                { id: 'discussion', label: 'Beis Medrash', icon: MessageSquare, enabled: true }
               ].filter(t => t.enabled).map(tool => {
                 const Icon = tool.icon;
                 return (
@@ -322,7 +322,7 @@ export default function LessonViewer() {
                   className="rounded-xl font-serif hover:scale-105 transition-transform"
                 >
                   <Users className="w-4 h-4 mr-2" />
-                  Chavruta Partner
+                  AI Chavrusa
                 </Button>
                 <Button
                   onClick={() => setActivePanel('discussion')}
@@ -330,7 +330,7 @@ export default function LessonViewer() {
                   className="rounded-xl font-serif hover:scale-105 transition-transform"
                 >
                   <MessageSquare className="w-4 h-4 mr-2" />
-                  Class Forum
+                  Beis Medrash
                 </Button>
               </div>
             </div>

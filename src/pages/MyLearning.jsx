@@ -64,9 +64,13 @@ export default function MyLearning() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          className="space-y-3"
         >
-          <h1 className="text-5xl font-black text-slate-900 mb-2">My Learning</h1>
-          <p className="text-xl text-slate-600">Track your progress across all courses</p>
+          <div>
+            <h1 className="text-5xl md:text-6xl font-black text-slate-900 mb-2 tracking-tight">My Torah Journey</h1>
+            <p className="text-xl text-amber-700 font-serif mb-2" dir="rtl">מסע הלימוד שלי</p>
+            <p className="text-xl text-slate-600 font-light">Track your sacred learning path and spiritual growth</p>
+          </div>
         </motion.div>
 
         <LearningAnalyticsDashboard userEmail={user?.email} />

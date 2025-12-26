@@ -366,6 +366,58 @@ export default function Dashboard() {
 
           </div>
         </motion.div>
+
+        {/* Jewish Time & Zmanim */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+          className="grid md:grid-cols-2 gap-6"
+        >
+          <div className="space-y-6">
+            <Link to={createPageUrl('Languages')}>
+              <Card className="card-modern border-white/60 premium-shadow hover:premium-shadow-xl transition-all duration-500 cursor-pointer rounded-[2.5rem] overflow-hidden group">
+                <div className="relative bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-900 p-8">
+                  <div className="absolute inset-0 opacity-20">
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-purple-400 rounded-full blur-[80px] group-hover:blur-[100px] transition-all" />
+                  </div>
+                  <CardContent className="relative p-0 space-y-4">
+                    <div className="text-6xl">📚</div>
+                    <div>
+                      <h3 className="text-3xl font-black text-white mb-2">Lashon Hakodesh</h3>
+                      <p className="text-slate-300 font-serif" dir="rtl">לימוד לשונות הקודש</p>
+                      <p className="text-slate-400 mt-3">Master Hebrew, Aramaic & Yiddish through immersive learning</p>
+                    </div>
+                  </CardContent>
+                </div>
+              </Card>
+            </Link>
+
+            <Link to={createPageUrl('SederPaths')}>
+              <Card className="card-modern border-white/60 premium-shadow hover:premium-shadow-xl transition-all duration-500 cursor-pointer rounded-[2.5rem] overflow-hidden group">
+                <div className="relative bg-gradient-to-br from-amber-900 via-orange-900 to-red-900 p-8">
+                  <div className="absolute inset-0 opacity-20">
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-400 rounded-full blur-[80px] group-hover:blur-[100px] transition-all" />
+                  </div>
+                  <CardContent className="relative p-0 space-y-4">
+                    <div className="text-6xl">🎯</div>
+                    <div>
+                      <h3 className="text-3xl font-black text-white mb-2">Seder Limud</h3>
+                      <p className="text-amber-300 font-serif" dir="rtl">סדר לימוד מובנה</p>
+                      <p className="text-slate-300 mt-3">Structured learning paths through Likutey Moharan</p>
+                    </div>
+                  </CardContent>
+                </div>
+              </Card>
+            </Link>
+          </div>
+
+          <div className="space-y-6">
+            <div id="zmanim-widget">
+              {/* Zmanim will be rendered here */}
+            </div>
+          </div>
+        </motion.div>
       </div>
     </div>
   );
