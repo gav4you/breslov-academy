@@ -248,8 +248,9 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.8 }}
+          whileHover={{ scale: 1.01 }}
         >
-          <Card className="relative overflow-hidden border border-amber-100/50 premium-shadow-xl rounded-[3rem]">
+          <Card className="relative overflow-hidden border border-amber-100/50 premium-shadow-xl rounded-[3rem] hover-lift">
             <div className="absolute inset-0 bg-gradient-to-br from-amber-50/80 via-orange-50/60 to-blue-50/80 backdrop-blur-3xl" />
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-200 rounded-full blur-[140px] opacity-20" />
             

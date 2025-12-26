@@ -89,7 +89,10 @@ export default function TalmudStudy() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6">
+                  <motion.div 
+                    whileHover={{ scale: 1.05, rotate: 1 }}
+                    className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 cursor-pointer transition-all hover:shadow-lg"
+                  >
                     <div className="flex items-center space-x-3 mb-2">
                       <BookOpen className="w-5 h-5 text-blue-600" />
                       <span className="text-slate-600 font-medium">Current Daf</span>
@@ -97,9 +100,12 @@ export default function TalmudStudy() {
                     <p className="text-3xl font-bold text-blue-900">
                       {dafYomiProgress.current_masechta} {dafYomiProgress.current_daf}
                     </p>
-                  </div>
+                  </motion.div>
                   
-                  <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6">
+                  <motion.div 
+                    whileHover={{ scale: 1.05, rotate: -1 }}
+                    className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 cursor-pointer transition-all hover:shadow-lg"
+                  >
                     <div className="flex items-center space-x-3 mb-2">
                       <CheckCircle className="w-5 h-5 text-green-600" />
                       <span className="text-slate-600 font-medium">Completed</span>
@@ -107,17 +113,20 @@ export default function TalmudStudy() {
                     <p className="text-3xl font-bold text-green-900">
                       {dafYomiProgress.total_dapim_completed}
                     </p>
-                  </div>
+                  </motion.div>
 
-                  <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-6">
+                  <motion.div 
+                    whileHover={{ scale: 1.05, rotate: 1 }}
+                    className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-6 cursor-pointer transition-all hover:shadow-lg"
+                  >
                     <div className="flex items-center space-x-3 mb-2">
-                      <Flame className="w-5 h-5 text-amber-600" />
+                      <Flame className="w-5 h-5 text-amber-600 animate-pulse" />
                       <span className="text-slate-600 font-medium">Streak</span>
                     </div>
                     <p className="text-3xl font-bold text-amber-900">
                       {dafYomiProgress.current_streak} days
                     </p>
-                  </div>
+                  </motion.div>
                 </div>
               </CardContent>
             </Card>

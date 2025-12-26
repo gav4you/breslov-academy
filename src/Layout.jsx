@@ -6,6 +6,8 @@ import { BookOpen, GraduationCap, TrendingUp, Crown, Menu, X, LogOut, Trophy } f
 import { Button } from '@/components/ui/button';
 import ThemeToggle from '@/components/theme/ThemeToggle';
 import NotificationCenter from '@/components/notifications/NotificationCenter';
+import SkipToContent from '@/components/accessibility/SkipToContent';
+import { motion } from 'framer-motion';
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
@@ -33,17 +35,22 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="min-h-screen gradient-mesh bg-slate-50">
+      <SkipToContent />
       {/* Header */}
       <header className="bg-slate-900/95 backdrop-blur-xl border-b border-white/10 premium-shadow-lg sticky top-0 z-50 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link to={createPageUrl('Dashboard')} className="flex items-center space-x-3 group">
-              <div className="w-12 h-12 bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-xl group-hover:shadow-amber-400/60 transition-all group-hover:scale-110 group-hover:rotate-6 duration-300">
+              <motion.div 
+                whileHover={{ scale: 1.1, rotate: 6 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-12 h-12 bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-xl group-hover:shadow-amber-400/60 transition-all duration-300"
+              >
                 <BookOpen className="w-7 h-7 text-white drop-shadow-lg" />
-              </div>
+              </motion.div>
               <div>
-                <h1 className="text-xl font-black text-white">Breslov Academy</h1>
+                <h1 className="text-xl font-black text-white tracking-tight">Breslov Academy</h1>
                 <p className="text-xs text-amber-400 font-semibold">Torah of Rebbe Nachman</p>
               </div>
             </Link>
@@ -144,7 +151,7 @@ export default function Layout({ children, currentPageName }) {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
 

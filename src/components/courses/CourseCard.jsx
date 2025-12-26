@@ -32,10 +32,11 @@ export default function CourseCard({ course, userTier = 'free' }) {
     <Link to={createPageUrl(`CourseDetail?id=${course.id}`)}>
       <motion.div
         whileHover={hasAccess ? { y: -12, scale: 1.02 } : {}}
+        whileTap={hasAccess ? { scale: 0.98 } : {}}
         transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
         className="h-full"
       >
-        <Card className="group overflow-hidden card-modern border-white/60 premium-shadow hover:premium-shadow-xl transition-all duration-500 cursor-pointer h-full rounded-[2.5rem]">
+        <Card className="group overflow-hidden card-modern border-white/60 premium-shadow hover:premium-shadow-xl transition-all duration-500 cursor-pointer h-full rounded-[2.5rem] hover-lift">
           <div className="relative h-56 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
             {course.thumbnail_url ? (
               <img 
