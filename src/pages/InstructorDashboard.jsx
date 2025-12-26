@@ -57,52 +57,58 @@ export default function InstructorDashboard() {
   return (
     <div className="min-h-screen gradient-mesh bg-slate-50">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
+        {/* Enhanced Header with Analytics */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between"
+          transition={{ duration: 0.6 }}
+          className="relative overflow-hidden rounded-[3rem] premium-shadow-xl"
         >
-          <div>
-            <h1 className="text-4xl font-black text-slate-900 mb-2">Instructor Dashboard</h1>
-            <p className="text-slate-600 text-lg">Welcome back, {user?.full_name}</p>
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-950 via-indigo-950 to-slate-950" />
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500 rounded-full blur-[120px] animate-pulse" />
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
           </div>
-          <Link to={createPageUrl('CourseBuilder')}>
-            <Button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-2xl">
-              <Plus className="w-5 h-5 mr-2" />
-              Create Course
-            </Button>
-          </Link>
-        </motion.div>
+          
+          <div className="relative p-10 space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-5xl font-black text-white mb-2">Instructor Dashboard</h1>
+                <p className="text-slate-300 text-lg">Welcome back, {user?.full_name}</p>
+              </div>
+              <Link to={createPageUrl('CourseBuilder')}>
+                <Button className="bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold rounded-2xl hover:shadow-2xl transition-all">
+                  <Plus className="w-5 h-5 mr-2" />
+                  Create Course
+                </Button>
+              </Link>
+            </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((stat, idx) => {
-            const Icon = stat.icon;
-            return (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                whileHover={{ y: -4 }}
-              >
-                <Card className="glass-effect border-0 premium-shadow hover:premium-shadow-lg transition-all rounded-[2rem]">
-                  <div className={`h-2 bg-gradient-to-r ${stat.color}`} />
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className={`p-3 bg-gradient-to-br ${stat.color} rounded-xl shadow-lg`}>
-                        <Icon className="w-6 h-6 text-white" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {stats.map((stat, idx) => {
+                const Icon = stat.icon;
+                return (
+                  <motion.div
+                    key={stat.label}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.1 }}
+                    whileHover={{ scale: 1.05, y: -4 }}
+                    className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-5 shadow-xl hover:shadow-2xl transition-all"
+                  >
+                    <div className="flex items-center space-x-3 mb-2">
+                      <div className={`p-2 bg-gradient-to-br ${stat.color} rounded-lg`}>
+                        <Icon className="w-5 h-5 text-white" />
                       </div>
+                      <div className="text-white font-black text-2xl">{stat.value}</div>
                     </div>
-                    <div className="text-3xl font-black text-slate-900 mb-1">{stat.value}</div>
-                    <div className="text-sm text-slate-600 font-medium">{stat.label}</div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </div>
+                    <div className="text-slate-300 text-sm font-medium">{stat.label}</div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </motion.div>
 
         {/* My Courses */}
         <div className="space-y-6">
