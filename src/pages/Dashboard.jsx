@@ -56,6 +56,15 @@ export default function Dashboard() {
     enabled: !!user?.email
   });
 
+  const { data: userLevel } = useQuery({
+    queryKey: ['userLevel', user?.email],
+    queryFn: async () => {
+      const levels = await base44.entities.UserLevel.filter({ user_email: user.email });
+      return levels[0] || { current_level: 'Initiate', experience_points: 0, lessons_completed: 0 };
+    },
+    enabled: !!user?.email
+  });
+
   useEffect(() => {
     if (subscription?.tier) {
       setUserTier(subscription.tier);
@@ -99,25 +108,60 @@ export default function Dashboard() {
 
   const todayWisdom = dailyWisdom[new Date().getDay() % dailyWisdom.length];
 
+  const levelInfo = {
+    Initiate: { next: 'Student', pointsNeeded: 100, color: 'from-slate-400 to-slate-500' },
+    Student: { next: 'Scholar', pointsNeeded: 500, color: 'from-blue-400 to-blue-500' },
+    Scholar: { next: 'Sage', pointsNeeded: 1500, color: 'from-purple-400 to-purple-500' },
+    Sage: { next: 'Master', pointsNeeded: 3000, color: 'from-amber-400 to-amber-500' },
+    Master: { next: null, pointsNeeded: null, color: 'from-amber-500 to-amber-600' }
+  };
+
+  const currentLevelInfo = levelInfo[userLevel?.current_level || 'Initiate'];
+  const progressToNext = currentLevelInfo.pointsNeeded 
+    ? ((userLevel?.experience_points || 0) / currentLevelInfo.pointsNeeded) * 100 
+    : 100;
+
   return (
-    <div className="space-y-8 max-w-6xl mx-auto">
-      {/* Welcome Header */}
-      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-8 md:p-12 shadow-2xl border border-slate-700">
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
-          Shalom, {user?.full_name?.split(' ')[0] || 'Student'}
-        </h1>
-        <p className="text-slate-300 text-lg md:text-xl mb-6">
-          Continue your journey through the teachings of Rebbe Nachman of Breslov
-        </p>
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center space-x-2 bg-white/10 rounded-full px-4 py-2">
-            <Flame className="w-5 h-5 text-amber-400" />
-            <span className="text-white font-semibold">{studyStreak?.current_streak || 0} Day Streak</span>
+    <div className="space-y-6 md:space-y-8">
+      {/* Welcome Header with Level */}
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-6 md:p-10 shadow-2xl border border-slate-700">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div>
+            <div className="flex items-center space-x-3 mb-2">
+              <h1 className="text-3xl md:text-5xl font-bold text-white">
+                Shalom, {user?.full_name?.split(' ')[0] || 'Student'}
+              </h1>
+              <div className={`bg-gradient-to-r ${currentLevelInfo.color} px-4 py-1 rounded-full`}>
+                <span className="text-white font-bold text-sm">{userLevel?.current_level || 'Initiate'}</span>
+              </div>
+            </div>
+            <p className="text-slate-300 text-base md:text-lg mb-4">
+              Continue your journey through the teachings of Rebbe Nachman of Breslov
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+                <Flame className="w-5 h-5 text-amber-400" />
+                <span className="text-white font-semibold text-sm">{studyStreak?.current_streak || 0} Day Streak</span>
+              </div>
+              <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+                <Trophy className="w-5 h-5 text-amber-400" />
+                <span className="text-white font-semibold text-sm">{completedLessons} Lessons</span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center space-x-2 bg-white/10 rounded-full px-4 py-2">
-            <Trophy className="w-5 h-5 text-amber-400" />
-            <span className="text-white font-semibold">{completedLessons} Lessons Completed</span>
-          </div>
+
+          {/* Level Progress */}
+          {currentLevelInfo.next && (
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20 text-white min-w-[280px]">
+              <CardContent className="p-4">
+                <div className="text-sm text-slate-300 mb-2">Progress to {currentLevelInfo.next}</div>
+                <Progress value={progressToNext} className="h-2 mb-2 bg-white/20" />
+                <div className="text-xs text-slate-300">
+                  {userLevel?.experience_points || 0} / {currentLevelInfo.pointsNeeded} XP
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 
