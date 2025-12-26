@@ -23,6 +23,8 @@ import RewardsShop from './pages/RewardsShop';
 import Mentorship from './pages/Mentorship';
 import Feed from './pages/Feed';
 import Portfolio from './pages/Portfolio';
+import AdaptiveLearning from './pages/AdaptiveLearning';
+import Tournaments from './pages/Tournaments';
 import __Layout from './Layout.jsx';
 
 
@@ -52,6 +54,8 @@ export const PAGES = {
     "Mentorship": Mentorship,
     "Feed": Feed,
     "Portfolio": Portfolio,
+    "AdaptiveLearning": AdaptiveLearning,
+    "Tournaments": Tournaments,
 }
 
 export const pagesConfig = {
