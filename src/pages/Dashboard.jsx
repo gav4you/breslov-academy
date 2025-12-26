@@ -120,89 +120,94 @@ export default function Dashboard() {
     : 100;
 
   return (
-    <div className="min-h-screen gradient-mesh bg-slate-50">
-      <div className="max-w-7xl mx-auto space-y-8 md:space-y-10">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20">
+      <div className="max-w-7xl mx-auto space-y-12 md:space-y-16 px-4 py-8 md:py-12">
         {/* Welcome Header - Oxford Inspired */}
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="relative overflow-hidden rounded-[2rem] premium-shadow-lg"
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="relative overflow-hidden rounded-[3rem] premium-shadow-xl"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900" />
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute top-20 right-20 w-96 h-96 bg-blue-500 rounded-full blur-[120px]" />
-            <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500 rounded-full blur-[120px]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-950" />
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-400 rounded-full blur-[140px] animate-pulse" />
+            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-400 rounded-full blur-[140px] animate-pulse" style={{ animationDelay: '1s' }} />
           </div>
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjAyIi8+PC9nPjwvc3ZnPg==')] opacity-20" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-950/20" />
           
-          <div className="relative p-8 md:p-14">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-              <div className="flex-1">
+          <div className="relative p-10 md:p-16">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
+              <div className="flex-1 space-y-8">
                 <motion.div 
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="flex items-center space-x-4 mb-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.6 }}
                 >
-                  <div className="p-3 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl shadow-lg animate-float">
-                    <GraduationCap className="w-8 h-8 text-white" />
+                  <div className="inline-flex items-center space-x-3 mb-6">
+                    <div className="p-2.5 bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 rounded-xl shadow-xl">
+                      <GraduationCap className="w-7 h-7 text-white" />
+                    </div>
+                    <span className="text-amber-300 font-semibold text-sm tracking-wider uppercase">Breslov Academy</span>
                   </div>
-                  <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight">
-                    Shalom, {user?.full_name?.split(' ')[0] || 'Student'}
+                  <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white tracking-tight leading-none mb-4">
+                    Shalom,<br />
+                    <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 text-transparent bg-clip-text">
+                      {user?.full_name?.split(' ')[0] || 'Student'}
+                    </span>
                   </h1>
+                  <p className="text-slate-300 text-lg md:text-xl font-light leading-relaxed max-w-2xl">
+                    Continue your scholarly journey through the profound wisdom of Rebbe Nachman of Breslov
+                  </p>
                 </motion.div>
-                <p className="text-slate-200 text-xl md:text-2xl mb-8 font-light leading-relaxed">
-                  Continue your scholarly journey through the wisdom of Rebbe Nachman of Breslov
-                </p>
                 
-                <div className="flex flex-wrap items-center gap-4">
+                <div className="flex flex-wrap items-center gap-3">
                   <motion.div 
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    whileHover={{ scale: 1.08, y: -2 }}
-                    className="glass-effect rounded-2xl px-6 py-3.5 shadow-xl"
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl px-5 py-3 shadow-xl"
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl animate-glow">
-                        <Flame className="w-5 h-5 text-white" />
+                      <div className="p-2 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg">
+                        <Flame className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-white font-black text-xl">{studyStreak?.current_streak || 0}</div>
-                        <div className="text-slate-300 text-xs font-medium">Day Streak</div>
+                        <div className="text-white font-bold text-lg">{studyStreak?.current_streak || 0}</div>
+                        <div className="text-slate-300 text-xs">Day Streak</div>
                       </div>
                     </div>
                   </motion.div>
                   
                   <motion.div 
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
-                    whileHover={{ scale: 1.08, y: -2 }}
-                    className="glass-effect rounded-2xl px-6 py-3.5 shadow-xl"
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl px-5 py-3 shadow-xl"
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl">
-                        <Trophy className="w-5 h-5 text-white" />
+                      <div className="p-2 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg">
+                        <Trophy className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-white font-black text-xl">{completedLessons}</div>
-                        <div className="text-slate-300 text-xs font-medium">Lessons</div>
+                        <div className="text-white font-bold text-lg">{completedLessons}</div>
+                        <div className="text-slate-300 text-xs">Lessons</div>
                       </div>
                     </div>
                   </motion.div>
 
                   <motion.div 
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.6 }}
-                    whileHover={{ scale: 1.08, y: -2 }}
-                    className={`glass-effect rounded-2xl px-6 py-3.5 shadow-xl bg-gradient-to-r ${currentLevelInfo.color}`}
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    className={`backdrop-blur-xl bg-gradient-to-r ${currentLevelInfo.color} border border-white/20 rounded-2xl px-5 py-3 shadow-xl`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <Sparkles className="w-5 h-5 text-white animate-pulse" />
-                      <div className="text-white font-black text-lg">{userLevel?.current_level || 'Initiate'}</div>
+                    <div className="flex items-center space-x-2">
+                      <Sparkles className="w-4 h-4 text-white" />
+                      <div className="text-white font-bold">{userLevel?.current_level || 'Initiate'}</div>
                     </div>
                   </motion.div>
                 </div>
@@ -211,23 +216,25 @@ export default function Dashboard() {
               {/* Level Progress Card */}
               {currentLevelInfo.next && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.7 }}
-                  className="glass-effect rounded-3xl p-8 min-w-[320px] shadow-2xl"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.7, duration: 0.6 }}
+                  className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-8 min-w-[280px] shadow-2xl"
                 >
-                  <div className="text-slate-200 text-sm mb-4 font-semibold uppercase tracking-wider">Next Rank</div>
-                  <div className="text-white text-3xl font-black mb-6">{currentLevelInfo.next}</div>
-                  <div className="relative h-4 bg-white/10 rounded-full overflow-hidden mb-4 shadow-inner">
+                  <div className="text-slate-300 text-xs mb-2 font-semibold uppercase tracking-widest">Next Rank</div>
+                  <div className="text-white text-2xl font-black mb-6">{currentLevelInfo.next}</div>
+                  <div className="relative h-3 bg-white/10 rounded-full overflow-hidden mb-4">
                     <motion.div 
                       initial={{ width: 0 }}
                       animate={{ width: `${progressToNext}%` }}
-                      transition={{ duration: 1.2, delay: 0.9, ease: "easeOut" }}
-                      className={`h-full bg-gradient-to-r ${currentLevelInfo.color} shadow-lg`}
-                    />
+                      transition={{ duration: 1.5, delay: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                      className={`h-full bg-gradient-to-r ${currentLevelInfo.color} relative`}
+                    >
+                      <div className="absolute inset-0 bg-white/20 animate-shimmer" />
+                    </motion.div>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-300 font-medium">{userLevel?.experience_points || 0} XP</span>
+                    <span className="text-slate-300">{userLevel?.experience_points || 0} XP</span>
                     <span className="text-white font-bold">{currentLevelInfo.pointsNeeded} XP</span>
                   </div>
                 </motion.div>
@@ -240,32 +247,28 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.7 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
         >
-          <Card className="relative overflow-hidden border-0 premium-shadow-lg rounded-[2rem]">
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-orange-50 to-blue-50" />
-            <div className="absolute top-0 right-0 w-96 h-96 bg-amber-300 rounded-full blur-[100px] opacity-30 animate-pulse" />
+          <Card className="relative overflow-hidden border border-amber-100/50 premium-shadow-xl rounded-[3rem]">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-50/80 via-orange-50/60 to-blue-50/80 backdrop-blur-3xl" />
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-200 rounded-full blur-[140px] opacity-20" />
             
-            <CardHeader className="relative pb-6">
-              <CardTitle className="text-3xl font-black text-slate-900 flex items-center space-x-4">
-                <div className="p-3 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl shadow-lg">
-                  <Star className="w-6 h-6 text-white" />
-                </div>
-                <span>Daily Wisdom</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="relative pb-8">
-              <div className="border-l-4 border-amber-500 pl-10 py-6">
-                <blockquote className="space-y-6">
-                  <p className="text-slate-800 text-2xl md:text-4xl font-serif leading-[1.6] font-semibold">
-                    "{todayWisdom.text}"
-                  </p>
-                  <footer className="flex items-center space-x-3 pt-4">
-                    <div className="h-0.5 flex-1 bg-gradient-to-r from-amber-400 to-transparent rounded-full" />
-                    <cite className="text-slate-700 font-bold text-lg not-italic">{todayWisdom.source}</cite>
-                  </footer>
-                </blockquote>
+            <CardHeader className="relative pb-8 pt-10">
+              <div className="inline-flex items-center space-x-3 bg-amber-100/80 backdrop-blur-sm px-4 py-2 rounded-full mb-4">
+                <Star className="w-4 h-4 text-amber-600" />
+                <span className="text-amber-800 font-bold text-sm">Daily Wisdom</span>
               </div>
+            </CardHeader>
+            <CardContent className="relative pb-12 px-10">
+              <blockquote className="space-y-8">
+                <p className="text-slate-800 text-2xl md:text-4xl lg:text-5xl font-serif leading-[1.5] font-medium">
+                  "{todayWisdom.text}"
+                </p>
+                <footer className="flex items-center space-x-4 pt-6">
+                  <div className="h-px flex-1 bg-gradient-to-r from-amber-300 via-amber-400 to-transparent" />
+                  <cite className="text-slate-600 font-semibold text-base not-italic">{todayWisdom.source}</cite>
+                </footer>
+              </blockquote>
             </CardContent>
           </Card>
         </motion.div>
@@ -276,101 +279,56 @@ export default function Dashboard() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.6 }}
+          className="space-y-10"
         >
-          <div className="flex items-center space-x-4 mb-8">
-            <div className="h-1.5 w-16 bg-gradient-to-r from-amber-500 via-amber-400 to-transparent rounded-full" />
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900">Torah Learning Paths</h2>
+          <div className="space-y-3">
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.7 }}
+              className="inline-flex items-center space-x-2"
+            >
+              <div className="h-1 w-12 bg-gradient-to-r from-slate-900 to-slate-400 rounded-full" />
+              <span className="text-slate-500 font-semibold text-sm uppercase tracking-widest">Your Path</span>
+            </motion.div>
+            <h2 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight">Torah Learning Paths</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              whileHover={{ y: -8 }}
-            >
-              <Link to={createPageUrl('TalmudStudy')}>
-                <Card className="glass-effect border-0 premium-shadow hover:premium-shadow-lg transition-all duration-500 group cursor-pointer h-full rounded-[2rem]">
-                  <CardContent className="p-8">
-                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-700 rounded-3xl flex items-center justify-center text-5xl mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl">
-                      📖
-                    </div>
-                    <h3 className="text-3xl font-black text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">Talmud</h3>
-                    <p className="text-slate-600 font-medium mb-6">Gemara, Mishnah & Daf Yomi</p>
-                    <Button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold shadow-lg">
-                      Begin Study
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Link>
-            </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { name: 'Talmud', desc: 'Gemara, Mishnah & Daf Yomi', icon: '📖', color: 'from-blue-500 to-blue-600', path: 'TalmudStudy', delay: 0.8 },
+              { name: 'Torah', desc: 'Chumash, Parsha & Rashi', icon: '📜', color: 'from-green-500 to-green-600', path: 'TorahStudy', delay: 0.9 },
+              { name: 'Kabbalah', desc: 'Zohar & Mystical Wisdom', icon: '✨', color: 'from-purple-500 to-purple-600', path: 'KabbalahStudy', delay: 1.0 },
+              { name: 'Halacha', desc: 'Jewish Law & Practice', icon: '⚖️', color: 'from-amber-500 to-amber-600', path: 'HalachaGuide', delay: 1.1 }
+            ].map((item, idx) => (
+              <motion.div
+                key={item.name}
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: item.delay, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ y: -12, transition: { duration: 0.3 } }}
+              >
+                <Link to={createPageUrl(item.path)}>
+                  <Card className="card-modern border-white/60 premium-shadow hover:premium-shadow-xl transition-all duration-500 group cursor-pointer h-full rounded-[2.5rem] overflow-hidden">
+                    <CardContent className="p-8 space-y-6">
+                      <div className={`w-20 h-20 bg-gradient-to-br ${item.color} rounded-[1.5rem] flex items-center justify-center text-5xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-xl`}>
+                        {item.icon}
+                      </div>
+                      <div>
+                        <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">{item.name}</h3>
+                        <p className="text-slate-600 font-medium leading-relaxed">{item.desc}</p>
+                      </div>
+                      <Button className={`w-full bg-gradient-to-r ${item.color} hover:shadow-xl text-white font-bold py-6 rounded-2xl transition-all duration-300`}>
+                        Begin Study
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </motion.div>
+            ))}
 
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-              whileHover={{ y: -8 }}
-            >
-              <Link to={createPageUrl('TorahStudy')}>
-                <Card className="glass-effect border-0 premium-shadow hover:premium-shadow-lg transition-all duration-500 group cursor-pointer h-full rounded-[2rem]">
-                  <CardContent className="p-8">
-                    <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-700 rounded-3xl flex items-center justify-center text-5xl mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl">
-                      📜
-                    </div>
-                    <h3 className="text-3xl font-black text-slate-900 mb-3 group-hover:text-green-600 transition-colors">Torah</h3>
-                    <p className="text-slate-600 font-medium mb-6">Chumash, Parsha & Rashi</p>
-                    <Button className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold shadow-lg">
-                      Begin Study
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Link>
-            </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              whileHover={{ y: -8 }}
-            >
-              <Link to={createPageUrl('KabbalahStudy')}>
-                <Card className="glass-effect border-0 premium-shadow hover:premium-shadow-lg transition-all duration-500 group cursor-pointer h-full rounded-[2rem]">
-                  <CardContent className="p-8">
-                    <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-purple-700 rounded-3xl flex items-center justify-center text-5xl mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl">
-                      ✨
-                    </div>
-                    <h3 className="text-3xl font-black text-slate-900 mb-3 group-hover:text-purple-600 transition-colors">Kabbalah</h3>
-                    <p className="text-slate-600 font-medium mb-6">Zohar & Mystical Wisdom</p>
-                    <Button className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold shadow-lg">
-                      Begin Study
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Link>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.9 }}
-              whileHover={{ y: -8 }}
-            >
-              <Link to={createPageUrl('HalachaGuide')}>
-                <Card className="glass-effect border-0 premium-shadow hover:premium-shadow-lg transition-all duration-500 group cursor-pointer h-full rounded-[2rem]">
-                  <CardContent className="p-8">
-                    <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-amber-700 rounded-3xl flex items-center justify-center text-5xl mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl">
-                      ⚖️
-                    </div>
-                    <h3 className="text-3xl font-black text-slate-900 mb-3 group-hover:text-amber-600 transition-colors">Halacha</h3>
-                    <p className="text-slate-600 font-medium mb-6">Jewish Law & Practice</p>
-                    <Button className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold shadow-lg">
-                      Begin Study
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Link>
-            </motion.div>
           </div>
         </motion.div>
       </div>
