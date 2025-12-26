@@ -166,8 +166,8 @@ export default function Dashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl px-5 py-3 shadow-xl"
+                    whileHover={{ scale: 1.08, y: -4 }}
+                    className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl px-5 py-3 shadow-xl hover:shadow-2xl transition-all duration-300"
                   >
                     <div className="flex items-center space-x-3">
                       <div className="p-2 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg">
@@ -184,8 +184,8 @@ export default function Dashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl px-5 py-3 shadow-xl"
+                    whileHover={{ scale: 1.08, y: -4 }}
+                    className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl px-5 py-3 shadow-xl hover:shadow-2xl transition-all duration-300"
                   >
                     <div className="flex items-center space-x-3">
                       <div className="p-2 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg">
@@ -202,8 +202,8 @@ export default function Dashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.6 }}
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    className={`backdrop-blur-xl bg-gradient-to-r ${currentLevelInfo.color} border border-white/20 rounded-2xl px-5 py-3 shadow-xl`}
+                    whileHover={{ scale: 1.08, y: -4, rotate: 2 }}
+                    className={`backdrop-blur-xl bg-gradient-to-r ${currentLevelInfo.color} border border-white/20 rounded-2xl px-5 py-3 shadow-xl hover:shadow-2xl transition-all duration-300`}
                   >
                     <div className="flex items-center space-x-2">
                       <Sparkles className="w-4 h-4 text-white" />
@@ -319,8 +319,13 @@ export default function Dashboard() {
                         <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">{item.name}</h3>
                         <p className="text-slate-600 font-medium leading-relaxed">{item.desc}</p>
                       </div>
-                      <Button className={`w-full bg-gradient-to-r ${item.color} hover:shadow-xl text-white font-bold py-6 rounded-2xl transition-all duration-300`}>
-                        Begin Study
+                      <Button className={`w-full bg-gradient-to-r ${item.color} hover:shadow-2xl text-white font-bold py-6 rounded-2xl transition-all duration-300 btn-premium group relative overflow-hidden`}>
+                        <span className="relative z-10 flex items-center justify-center gap-2">
+                          Begin Study
+                          <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                        </span>
                       </Button>
                     </CardContent>
                   </Card>

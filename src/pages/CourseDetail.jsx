@@ -107,14 +107,14 @@ export default function CourseDetail() {
         <div className="relative p-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             <div className="md:col-span-2">
-            <div className="flex items-center space-x-3 mb-4">
-              <Badge className="bg-amber-500 text-white">
+            <div className="flex items-center flex-wrap gap-2 mb-6">
+              <Badge className="bg-amber-500 text-white badge-modern hover:bg-amber-600">
                 {course.category?.replace(/_/g, ' ')}
               </Badge>
-              <Badge className="bg-slate-700 text-white">
+              <Badge className="bg-slate-700 text-white badge-modern hover:bg-slate-800">
                 {course.level}
               </Badge>
-              <Badge className="bg-slate-700 text-white flex items-center space-x-1">
+              <Badge className="bg-slate-700 text-white flex items-center space-x-1 badge-modern hover:bg-slate-800">
                 <Crown className="w-3 h-3" />
                 <span>{course.access_tier}</span>
               </Badge>

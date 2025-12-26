@@ -85,12 +85,12 @@ export default function CourseCard({ course, userTier = 'free' }) {
               {course.description}
             </p>
 
-            <div className="flex items-center justify-between text-sm text-slate-500 mb-4">
-              <span className="font-semibold">Prof. {course.instructor}</span>
+            <div className="flex items-center justify-between text-sm text-slate-500 mb-4 gap-3">
+              <span className="font-semibold truncate">Prof. {course.instructor}</span>
               {course.duration_hours && (
-                <div className="flex items-center space-x-1 bg-slate-100 px-3 py-1 rounded-full">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span className="font-medium">{course.duration_hours}h</span>
+                <div className="flex items-center space-x-1 bg-slate-100 px-3 py-1.5 rounded-full group-hover:bg-slate-200 transition-colors">
+                  <Clock className="w-3.5 h-3.5 text-slate-600" />
+                  <span className="font-semibold text-slate-700">{course.duration_hours}h</span>
                 </div>
               )}
             </div>

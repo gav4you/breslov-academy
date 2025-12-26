@@ -34,7 +34,7 @@ export default function Layout({ children, currentPageName }) {
   return (
     <div className="min-h-screen gradient-mesh bg-slate-50">
       {/* Header */}
-      <header className="bg-slate-900/95 backdrop-blur-xl border-b border-white/10 premium-shadow-lg sticky top-0 z-50">
+      <header className="bg-slate-900/95 backdrop-blur-xl border-b border-white/10 premium-shadow-lg sticky top-0 z-50 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -57,15 +57,19 @@ export default function Layout({ children, currentPageName }) {
                   <Link
                     key={item.name}
                     to={createPageUrl(item.path)}
-                    className={`flex items-center space-x-2 px-5 py-2.5 rounded-2xl transition-all duration-300 relative overflow-hidden ${
+                    className={`flex items-center space-x-2 px-5 py-2.5 rounded-2xl transition-all duration-300 relative overflow-hidden group ${
                       isActive
-                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xl font-bold'
-                        : 'text-slate-300 hover:text-white hover:bg-white/10 font-semibold hover:scale-105'
+                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xl font-bold scale-105'
+                        : 'text-slate-300 hover:text-white hover:bg-white/10 font-semibold hover:scale-105 hover:shadow-lg'
                     }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span className="text-sm">{item.name}</span>
-                  </Link>
+
+                                  >
+                                    <Icon className={`w-4 h-4 transition-transform duration-300 ${isActive ? '' : 'group-hover:scale-110'}`} />
+                                    <span className="text-sm">{item.name}</span>
+                                    {isActive && (
+                                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-white rounded-full" />
+                                    )}
+                                  </Link>
                 );
               })}
             </nav>

@@ -87,7 +87,14 @@ export default function TorahStudy() {
                       <h3 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">{book.name}</h3>
                       <p className="text-4xl text-amber-700 font-black mb-8" dir="rtl">{book.hebrew}</p>
                     </div>
-                    <Button className={`w-full bg-gradient-to-r ${book.color} text-white font-bold py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300`}>Begin Study</Button>
+                    <Button className={`w-full bg-gradient-to-r ${book.color} text-white font-bold py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 btn-premium group`}>
+                      <span className="flex items-center justify-center gap-2">
+                        Begin Study
+                        <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </span>
+                    </Button>
                   </CardContent>
                 </Card>
               </motion.div>
