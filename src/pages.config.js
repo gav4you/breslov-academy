@@ -28,6 +28,9 @@ import Tournaments from './pages/Tournaments';
 import Skills from './pages/Skills';
 import StudyBuddies from './pages/StudyBuddies';
 import CareerPaths from './pages/CareerPaths';
+import LiveStreams from './pages/LiveStreams';
+import Forums from './pages/Forums';
+import Scholarships from './pages/Scholarships';
 import __Layout from './Layout.jsx';
 
 
@@ -62,6 +65,9 @@ export const PAGES = {
     "Skills": Skills,
     "StudyBuddies": StudyBuddies,
     "CareerPaths": CareerPaths,
+    "LiveStreams": LiveStreams,
+    "Forums": Forums,
+    "Scholarships": Scholarships,
 }
 
 export const pagesConfig = {
