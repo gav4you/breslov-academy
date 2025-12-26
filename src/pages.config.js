@@ -21,6 +21,8 @@ import Leaderboard from './pages/Leaderboard';
 import Challenges from './pages/Challenges';
 import RewardsShop from './pages/RewardsShop';
 import Mentorship from './pages/Mentorship';
+import Feed from './pages/Feed';
+import Portfolio from './pages/Portfolio';
 import __Layout from './Layout.jsx';
 
 
@@ -48,6 +50,8 @@ export const PAGES = {
     "Challenges": Challenges,
     "RewardsShop": RewardsShop,
     "Mentorship": Mentorship,
+    "Feed": Feed,
+    "Portfolio": Portfolio,
 }
 
 export const pagesConfig = {
