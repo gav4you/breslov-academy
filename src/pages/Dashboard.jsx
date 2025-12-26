@@ -152,13 +152,13 @@ export default function Dashboard() {
                     <span className="text-amber-300 font-semibold text-sm tracking-wider uppercase">Breslov Academy</span>
                   </div>
                   <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight leading-none mb-3">
-                    Shalom Aleichem,<br />
+                    Shalom,<br />
                     <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 text-transparent bg-clip-text">
                       {user?.full_name?.split(' ')[0] || 'Student'}
                     </span>
                   </h1>
                   <p className="text-slate-300 text-lg md:text-xl font-light leading-relaxed max-w-2xl">
-                    Welcome to Breslov Academy - Master Torah, Talmud, Kabbalah & Sacred Languages through the teachings of Rebbe Nachman
+                    Continue your scholarly journey through the profound wisdom of Rebbe Nachman of Breslov
                   </p>
                 </motion.div>
               </div>

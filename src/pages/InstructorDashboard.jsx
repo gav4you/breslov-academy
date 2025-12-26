@@ -73,8 +73,8 @@ export default function InstructorDashboard() {
           <div className="relative p-10 space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-5xl font-black text-white mb-2">Rebbe Dashboard</h1>
-                <p className="text-slate-300 text-lg">Shalom, Rabbi {user?.full_name} - Continue spreading Torah wisdom</p>
+                <h1 className="text-5xl font-black text-white mb-2">Instructor Dashboard</h1>
+                <p className="text-slate-300 text-lg">Welcome back, {user?.full_name}</p>
               </div>
               <Link to={createPageUrl('CourseBuilder')}>
                 <Button className="bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold rounded-2xl hover:shadow-2xl transition-all">

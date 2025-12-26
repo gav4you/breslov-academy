@@ -69,12 +69,12 @@ export default function RosettaStoneLesson() {
     biblical_hebrew: [
       {
         type: 'image-word',
-        question: 'Which image represents this sacred word?',
+        question: 'Which image represents this word?',
         word: 'אֱלֹהִים',
-        transliteration: 'Elohim (God)',
+        transliteration: 'Elohim',
         images: [
           { id: 1, url: '🌟', alt: 'star' },
-          { id: 2, url: '☁️', alt: 'divine presence', correct: true },
+          { id: 2, url: '☁️', alt: 'divine light', correct: true },
           { id: 3, url: '🌊', alt: 'water' },
           { id: 4, url: '🏔️', alt: 'mountain' }
         ]
@@ -88,19 +88,19 @@ export default function RosettaStoneLesson() {
       },
       {
         type: 'image-word',
-        question: 'What is this sacred object in Hebrew?',
+        question: 'Select the correct word for this image',
         word: null,
-        images: [{ id: 1, url: '📖', alt: 'sefer - holy book', correct: true }],
+        images: [{ id: 1, url: '📖', alt: 'book', correct: true }],
         options: ['סֵפֶר', 'מַיִם', 'אוֹר', 'שָׁמַיִם'],
         correctAnswer: 'סֵפֶר'
       },
       {
         type: 'audio-match',
-        question: 'Listen and select the Torah scroll',
+        question: 'Listen and select the matching image',
         word: 'תּוֹרָה',
-        transliteration: 'Torah (The Five Books)',
+        transliteration: 'Torah',
         images: [
-          { id: 1, url: '📜', alt: 'Torah scroll', correct: true },
+          { id: 1, url: '📜', alt: 'scroll', correct: true },
           { id: 2, url: '🎵', alt: 'music' },
           { id: 3, url: '🏛️', alt: 'temple' },
           { id: 4, url: '👑', alt: 'crown' }
@@ -108,9 +108,9 @@ export default function RosettaStoneLesson() {
       },
       {
         type: 'sentence-build',
-        question: 'Arrange to form the opening of Bereishit (Genesis)',
+        question: 'Arrange the words to form the phrase',
         correctOrder: ['בְּרֵאשִׁית', 'בָּרָא', 'אֱלֹהִים'],
-        translation: 'In the beginning, God created (Genesis 1:1)',
+        translation: 'In the beginning, God created',
         words: ['אֱלֹהִים', 'בָּרָא', 'בְּרֵאשִׁית']
       },
       {
@@ -124,96 +124,28 @@ export default function RosettaStoneLesson() {
     aramaic: [
       {
         type: 'image-word',
-        question: 'Which image represents this Aramaic word from Daniel?',
+        question: 'Which image represents this Aramaic word?',
         word: 'מַלְכָּא',
-        transliteration: 'Malka (King)',
+        transliteration: 'Malka',
         images: [
-          { id: 1, url: '👑', alt: 'king - melech', correct: true },
+          { id: 1, url: '👑', alt: 'king', correct: true },
           { id: 2, url: '⚔️', alt: 'sword' },
           { id: 3, url: '🏰', alt: 'castle' },
           { id: 4, url: '📜', alt: 'decree' }
-        ]
-      },
-      {
-        type: 'image-word',
-        question: 'Identify this sacred Aramaic word',
-        word: 'קַדִּישׁ',
-        transliteration: 'Kaddish (Holy)',
-        images: [
-          { id: 1, url: '🕯️', alt: 'candle', correct: true },
-          { id: 2, url: '📿', alt: 'beads' },
-          { id: 3, url: '🏺', alt: 'vessel' },
-          { id: 4, url: '🌙', alt: 'moon' }
-        ]
-      }
-    ],
-    talmud_bavli: [
-      {
-        type: 'image-word',
-        question: 'Match this Talmudic term',
-        word: 'גְּמָרָא',
-        transliteration: 'Gemara (The Talmud)',
-        images: [
-          { id: 1, url: '📚', alt: 'books of learning', correct: true },
-          { id: 2, url: '🎓', alt: 'scholar' },
-          { id: 3, url: '✍️', alt: 'writing' },
-          { id: 4, url: '🔍', alt: 'study' }
-        ]
-      }
-    ],
-    yiddish: [
-      {
-        type: 'image-word',
-        question: 'What does this Yiddish word mean?',
-        word: 'שבת',
-        transliteration: 'Shabes (Sabbath)',
-        images: [
-          { id: 1, url: '🕯️🕯️', alt: 'Shabbat candles', correct: true },
-          { id: 2, url: '🍷', alt: 'wine' },
-          { id: 3, url: '🍞🍞', alt: 'challah' },
-          { id: 4, url: '⭐', alt: 'star' }
         ]
       }
     ],
     modern_hebrew: [
       {
         type: 'image-word',
-        question: 'Modern Hebrew greeting',
+        question: 'Select the matching image',
         word: 'שָׁלוֹם',
-        transliteration: 'Shalom (Peace/Hello)',
+        transliteration: 'Shalom',
         images: [
-          { id: 1, url: '👋', alt: 'greeting - shalom', correct: true },
+          { id: 1, url: '👋', alt: 'greeting', correct: true },
           { id: 2, url: '🏠', alt: 'house' },
           { id: 3, url: '🍞', alt: 'bread' },
           { id: 4, url: '☕', alt: 'coffee' }
-        ]
-      }
-    ],
-    torah_hebrew: [
-      {
-        type: 'image-word',
-        question: 'Torah Hebrew - the first word of Creation',
-        word: 'בְּרֵאשִׁית',
-        transliteration: 'Bereishit (In the beginning)',
-        images: [
-          { id: 1, url: '🌍', alt: 'creation of world', correct: true },
-          { id: 2, url: '⏰', alt: 'time' },
-          { id: 3, url: '📅', alt: 'calendar' },
-          { id: 4, url: '🌅', alt: 'sunrise' }
-        ]
-      }
-    ],
-    old_hebrew: [
-      {
-        type: 'image-word',
-        question: 'Ancient Hebrew script',
-        word: 'יהוה',
-        transliteration: 'Hashem (The Name)',
-        images: [
-          { id: 1, url: '☁️', alt: 'divine presence', correct: true },
-          { id: 2, url: '🔥', alt: 'fire' },
-          { id: 3, url: '💨', alt: 'wind' },
-          { id: 4, url: '⚡', alt: 'lightning' }
         ]
       }
     ]
