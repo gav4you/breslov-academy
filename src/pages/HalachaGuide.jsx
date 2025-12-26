@@ -104,14 +104,15 @@ export default function HalachaGuide() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: idx * 0.05 }}
 
-              whileHover={{ y: -4 }}
+
+              whileHover={{ y: -6, scale: 1.02, transition: { duration: 0.2 } }}
               >
-                <Card className="glass-effect border-0 premium-shadow hover:premium-shadow-lg transition-all duration-300 group cursor-pointer rounded-2xl">
-                  <CardContent className="p-6 text-center">
-                    <div className={`w-16 h-16 bg-gradient-to-br ${cat.color} rounded-2xl flex items-center justify-center text-3xl mb-4 mx-auto group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg`}>
+                <Card className="card-modern border-white/60 premium-shadow hover:premium-shadow-lg transition-all duration-300 group cursor-pointer rounded-[1.5rem] overflow-hidden">
+                  <CardContent className="p-6 text-center space-y-3">
+                    <div className={`w-20 h-20 bg-gradient-to-br ${cat.color} rounded-2xl flex items-center justify-center text-4xl mx-auto group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-xl`}>
                       {cat.icon}
                     </div>
-                    <h3 className="font-black text-base text-slate-900">{cat.name.replace('_', ' ')}</h3>
+                    <h3 className="font-black text-lg text-slate-900 tracking-tight">{cat.name.replace('_', ' ')}</h3>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -135,9 +136,11 @@ export default function HalachaGuide() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
 
+
+                  whileHover={{ y: -4 }}
                 >
-                  <Card className="glass-effect border-0 premium-shadow hover:premium-shadow-lg transition-all rounded-[2rem]">
-                    <CardContent className="p-6">
+                  <Card className="card-modern border-white/60 premium-shadow hover:premium-shadow-lg transition-all duration-300 rounded-[2rem] overflow-hidden">
+                    <CardContent className="p-8">
                       <div className="flex flex-wrap gap-2 mb-3">
                         <Badge className="bg-slate-900 text-white">{ruling.category}</Badge>
                         <Badge className={severityColors[ruling.severity]}>{ruling.severity}</Badge>

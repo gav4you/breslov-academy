@@ -31,21 +31,21 @@ export default function CourseCard({ course, userTier = 'free' }) {
   return (
     <Link to={createPageUrl(`CourseDetail?id=${course.id}`)}>
       <motion.div
-        whileHover={hasAccess ? { y: -8 } : {}}
-        transition={{ duration: 0.3 }}
+        whileHover={hasAccess ? { y: -12, scale: 1.02 } : {}}
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
         className="h-full"
       >
-        <Card className="group overflow-hidden glass-card border-0 shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer h-full">
-          <div className="relative h-48 overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900">
+        <Card className="group overflow-hidden card-modern border-white/60 premium-shadow hover:premium-shadow-xl transition-all duration-500 cursor-pointer h-full rounded-[2.5rem]">
+          <div className="relative h-56 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
             {course.thumbnail_url ? (
               <img 
                 src={course.thumbnail_url} 
                 alt={course.title}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700 ease-out"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
-                <TierIcon className={`w-20 h-20 ${tierColor} opacity-40`} />
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950">
+                <TierIcon className={`w-24 h-24 ${tierColor} opacity-30 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500`} />
               </div>
             )}
             
@@ -72,8 +72,8 @@ export default function CourseCard({ course, userTier = 'free' }) {
             </div>
           </div>
 
-          <CardContent className="p-6">
-            <h3 className="font-bold text-2xl text-slate-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">
+          <CardContent className="p-8 space-y-4">
+            <h3 className="font-black text-2xl text-slate-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight tracking-tight">
               {course.title}
             </h3>
             {course.title_hebrew && (
@@ -96,9 +96,9 @@ export default function CourseCard({ course, userTier = 'free' }) {
             </div>
 
             {hasAccess ? (
-              <Button className="w-full bg-gradient-to-r from-slate-900 to-slate-800 hover:from-slate-800 hover:to-slate-700 text-white font-semibold group">
+              <Button className="w-full bg-gradient-to-r from-slate-900 to-slate-800 hover:from-slate-800 hover:to-slate-700 text-white font-bold py-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group">
                 Enroll Now
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform duration-300" />
               </Button>
             ) : course.price ? (
               <div className="pt-4 border-t border-slate-200">

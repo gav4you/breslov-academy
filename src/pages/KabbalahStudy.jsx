@@ -80,16 +80,19 @@ export default function KabbalahStudy() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + idx * 0.1 }}
 
-              whileHover={{ y: -8 }}
+
+              whileHover={{ y: -12, transition: { duration: 0.3 } }}
               >
-                <Card className="glass-effect border-0 premium-shadow hover:premium-shadow-lg transition-all duration-500 group h-full rounded-[2rem]">
-                  <CardContent className="p-8">
-                    <div className={`w-20 h-20 bg-gradient-to-br ${cat.color} rounded-3xl flex items-center justify-center text-5xl mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl`}>
+                <Card className="card-modern border-white/60 premium-shadow hover:premium-shadow-xl transition-all duration-500 group h-full rounded-[2.5rem] overflow-hidden">
+                  <CardContent className="p-10 space-y-6">
+                    <div className={`w-24 h-24 bg-gradient-to-br ${cat.color} rounded-[2rem] flex items-center justify-center text-6xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-2xl`}>
                       {cat.icon}
                     </div>
-                    <h3 className="text-2xl font-black text-slate-900 mb-3">{cat.name}</h3>
-                    <p className="text-slate-600 font-semibold text-sm mb-6">{cat.desc}</p>
-                    <Button className={`w-full bg-gradient-to-r ${cat.color} text-white font-bold shadow-lg`}>Explore</Button>
+                    <div>
+                      <h3 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">{cat.name}</h3>
+                      <p className="text-slate-600 font-semibold leading-relaxed">{cat.desc}</p>
+                    </div>
+                    <Button className={`w-full bg-gradient-to-r ${cat.color} text-white font-bold py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300`}>Explore</Button>
                   </CardContent>
                 </Card>
               </motion.div>

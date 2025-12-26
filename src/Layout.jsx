@@ -39,8 +39,8 @@ export default function Layout({ children, currentPageName }) {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link to={createPageUrl('Dashboard')} className="flex items-center space-x-3 group">
-              <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center shadow-xl group-hover:shadow-amber-500/50 transition-all group-hover:scale-105 duration-300">
-                <BookOpen className="w-7 h-7 text-white" />
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-xl group-hover:shadow-amber-400/60 transition-all group-hover:scale-110 group-hover:rotate-6 duration-300">
+                <BookOpen className="w-7 h-7 text-white drop-shadow-lg" />
               </div>
               <div>
                 <h1 className="text-xl font-black text-white">Breslov Academy</h1>
@@ -57,10 +57,10 @@ export default function Layout({ children, currentPageName }) {
                   <Link
                     key={item.name}
                     to={createPageUrl(item.path)}
-                    className={`flex items-center space-x-2 px-5 py-2.5 rounded-2xl transition-all duration-300 ${
+                    className={`flex items-center space-x-2 px-5 py-2.5 rounded-2xl transition-all duration-300 relative overflow-hidden ${
                       isActive
                         ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xl font-bold'
-                        : 'text-slate-300 hover:text-white hover:bg-white/10 font-semibold'
+                        : 'text-slate-300 hover:text-white hover:bg-white/10 font-semibold hover:scale-105'
                     }`}
                   >
                     <Icon className="w-4 h-4" />

@@ -75,16 +75,19 @@ export default function TorahStudy() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + idx * 0.1 }}
 
-              whileHover={{ y: -8 }}
+
+              whileHover={{ y: -12, transition: { duration: 0.3 } }}
               >
-                <Card className="glass-effect border-0 premium-shadow hover:premium-shadow-lg transition-all duration-500 group h-full rounded-[2rem]">
-                  <CardContent className="p-8 text-center">
-                    <div className={`w-24 h-24 bg-gradient-to-br ${book.color} rounded-3xl flex items-center justify-center text-5xl mb-6 mx-auto group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl`}>
+                <Card className="card-modern border-white/60 premium-shadow hover:premium-shadow-xl transition-all duration-500 group h-full rounded-[2.5rem] overflow-hidden">
+                  <CardContent className="p-10 text-center space-y-6">
+                    <div className={`w-28 h-28 bg-gradient-to-br ${book.color} rounded-[2rem] flex items-center justify-center text-6xl mx-auto group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-2xl`}>
                       {book.icon}
                     </div>
-                    <h3 className="text-2xl font-black text-slate-900 mb-2">{book.name}</h3>
-                    <p className="text-3xl text-amber-700 font-black mb-6" dir="rtl">{book.hebrew}</p>
-                    <Button className={`w-full bg-gradient-to-r ${book.color} text-white font-bold shadow-lg`}>Begin Study</Button>
+                    <div>
+                      <h3 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">{book.name}</h3>
+                      <p className="text-4xl text-amber-700 font-black mb-8" dir="rtl">{book.hebrew}</p>
+                    </div>
+                    <Button className={`w-full bg-gradient-to-r ${book.color} text-white font-bold py-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300`}>Begin Study</Button>
                   </CardContent>
                 </Card>
               </motion.div>
