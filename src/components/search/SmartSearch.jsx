@@ -1,88 +1,68 @@
-import React, { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Search, Sparkles, Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Search, BookOpen, Video, FileText, Users, Sparkles } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-export default function SmartSearch({ onSelect }) {
+export default function SmartSearch() {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
 
-  const mockResults = [
-    { type: 'course', title: 'Introduction to Likutey Moharan', icon: BookOpen, category: 'Courses' },
-    { type: 'lesson', title: 'The Power of Hitbodedut', icon: Video, category: 'Lessons' },
-    { type: 'article', title: 'Understanding Simcha', icon: FileText, category: 'Articles' },
-    { type: 'group', title: 'Daily Talmud Study Circle', icon: Users, category: 'Groups' },
-  ];
-
-  useEffect(() => {
-    if (query.length > 2) {
-      setResults(mockResults.filter(r => 
-        r.title.toLowerCase().includes(query.toLowerCase())
-      ));
-      setIsOpen(true);
-    } else {
-      setResults([]);
-      setIsOpen(false);
-    }
-  }, [query]);
+  const results = {
+    all: 156,
+    courses: 12,
+    lessons: 45,
+    discussions: 67,
+    resources: 32
+  };
 
   return (
-    <div className="relative">
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-        <Input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search courses, lessons, topics..."
-          className="pl-12 pr-4 py-6 rounded-2xl text-lg border-2 border-slate-200 focus:border-blue-500 transition-colors"
-        />
-        {query && (
-          <Sparkles className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-amber-500 animate-pulse" />
-        )}
-      </div>
+    <Card className="glass-effect border-0 premium-shadow-xl rounded-[2.5rem]">
+      <CardContent className="p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Sparkles className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-600" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="AI-powered search..."
+              className="pl-12 pr-12 rounded-2xl h-14 text-lg"
+            />
+          </div>
+          <Button variant="outline" size="sm" className="rounded-xl">
+            <Filter className="w-4 h-4" />
+          </Button>
+        </div>
 
-      <AnimatePresence>
-        {isOpen && results.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute top-full mt-2 w-full z-50"
-          >
-            <Card className="glass-effect border-0 premium-shadow-xl rounded-2xl overflow-hidden">
-              <div className="max-h-96 overflow-y-auto">
-                {results.map((result, idx) => {
-                  const Icon = result.icon;
-                  return (
-                    <motion.button
-                      key={idx}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.05 }}
-                      onClick={() => {
-                        onSelect?.(result);
-                        setIsOpen(false);
-                        setQuery('');
-                      }}
-                      className="w-full p-4 flex items-center gap-3 hover:bg-blue-50 transition-colors text-left"
-                    >
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-bold text-slate-900 truncate">{result.title}</div>
-                        <div className="text-xs text-slate-500">{result.category}</div>
-                      </div>
-                    </motion.button>
-                  );
-                })}
+        {query && (
+          <Tabs defaultValue="all">
+            <TabsList className="grid grid-cols-5 bg-white rounded-xl">
+              <TabsTrigger value="all">
+                All ({results.all})
+              </TabsTrigger>
+              <TabsTrigger value="courses">
+                Courses ({results.courses})
+              </TabsTrigger>
+              <TabsTrigger value="lessons">
+                Lessons ({results.lessons})
+              </TabsTrigger>
+              <TabsTrigger value="discussions">
+                Discuss ({results.discussions})
+              </TabsTrigger>
+              <TabsTrigger value="resources">
+                Files ({results.resources})
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="all" className="mt-4">
+              <div className="text-sm text-slate-600">
+                Found {results.all} results for "{query}"
               </div>
-            </Card>
-          </motion.div>
+            </TabsContent>
+          </Tabs>
         )}
-      </AnimatePresence>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

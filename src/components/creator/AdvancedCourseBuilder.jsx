@@ -1,173 +1,86 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus, Video, FileText, CheckSquare, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { GripVertical, Plus, Video, FileText, Trophy, Settings, Eye } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-export default function AdvancedCourseBuilder({ course, onSave }) {
-  const [curriculum, setCurriculum] = useState({
-    sections: [
-      {
-        id: '1',
-        title: 'Introduction',
-        lessons: [
-          { id: 'l1', title: 'Welcome to the Course', type: 'video', duration: 5 },
-          { id: 'l2', title: 'Course Overview', type: 'text', duration: 3 }
-        ]
-      }
-    ]
+export default function AdvancedCourseBuilder({ onSave }) {
+  const [course, setCourse] = useState({
+    title: '',
+    description: '',
+    lessons: [],
+    quizzes: [],
+    resources: []
   });
 
-  const onDragEnd = (result) => {
-    if (!result.destination) return;
-    
-    const sections = Array.from(curriculum.sections);
-    const [reordered] = sections.splice(result.source.index, 1);
-    sections.splice(result.destination.index, 0, reordered);
-    
-    setCurriculum({ ...curriculum, sections });
-  };
-
-  const addSection = () => {
-    setCurriculum({
-      sections: [...curriculum.sections, {
-        id: Date.now().toString(),
-        title: 'New Section',
-        lessons: []
-      }]
-    });
-  };
-
-  const addLesson = (sectionId) => {
-    const sections = curriculum.sections.map(section => {
-      if (section.id === sectionId) {
-        return {
-          ...section,
-          lessons: [...section.lessons, {
-            id: Date.now().toString(),
-            title: 'New Lesson',
-            type: 'video',
-            duration: 0
-          }]
-        };
-      }
-      return section;
-    });
-    setCurriculum({ sections });
-  };
-
   return (
-    <div className="space-y-6">
-      <Card className="glass-effect border-0 premium-shadow-lg rounded-[2rem]">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="font-serif text-2xl">Curriculum Builder</CardTitle>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="rounded-xl font-serif">
-                <Eye className="w-4 h-4 mr-2" />
-                Preview
-              </Button>
-              <Button 
-                onClick={() => onSave?.(curriculum)}
-                className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl font-serif"
-              >
-                Save Curriculum
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="sections">
-              {(provided) => (
-                <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
-                  {curriculum.sections.map((section, sectionIdx) => (
-                    <Draggable key={section.id} draggableId={section.id} index={sectionIdx}>
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                        >
-                          <Card className="bg-white border-2 border-slate-200 rounded-2xl">
-                            <CardContent className="p-6">
-                              <div className="flex items-center gap-3 mb-4">
-                                <div {...provided.dragHandleProps}>
-                                  <GripVertical className="w-5 h-5 text-slate-400 cursor-grab" />
-                                </div>
-                                <Input
-                                  value={section.title}
-                                  onChange={(e) => {
-                                    const sections = [...curriculum.sections];
-                                    sections[sectionIdx].title = e.target.value;
-                                    setCurriculum({ sections });
-                                  }}
-                                  className="text-lg font-bold font-serif rounded-xl"
-                                />
-                                <Badge variant="outline">{section.lessons.length} lessons</Badge>
-                              </div>
+    <Card className="glass-effect border-0 premium-shadow-xl rounded-[2.5rem]">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 font-serif">
+          <Plus className="w-5 h-5 text-blue-600" />
+          Course Builder
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-4">
+          <Input
+            placeholder="Course Title"
+            className="rounded-xl text-xl font-bold"
+          />
+          <Textarea
+            placeholder="Course Description"
+            className="min-h-[100px] rounded-xl"
+          />
+        </div>
 
-                              {/* Lessons */}
-                              <div className="space-y-2 ml-8">
-                                {section.lessons.map((lesson, lessonIdx) => {
-                                  const Icon = lesson.type === 'video' ? Video : 
-                                             lesson.type === 'quiz' ? Trophy : FileText;
-                                  return (
-                                    <div key={lesson.id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-                                      <Icon className="w-4 h-4 text-slate-600" />
-                                      <Input
-                                        value={lesson.title}
-                                        className="flex-1 text-sm font-serif"
-                                        placeholder="Lesson title..."
-                                      />
-                                      <Input
-                                        type="number"
-                                        value={lesson.duration}
-                                        className="w-20 text-sm"
-                                        placeholder="min"
-                                      />
-                                      <Button variant="ghost" size="sm">
-                                        <Settings className="w-4 h-4" />
-                                      </Button>
-                                    </div>
-                                  );
-                                })}
-                                
-                                <Button
-                                  onClick={() => addLesson(section.id)}
-                                  variant="outline"
-                                  size="sm"
-                                  className="w-full rounded-xl font-serif"
-                                >
-                                  <Plus className="w-4 h-4 mr-2" />
-                                  Add Lesson
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
+        <Tabs defaultValue="lessons">
+          <TabsList className="grid grid-cols-3 bg-white rounded-xl">
+            <TabsTrigger value="lessons">
+              <Video className="w-4 h-4 mr-2" />
+              Lessons
+            </TabsTrigger>
+            <TabsTrigger value="quizzes">
+              <CheckSquare className="w-4 h-4 mr-2" />
+              Quizzes
+            </TabsTrigger>
+            <TabsTrigger value="resources">
+              <FileText className="w-4 h-4 mr-2" />
+              Resources
+            </TabsTrigger>
+          </TabsList>
 
-          <Button
-            onClick={addSection}
-            variant="outline"
-            className="w-full rounded-2xl py-6 font-serif text-lg"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Add Section
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+          <TabsContent value="lessons" className="space-y-3 mt-4">
+            <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Lesson
+            </Button>
+          </TabsContent>
+
+          <TabsContent value="quizzes" className="space-y-3 mt-4">
+            <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Quiz
+            </Button>
+          </TabsContent>
+
+          <TabsContent value="resources" className="space-y-3 mt-4">
+            <Button className="w-full bg-gradient-to-r from-green-600 to-emerald-700 text-white rounded-xl">
+              <Upload className="w-4 h-4 mr-2" />
+              Upload Resource
+            </Button>
+          </TabsContent>
+        </Tabs>
+
+        <Button
+          onClick={() => onSave?.(course)}
+          size="lg"
+          className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl"
+        >
+          Save & Publish Course
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

@@ -1,61 +1,50 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Check, Crown, Star, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Crown, Zap, Star, Infinity } from 'lucide-react';
-import { motion } from 'framer-motion';
 
-export default function MembershipTiers({ onSelect, currentTier }) {
+export default function MembershipTiers({ currentTier = 'free' }) {
   const tiers = [
     {
-      id: 'free',
-      name: 'Talmid (Student)',
+      name: 'Free',
       price: 0,
-      period: 'forever',
       icon: Star,
-      color: 'from-slate-500 to-slate-600',
+      color: 'from-slate-400 to-slate-600',
       features: [
         'Access to free courses',
-        'Community forum access',
-        'Weekly newsletter',
-        'Basic study tools'
+        'Basic flashcards',
+        'Community forums',
+        'Weekly wisdom emails'
       ]
     },
     {
-      id: 'premium',
-      name: 'Chaver (Member)',
+      name: 'Premium',
       price: 29,
-      period: 'month',
       icon: Crown,
-      color: 'from-blue-500 to-indigo-600',
-      popular: true,
+      color: 'from-blue-400 to-blue-600',
       features: [
-        'All free tier features',
-        'Access to all premium courses',
-        'Chavruta AI unlimited',
-        'Advanced analytics',
-        'Certificate of completion',
-        'Live office hours monthly',
-        'Downloadable resources'
-      ]
+        'All Free features',
+        'Premium courses library',
+        'AI study assistant',
+        'Live shiurim access',
+        'Download resources',
+        'Certificate of completion'
+      ],
+      popular: true
     },
     {
-      id: 'elite',
-      name: 'Mekubal (Master)',
+      name: 'Elite',
       price: 99,
-      period: 'month',
-      icon: Infinity,
-      color: 'from-purple-500 to-pink-600',
+      icon: Zap,
+      color: 'from-amber-400 to-amber-600',
       features: [
-        'Everything in Premium',
-        'Exclusive master classes',
-        '1-on-1 mentorship sessions',
-        'Early access to new content',
-        'Private community space',
-        'Personalized learning paths',
-        'Direct Rebbe communication',
-        'Lifetime access guarantee',
-        'Physical course materials'
+        'All Premium features',
+        'Unlimited AI tutoring',
+        '1-on-1 with instructors',
+        'Exclusive masterclasses',
+        'Priority support',
+        'Custom learning paths'
       ]
     }
   ];
@@ -64,66 +53,52 @@ export default function MembershipTiers({ onSelect, currentTier }) {
     <div className="grid md:grid-cols-3 gap-6">
       {tiers.map((tier, idx) => {
         const Icon = tier.icon;
-        const isCurrent = currentTier === tier.id;
-
+        const isCurrent = tier.name.toLowerCase() === currentTier;
+        
         return (
-          <motion.div
-            key={tier.id}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.15 }}
-            whileHover={{ y: -8, transition: { duration: 0.2 } }}
+          <Card
+            key={idx}
+            className={`glass-effect border-0 premium-shadow-lg rounded-[2rem] ${
+              tier.popular ? 'ring-2 ring-blue-500' : ''
+            }`}
           >
-            <Card className={`card-modern border-white/60 premium-shadow hover:premium-shadow-xl transition-all rounded-[2rem] overflow-hidden ${
-              tier.popular ? 'ring-2 ring-blue-500 ring-offset-4 scale-105' : ''
-            }`}>
+            <CardContent className="p-8 space-y-6">
               {tier.popular && (
-                <div className="h-2 bg-gradient-to-r from-blue-500 to-indigo-600" />
+                <Badge className="bg-blue-600 text-white">Most Popular</Badge>
               )}
-              
-              <CardContent className="p-8 space-y-6">
-                {tier.popular && (
-                  <Badge className="bg-blue-600 text-white font-serif">
-                    Most Popular
-                  </Badge>
-                )}
 
-                <div className="text-center">
-                  <div className={`w-20 h-20 bg-gradient-to-br ${tier.color} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
-                    <Icon className="w-10 h-10 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-black text-slate-900 font-serif mb-2">{tier.name}</h3>
-                  <div className="mb-4">
-                    <span className="text-5xl font-black text-slate-900">${tier.price}</span>
-                    {tier.period !== 'forever' && (
-                      <span className="text-slate-600">/{tier.period}</span>
-                    )}
-                  </div>
+              <div className="text-center">
+                <div className={`w-16 h-16 mx-auto bg-gradient-to-br ${tier.color} rounded-2xl flex items-center justify-center mb-4`}>
+                  <Icon className="w-8 h-8 text-white" />
                 </div>
-
-                <div className="space-y-3">
-                  {tier.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-                      <span className="text-sm text-slate-700 font-serif">{feature}</span>
-                    </div>
-                  ))}
+                <div className="text-2xl font-black text-slate-900 mb-2">{tier.name}</div>
+                <div className="text-5xl font-black text-slate-900 mb-2">
+                  ${tier.price}
+                  <span className="text-lg text-slate-600">/mo</span>
                 </div>
+              </div>
 
-                <Button
-                  onClick={() => onSelect?.(tier.id)}
-                  disabled={isCurrent}
-                  className={`w-full py-6 rounded-2xl font-bold font-serif ${
-                    isCurrent 
-                      ? 'bg-slate-200 text-slate-500'
-                      : `bg-gradient-to-r ${tier.color} text-white hover:shadow-2xl`
-                  }`}
-                >
-                  {isCurrent ? 'Current Plan' : tier.price === 0 ? 'Start Free' : 'Upgrade Now'}
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
+              <div className="space-y-3">
+                {tier.features.map((feature, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                    <span className="text-sm text-slate-700">{feature}</span>
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                disabled={isCurrent}
+                className={`w-full rounded-2xl ${
+                  isCurrent 
+                    ? 'bg-slate-300 text-slate-600' 
+                    : `bg-gradient-to-r ${tier.color} text-white`
+                }`}
+              >
+                {isCurrent ? 'Current Plan' : 'Upgrade'}
+              </Button>
+            </CardContent>
+          </Card>
         );
       })}
     </div>

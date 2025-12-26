@@ -1,67 +1,92 @@
 import React from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ShoppingCart, Zap, Star, Flame, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Zap, Star } from 'lucide-react';
-import { toast } from 'sonner';
 
-export default function PowerUpShop({ userEmail }) {
-  const queryClient = useQueryClient();
-
-  const { data: powerups = [] } = useQuery({
-    queryKey: ['powerups'],
-    queryFn: () => base44.entities.PowerUp.list()
-  });
-
-  const purchaseMutation = useMutation({
-    mutationFn: async (powerup) => {
-      return await base44.entities.UserPowerUp.create({
-        user_email: userEmail,
-        powerup_id: powerup.id,
-        activated_at: new Date().toISOString(),
-        expires_at: new Date(Date.now() + powerup.duration_hours * 3600000).toISOString()
-      });
+export default function PowerUpShop({ userXP = 0 }) {
+  const items = [
+    {
+      id: 'double_xp',
+      name: 'Double XP Boost',
+      description: '2x experience for 1 hour',
+      cost: 100,
+      icon: Star,
+      color: 'from-amber-400 to-yellow-600'
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['user-powerups']);
-      toast.success('Power-up activated!');
+    {
+      id: 'streak_saver',
+      name: 'Streak Freeze',
+      description: 'Protect your streak for 1 day',
+      cost: 75,
+      icon: Shield,
+      color: 'from-blue-400 to-cyan-600'
+    },
+    {
+      id: 'mega_boost',
+      name: 'Mega XP Boost',
+      description: '5x experience for 15 minutes',
+      cost: 250,
+      icon: Flame,
+      color: 'from-red-400 to-orange-600'
     }
-  });
-
-  const rarityColors = {
-    common: 'bg-slate-100 text-slate-800',
-    rare: 'bg-blue-100 text-blue-800',
-    epic: 'bg-purple-100 text-purple-800',
-    legendary: 'bg-amber-100 text-amber-800'
-  };
+  ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {powerups.map((powerup) => (
-        <Card key={powerup.id} className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h3 className="font-bold mb-2">{powerup.name}</h3>
-                <Badge className={rarityColors[powerup.rarity]}>
-                  <Star className="w-3 h-3 mr-1" />
-                  {powerup.rarity}
-                </Badge>
+    <Card className="glass-effect border-0 premium-shadow-lg rounded-[2.5rem]">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2 font-serif">
+            <ShoppingCart className="w-5 h-5 text-green-600" />
+            Power-Up Shop
+          </div>
+          <Badge className="bg-amber-100 text-amber-800 flex items-center gap-1">
+            <Zap className="w-3 h-3" />
+            {userXP} XP
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {items.map((item, idx) => {
+          const Icon = item.icon;
+          const canAfford = userXP >= item.cost;
+          
+          return (
+            <div
+              key={item.id}
+              className={`p-4 rounded-xl border-2 ${
+                canAfford 
+                  ? 'bg-white border-slate-200' 
+                  : 'bg-slate-50 border-slate-200 opacity-60'
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <div className={`w-14 h-14 bg-gradient-to-br ${item.color} rounded-xl flex items-center justify-center shrink-0`}>
+                  <Icon className="w-7 h-7 text-white" />
+                </div>
+                
+                <div className="flex-1">
+                  <div className="font-black text-slate-900 mb-1">{item.name}</div>
+                  <div className="text-sm text-slate-600 mb-3">{item.description}</div>
+                  
+                  <Button
+                    disabled={!canAfford}
+                    size="sm"
+                    className={`w-full rounded-xl ${
+                      canAfford 
+                        ? `bg-gradient-to-r ${item.color} text-white` 
+                        : 'bg-slate-300 text-slate-600'
+                    }`}
+                  >
+                    <Zap className="w-4 h-4 mr-2" />
+                    {item.cost} XP
+                  </Button>
+                </div>
               </div>
-              <Zap className="w-8 h-8 text-amber-500" />
             </div>
-            <p className="text-sm text-slate-600 mb-4">{powerup.description}</p>
-            <div className="flex items-center justify-between">
-              <span className="text-lg font-bold text-blue-600">{powerup.cost_points} pts</span>
-              <Button size="sm" onClick={() => purchaseMutation.mutate(powerup)}>
-                Activate
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+          );
+        })}
+      </CardContent>
+    </Card>
   );
 }

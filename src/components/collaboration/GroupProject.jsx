@@ -1,102 +1,87 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Users, Upload, MessageCircle, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, Plus, CheckCircle, Clock } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Progress } from '@/components/ui/progress';
 
-export default function GroupProject({ project, teamMembers, onJoinTeam, userEmail }) {
-  const [selectedTeam, setSelectedTeam] = useState(null);
+export default function GroupProject({ projectId }) {
+  const project = {
+    title: 'Breslov Teachings Presentation',
+    members: ['You', 'Moshe L.', 'David K.', 'Sarah M.'],
+    tasks: [
+      { name: 'Research', assignee: 'You', status: 'completed' },
+      { name: 'Script Writing', assignee: 'Moshe L.', status: 'in_progress' },
+      { name: 'Slides Design', assignee: 'David K.', status: 'pending' },
+      { name: 'Final Review', assignee: 'Sarah M.', status: 'pending' }
+    ],
+    dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  };
 
-  const teams = project?.teams || [];
-  const userTeam = teams.find(t => t.members?.includes(userEmail));
+  const completedTasks = project.tasks.filter(t => t.status === 'completed').length;
+  const progress = (completedTasks / project.tasks.length) * 100;
 
   return (
-    <Card className="glass-effect border-0 premium-shadow-lg rounded-[2rem]">
+    <Card className="glass-effect border-0 premium-shadow-lg rounded-[2.5rem]">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 font-serif">
           <Users className="w-5 h-5 text-purple-600" />
-          Group Project: {project?.title}
+          Group Project
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="p-4 bg-purple-50 rounded-xl">
-          <h4 className="font-bold text-slate-900 mb-2">Project Overview</h4>
-          <p className="text-slate-700 mb-3">{project?.description}</p>
-          <div className="flex items-center gap-4 text-sm text-slate-600">
-            <div className="flex items-center gap-1">
-              <Users className="w-4 h-4" />
-              Teams of {project?.team_size} students
-            </div>
-            <div className="flex items-center gap-1">
-              <Clock className="w-4 h-4" />
-              Due: {new Date(project?.due_date).toLocaleDateString()}
-            </div>
+        <div>
+          <div className="text-2xl font-black text-slate-900 mb-2">{project.title}</div>
+          <div className="text-sm text-slate-600">
+            Due: {project.dueDate.toLocaleDateString()}
           </div>
         </div>
 
-        {userTeam ? (
-          <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-            <div className="flex items-center gap-2 mb-3">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              <span className="font-bold text-green-900">You're on Team {userTeam.name}</span>
-            </div>
-            <div className="space-y-2">
-              <div className="font-medium text-slate-900 text-sm">Team Members:</div>
-              {userTeam.members?.map((member, idx) => (
-                <div key={idx} className="flex items-center gap-2 p-2 bg-white rounded-lg">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                    {member[0]}
-                  </div>
-                  <span className="text-sm text-slate-700">{member}</span>
-                </div>
-              ))}
-            </div>
-            <Button className="w-full mt-4 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold rounded-xl">
-              Go to Team Workspace
-            </Button>
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="font-bold text-slate-700">Overall Progress</span>
+            <span className="text-slate-900">{Math.round(progress)}%</span>
           </div>
-        ) : (
-          <div>
-            <h4 className="font-bold text-slate-900 mb-3">Available Teams</h4>
-            <div className="space-y-3">
-              {teams.filter(t => (t.members?.length || 0) < project?.team_size).map((team, idx) => (
-                <motion.div
-                  key={team.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  className="p-4 bg-white rounded-xl border border-slate-200 hover:border-blue-500 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-bold text-slate-900">{team.name}</div>
-                      <div className="text-sm text-slate-600">
-                        {team.members?.length || 0}/{project?.team_size} members
-                      </div>
-                    </div>
-                    <Button
-                      onClick={() => onJoinTeam?.(team.id)}
-                      size="sm"
-                      className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl"
-                    >
-                      Join Team
-                    </Button>
-                  </div>
-                </motion.div>
-              ))}
+          <Progress value={progress} className="h-3" />
+        </div>
 
-              <Button
-                variant="outline"
-                className="w-full rounded-xl"
-                onClick={() => onJoinTeam?.('new')}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create New Team
-              </Button>
+        <div className="space-y-2">
+          <div className="text-sm font-bold text-slate-700">Tasks</div>
+          {project.tasks.map((task, idx) => (
+            <div key={idx} className={`p-3 rounded-xl border ${
+              task.status === 'completed' 
+                ? 'bg-green-50 border-green-200' 
+                : task.status === 'in_progress'
+                ? 'bg-blue-50 border-blue-200'
+                : 'bg-white border-slate-200'
+            }`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-bold text-slate-900 text-sm">{task.name}</div>
+                  <div className="text-xs text-slate-600">{task.assignee}</div>
+                </div>
+                <Badge className={
+                  task.status === 'completed' ? 'bg-green-600 text-white' :
+                  task.status === 'in_progress' ? 'bg-blue-600 text-white' :
+                  'bg-slate-400 text-white'
+                }>
+                  {task.status.replace('_', ' ')}
+                </Badge>
+              </div>
             </div>
-          </div>
-        )}
+          ))}
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <Button variant="outline" className="rounded-xl">
+            <MessageCircle className="w-4 h-4 mr-2" />
+            Team Chat
+          </Button>
+          <Button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl">
+            <Upload className="w-4 h-4 mr-2" />
+            Upload
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

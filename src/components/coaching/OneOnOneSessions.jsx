@@ -1,99 +1,87 @@
 import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Video, Calendar, User, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar } from '@/components/ui/calendar';
-import { Video, Clock, User, CheckCircle } from 'lucide-react';
-import { motion } from 'framer-motion';
 
-export default function OneOnOneSessions({ instructor, availableSlots, onBook }) {
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedTime, setSelectedTime] = useState(null);
-
-  const times = [
-    '9:00 AM', '10:00 AM', '11:00 AM',
-    '2:00 PM', '3:00 PM', '4:00 PM',
-    '7:00 PM', '8:00 PM'
+export default function OneOnOneSessions({ instructorId }) {
+  const sessions = [
+    {
+      date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+      instructor: 'Rabbi Cohen',
+      topic: 'Personalized Torah study plan',
+      duration: 30,
+      status: 'upcoming'
+    },
+    {
+      date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      instructor: 'Rabbi Levy',
+      topic: 'Hebrew pronunciation practice',
+      duration: 45,
+      status: 'completed'
+    }
   ];
 
   return (
     <Card className="glass-effect border-0 premium-shadow-lg rounded-[2rem]">
-      <CardContent className="p-8 space-y-6">
-        <div className="flex items-center gap-4">
-          <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center">
-            <User className="w-10 h-10 text-white" />
-          </div>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 font-serif">
+          <Video className="w-5 h-5 text-purple-600" />
           <div>
-            <h3 className="text-2xl font-black text-slate-900 font-serif mb-1">
-              Private Session with {instructor?.name}
-            </h3>
-            <div className="flex items-center gap-3 text-sm text-slate-600">
-              <Badge className="bg-purple-100 text-purple-800 font-serif">1-on-1 Mentorship</Badge>
+            <div>1-on-1 Sessions</div>
+            <div className="text-sm text-slate-600 font-normal" dir="rtl">מפגשים אישיים</div>
+          </div>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {sessions.map((session, idx) => (
+          <div
+            key={idx}
+            className={`p-4 rounded-xl border-2 ${
+              session.status === 'upcoming' 
+                ? 'bg-blue-50 border-blue-200' 
+                : 'bg-slate-50 border-slate-200'
+            }`}
+          >
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <div className="font-bold text-slate-900">{session.topic}</div>
+                <div className="text-sm text-slate-600">with {session.instructor}</div>
+              </div>
+              <Badge className={
+                session.status === 'upcoming' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-slate-600 text-white'
+              }>
+                {session.status}
+              </Badge>
+            </div>
+
+            <div className="flex items-center gap-4 text-xs text-slate-600 mb-3">
+              <div className="flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                {session.date.toLocaleDateString()}
+              </div>
               <div className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                60 minutes
+                {session.duration} min
               </div>
             </div>
+
+            {session.status === 'upcoming' && (
+              <Button
+                size="sm"
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl"
+              >
+                <Video className="w-4 h-4 mr-2" />
+                Join Session
+              </Button>
+            )}
           </div>
-        </div>
+        ))}
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Calendar */}
-          <div>
-            <h4 className="font-bold text-slate-900 mb-3 font-serif">Select Date</h4>
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              className="rounded-2xl border-2 border-slate-200 p-3"
-            />
-          </div>
-
-          {/* Time Slots */}
-          <div>
-            <h4 className="font-bold text-slate-900 mb-3 font-serif">Select Time</h4>
-            <div className="grid grid-cols-2 gap-2 max-h-96 overflow-y-auto">
-              {times.map((time, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedTime(time)}
-                  disabled={!selectedDate}
-                  className={`p-3 rounded-xl text-sm font-serif transition-all ${
-                    selectedTime === time
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-white border-2 border-slate-200 hover:border-purple-300'
-                  } ${!selectedDate ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {time}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {selectedDate && selectedTime && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border-2 border-purple-200"
-          >
-            <div className="flex items-center gap-2 text-purple-900 mb-3">
-              <CheckCircle className="w-5 h-5" />
-              <span className="font-bold font-serif">Session Confirmed</span>
-            </div>
-            <div className="text-sm text-purple-800 font-serif">
-              {selectedDate.toLocaleDateString()} at {selectedTime}
-            </div>
-          </motion.div>
-        )}
-
-        <Button
-          onClick={() => onBook?.({ date: selectedDate, time: selectedTime })}
-          disabled={!selectedDate || !selectedTime}
-          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-6 rounded-2xl font-serif"
-        >
-          <Video className="w-5 h-5 mr-2" />
-          Book Session ($150)
+        <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl">
+          Book New Session
         </Button>
       </CardContent>
     </Card>

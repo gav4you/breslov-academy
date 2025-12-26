@@ -64,6 +64,7 @@ import TorahStudy from './pages/TorahStudy';
 import Tournaments from './pages/Tournaments';
 import Webinars from './pages/Webinars';
 import Settings from './pages/Settings';
+import Profile from './pages/Profile';
 import __Layout from './Layout.jsx';
 
 
@@ -134,6 +135,7 @@ export const PAGES = {
     "Tournaments": Tournaments,
     "Webinars": Webinars,
     "Settings": Settings,
+    "Profile": Profile,
 }
 
 export const pagesConfig = {
