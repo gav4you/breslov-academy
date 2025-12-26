@@ -7,7 +7,7 @@ import AITutor from '../components/ai/AITutor';
 import TranscriptViewer from '../components/video/TranscriptViewer';
 import Whiteboard from '../components/collaboration/Whiteboard';
 import OfflineMode from '../components/mobile/OfflineMode';
-import AdvancedVideoPlayer from '../components/video/AdvancedVideoPlayer';
+import VideoPlayer from '../components/video/VideoPlayer';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Link } from 'react-router-dom';
@@ -162,12 +162,11 @@ export default function LessonViewer() {
         </div>
       </div>
 
-      {/* Video/Audio Player */}
+      {/* Video Player */}
       {lesson.video_url && (
-        <AdvancedVideoPlayer
+        <VideoPlayer
           src={lesson.video_url}
           onTimeUpdate={(time) => {
-            // Auto-save progress
             if (progress) {
               base44.entities.UserProgress.update(progress.id, {
                 last_position_seconds: Math.floor(time)
@@ -175,12 +174,17 @@ export default function LessonViewer() {
             }
           }}
           onEnded={() => {
-            // Auto-complete lesson when video ends
             if (!progress?.completed) {
               markCompleteMutation.mutate();
             }
           }}
           initialTime={progress?.last_position_seconds || 0}
+          bookmarks={lesson.bookmarks || []}
+          onAddBookmark={(time) => {
+            // Add bookmark functionality
+            console.log('Bookmark added at', time);
+          }}
+          transcript={lesson.transcript || []}
         />
       )}
 
