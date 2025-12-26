@@ -31,6 +31,8 @@ import CareerPaths from './pages/CareerPaths';
 import LiveStreams from './pages/LiveStreams';
 import Forums from './pages/Forums';
 import Scholarships from './pages/Scholarships';
+import Microlearning from './pages/Microlearning';
+import AlumniNetwork from './pages/AlumniNetwork';
 import __Layout from './Layout.jsx';
 
 
@@ -68,6 +70,8 @@ export const PAGES = {
     "LiveStreams": LiveStreams,
     "Forums": Forums,
     "Scholarships": Scholarships,
+    "Microlearning": Microlearning,
+    "AlumniNetwork": AlumniNetwork,
 }
 
 export const pagesConfig = {
