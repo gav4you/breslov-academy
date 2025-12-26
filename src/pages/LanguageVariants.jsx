@@ -244,12 +244,18 @@ export default function LanguageVariants() {
                       </div>
                     </div>
 
-                    <Link to={createPageUrl(`RosettaStoneLesson?lang=${lang.id}`)}>
-                      <Button className={`w-full bg-gradient-to-r ${lang.color} text-white font-bold py-6 rounded-2xl hover:shadow-2xl transition-all`}>
-                        {progress ? 'Continue Learning' : 'Start Learning'}
-                        <BookOpen className="w-4 h-4 ml-2" />
-                      </Button>
-                    </Link>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Link to={createPageUrl(`RosettaStoneLesson?lang=${lang.id}`)}>
+                        <Button className={`w-full bg-gradient-to-r ${lang.color} text-white font-bold py-4 rounded-2xl hover:shadow-2xl transition-all`}>
+                          {progress ? 'Continue' : 'Start'}
+                        </Button>
+                      </Link>
+                      <Link to={createPageUrl(`LanguageLearning?lang=${lang.id}`)}>
+                        <Button variant="outline" className="w-full py-4 rounded-2xl font-bold">
+                          All Features
+                        </Button>
+                      </Link>
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>

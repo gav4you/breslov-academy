@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, BookOpen, Award, Flame } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import FlashcardPractice from '../components/language/FlashcardPractice';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, BookOpen, MessageCircle, PenTool, Repeat, FileText, Trophy } from 'lucide-react';
+import SpacedRepetition from '../components/language/SpacedRepetition';
+import ConversationSimulator from '../components/language/ConversationSimulator';
+import StoryReader from '../components/language/StoryReader';
+import WritingPractice from '../components/language/WritingPractice';
+import DailyGoals from '../components/language/DailyGoals';
 
 export default function LanguageLearning() {
   const [user, setUser] = useState(null);
   const urlParams = new URLSearchParams(window.location.search);
-  const language = urlParams.get('lang');
-  const [practiceMode, setPracticeMode] = useState(null);
+  const languageId = urlParams.get('lang') || 'biblical_hebrew';
 
   useEffect(() => {
     const loadUser = async () => {
@@ -26,148 +29,190 @@ export default function LanguageLearning() {
     loadUser();
   }, []);
 
-  const { data: lessons = [] } = useQuery({
-    queryKey: ['language-lessons', language],
-    queryFn: () => base44.entities.LanguageLesson.filter({ language }, 'lesson_number'),
-    enabled: !!language
-  });
-
-  const { data: langProgress } = useQuery({
-    queryKey: ['language-progress', user?.email, language],
+  const { data: progress } = useQuery({
+    queryKey: ['languageProgress', user?.email, languageId],
     queryFn: async () => {
-      const progs = await base44.entities.LanguageProgress.filter({ 
+      const progs = await base44.entities.LanguageProgress.filter({
         user_email: user.email,
-        language 
+        language_variant: languageId
       });
       return progs[0];
     },
-    enabled: !!user?.email && !!language
+    enabled: !!user?.email
   });
 
-  const languageNames = {
-    biblical_hebrew: { name: 'Biblical Hebrew', hebrew: 'עברית מקראית' },
-    torah_hebrew: { name: 'Torah Hebrew', hebrew: 'עברית תורנית' },
-    talmud_bavli: { name: 'Talmud Bavli', hebrew: 'תלמוד בבלי' },
-    modern_hebrew: { name: 'Modern Hebrew', hebrew: 'עברית חדשה' },
-    aramaic: { name: 'Aramaic', hebrew: 'ארמית' },
-    yiddish: { name: 'Yiddish', hebrew: 'אידיש' },
-    ancient_hebrew: { name: 'Ancient Hebrew', hebrew: 'עברית עתיקה' }
+  // Sample data
+  const sampleVocab = [
+    {
+      id: '1',
+      word_hebrew: 'שָׁלוֹם',
+      transliteration: 'Shalom',
+      translation: 'Peace, Hello, Goodbye',
+      example_sentence: 'שָׁלוֹם עֲלֵיכֶם',
+      image_url: '👋',
+      grammar_notes: 'Used for greetings and farewells'
+    }
+  ];
+
+  const sampleConversation = {
+    conversation_title: 'Meeting Someone New',
+    scenario: 'Introducing yourself in Hebrew',
+    cultural_notes: 'Israelis often use informal greetings even with strangers',
+    dialogue: [
+      {
+        speaker: 'Person',
+        hebrew: 'שָׁלוֹם! מַה שְׁמֶךָ?',
+        transliteration: 'Shalom! Ma shimcha?',
+        translation: 'Hello! What is your name?'
+      },
+      {
+        speaker: 'you',
+        hebrew: 'שְׁמִי דָּוִד',
+        transliteration: 'Shmi David',
+        translation: 'My name is David',
+        responses: [
+          {
+            hebrew: 'שְׁמִי דָּוִד',
+            translation: 'My name is David'
+          },
+          {
+            hebrew: 'אֲנִי דָּוִד',
+            translation: 'I am David'
+          }
+        ]
+      }
+    ]
   };
 
-  const currentLang = languageNames[language];
+  const sampleStory = {
+    title: 'A Day in Jerusalem',
+    title_hebrew: 'יוֹם בִּירוּשָׁלַיִם',
+    story_text: 'הַיּוֹם יוֹם יָפֶה בִּירוּשָׁלַיִם. הַשֶּׁמֶשׁ זוֹרַחַת וְהָעִיר מְלֵאָה חַיִּים.',
+    translation: 'Today is a beautiful day in Jerusalem. The sun is shining and the city is full of life.',
+    difficulty_level: 1,
+    vocabulary_highlights: [
+      { word: 'יוֹם', translation: 'day' },
+      { word: 'יָפֶה', translation: 'beautiful' }
+    ],
+    cultural_context: 'Jerusalem is the spiritual heart of Judaism',
+    comprehension_questions: [
+      {
+        question: 'What is the weather like?',
+        options: ['Rainy', 'Sunny', 'Cloudy', 'Windy'],
+        correct: 'Sunny'
+      }
+    ]
+  };
 
-  if (practiceMode && lessons.length > 0) {
-    const allVocabulary = lessons.flatMap(l => l.vocabulary || []);
-    
-    return (
-      <div className="max-w-4xl mx-auto space-y-6">
-        <Button variant="ghost" onClick={() => setPracticeMode(null)}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Lessons
-        </Button>
-        <FlashcardPractice 
-          vocabulary={allVocabulary}
-          onComplete={(results) => {
-            setPracticeMode(null);
-            // Save progress
-          }}
-        />
-      </div>
-    );
-  }
+  const sampleWriting = {
+    type: 'sentence',
+    prompt: 'Write "Good morning" in Hebrew',
+    hint: 'Think about the word for morning (בֹּקֶר)',
+    correct_answer: 'בֹּקֶר טוֹב',
+    common_mistakes: ['forgetting the vowels', 'wrong word order']
+  };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <Link to={createPageUrl('Languages')}>
-          <Button variant="ghost" className="mb-4">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            All Languages
-          </Button>
-        </Link>
-
-        <div className="bg-gradient-to-r from-blue-900 to-purple-900 rounded-2xl p-8 text-white">
-          <h1 className="text-4xl font-bold mb-2">{currentLang?.name}</h1>
-          <p className="text-2xl text-blue-200 mb-4" dir="rtl">{currentLang?.hebrew}</p>
-          <div className="flex items-center space-x-6 text-blue-100">
-            <div className="flex items-center">
-              <Flame className="w-5 h-5 mr-2" />
-              <span>{langProgress?.streak_days || 0} day streak</span>
-            </div>
-            <div className="flex items-center">
-              <Award className="w-5 h-5 mr-2" />
-              <span>{langProgress?.words_learned || 0} words learned</span>
-            </div>
-            <div className="flex items-center">
-              <BookOpen className="w-5 h-5 mr-2" />
-              <span>{langProgress?.lessons_completed || 0} lessons completed</span>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20 p-4">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <Link to={createPageUrl('LanguageVariants')}>
+            <Button variant="ghost" className="rounded-xl">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              All Languages
+            </Button>
+          </Link>
+          <h1 className="text-3xl font-black text-slate-900">
+            {languageId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+          </h1>
         </div>
-      </div>
 
-      {/* Practice Options */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setPracticeMode('flashcards')}>
-          <CardContent className="p-6 text-center">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">🃏</span>
-            </div>
-            <h3 className="font-bold text-lg mb-2">Flashcards</h3>
-            <p className="text-slate-600 text-sm">Practice vocabulary with interactive flashcards</p>
-          </CardContent>
-        </Card>
+        {/* Daily Goals */}
+        <DailyGoals progress={progress} />
 
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-          <CardContent className="p-6 text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">✍️</span>
-            </div>
-            <h3 className="font-bold text-lg mb-2">Writing Practice</h3>
-            <p className="text-slate-600 text-sm">Learn to write in Hebrew script</p>
-          </CardContent>
-        </Card>
+        {/* Learning Modes */}
+        <Tabs defaultValue="vocabulary" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5 gap-2 bg-white/80 backdrop-blur-sm p-2 rounded-2xl">
+            <TabsTrigger value="vocabulary" className="rounded-xl">
+              <Repeat className="w-4 h-4 mr-2" />
+              Flashcards
+            </TabsTrigger>
+            <TabsTrigger value="conversation" className="rounded-xl">
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Conversation
+            </TabsTrigger>
+            <TabsTrigger value="stories" className="rounded-xl">
+              <FileText className="w-4 h-4 mr-2" />
+              Stories
+            </TabsTrigger>
+            <TabsTrigger value="writing" className="rounded-xl">
+              <PenTool className="w-4 h-4 mr-2" />
+              Writing
+            </TabsTrigger>
+            <TabsTrigger value="achievements" className="rounded-xl">
+              <Trophy className="w-4 h-4 mr-2" />
+              Progress
+            </TabsTrigger>
+          </TabsList>
 
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-          <CardContent className="p-6 text-center">
-            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">🗣️</span>
-            </div>
-            <h3 className="font-bold text-lg mb-2">Speaking</h3>
-            <p className="text-slate-600 text-sm">Practice pronunciation and speaking</p>
-          </CardContent>
-        </Card>
-      </div>
+          <TabsContent value="vocabulary">
+            <SpacedRepetition
+              card={sampleVocab[0]}
+              onComplete={() => console.log('completed')}
+              userEmail={user?.email}
+              languageVariant={languageId}
+            />
+          </TabsContent>
 
-      {/* Lessons */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Lessons</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {lessons.length === 0 ? (
-            <div className="text-center py-12 text-slate-500">
-              <BookOpen className="w-16 h-16 mx-auto mb-4 text-slate-400" />
-              <p>Lessons coming soon!</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {lessons.map((lesson) => (
-                <div key={lesson.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50">
-                  <div>
-                    <h4 className="font-semibold">Lesson {lesson.lesson_number}: {lesson.title}</h4>
-                    <p className="text-sm text-slate-600 mt-1">
-                      {lesson.vocabulary?.length || 0} new words • {lesson.level}
-                    </p>
+          <TabsContent value="conversation">
+            <ConversationSimulator
+              conversation={sampleConversation}
+              onComplete={() => console.log('conversation complete')}
+            />
+          </TabsContent>
+
+          <TabsContent value="stories">
+            <StoryReader
+              story={sampleStory}
+              onComplete={(answers) => console.log('story complete', answers)}
+            />
+          </TabsContent>
+
+          <TabsContent value="writing">
+            <WritingPractice
+              exercise={sampleWriting}
+              onComplete={() => console.log('writing complete')}
+            />
+          </TabsContent>
+
+          <TabsContent value="achievements">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="glass-effect border-0 premium-shadow-xl rounded-[2.5rem] p-8">
+                <h3 className="text-2xl font-black mb-4">Your Stats</h3>
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Level</span>
+                    <span className="font-bold text-blue-600">{progress?.level || 1}</span>
                   </div>
-                  <Button size="sm">Start Lesson</Button>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Words Mastered</span>
+                    <span className="font-bold text-green-600">{progress?.vocabulary_mastered?.length || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Study Time</span>
+                    <span className="font-bold text-purple-600">{progress?.total_minutes_studied || 0} min</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Streak</span>
+                    <span className="font-bold text-orange-600">{progress?.daily_streak || 0} days</span>
+                  </div>
                 </div>
-              ))}
+              </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

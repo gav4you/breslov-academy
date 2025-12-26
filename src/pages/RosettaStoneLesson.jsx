@@ -80,6 +80,13 @@ export default function RosettaStoneLesson() {
         ]
       },
       {
+        type: 'listening',
+        question: 'Type what you hear',
+        word: 'שָׁלוֹם',
+        transliteration: 'Shalom',
+        correctAnswer: 'שלום'
+      },
+      {
         type: 'image-word',
         question: 'Select the correct word for this image',
         word: null,
