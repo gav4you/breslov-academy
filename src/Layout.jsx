@@ -25,10 +25,10 @@ export default function Layout({ children, currentPageName }) {
 
   const navigation = [
     { name: 'Dashboard', path: 'Dashboard', icon: BookOpen },
-    { name: 'Courses', path: 'Courses', icon: GraduationCap },
+    { name: 'Marketplace', path: 'Marketplace', icon: GraduationCap },
     { name: 'Study Sets', path: 'StudySets', icon: BookOpen },
-    { name: 'Languages', path: 'Languages', icon: Menu },
-    { name: 'Community', path: 'Community', icon: Menu },
+    { name: 'Events', path: 'Events', icon: Menu },
+    { name: 'Messages', path: 'Messages', icon: Menu },
   ];
 
   return (

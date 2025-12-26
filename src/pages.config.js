@@ -13,6 +13,10 @@ import Analytics from './pages/Analytics';
 import AffiliateProgram from './pages/AffiliateProgram';
 import StudySets from './pages/StudySets';
 import StudySet from './pages/StudySet';
+import Marketplace from './pages/Marketplace';
+import Events from './pages/Events';
+import Messages from './pages/Messages';
+import Downloads from './pages/Downloads';
 import __Layout from './Layout.jsx';
 
 
@@ -32,6 +36,10 @@ export const PAGES = {
     "AffiliateProgram": AffiliateProgram,
     "StudySets": StudySets,
     "StudySet": StudySet,
+    "Marketplace": Marketplace,
+    "Events": Events,
+    "Messages": Messages,
+    "Downloads": Downloads,
 }
 
 export const pagesConfig = {
