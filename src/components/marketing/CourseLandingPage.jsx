@@ -1,144 +1,131 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Star, Users, Clock, Award, PlayCircle } from 'lucide-react';
+import { Check, Star, PlayCircle, Award, Users } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-export default function CourseLandingPage({ course, lessons, reviews, instructorInfo }) {
-  const avgRating = reviews?.length > 0
-    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-    : 5;
+export default function CourseLandingPage({ course, onEnroll }) {
+  const testimonials = [
+    { name: 'David Cohen', text: 'This course changed my understanding completely!', rating: 5 },
+    { name: 'Sarah Levy', text: 'Clear explanations and excellent structure.', rating: 5 },
+    { name: 'Rachel Klein', text: 'Highly recommend to anyone interested in Torah study.', rating: 5 },
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <Badge className="mb-4 bg-amber-500">{course.category?.replace(/_/g, ' ')}</Badge>
-              <h1 className="text-5xl font-bold mb-4">{course.title}</h1>
-              {course.title_hebrew && (
-                <p className="text-2xl text-blue-200 mb-6" dir="rtl">{course.title_hebrew}</p>
-              )}
-              <p className="text-xl text-slate-300 mb-8">{course.description}</p>
-              
-              <div className="flex items-center space-x-6 mb-8">
-                <div className="flex items-center">
-                  <Star className="w-5 h-5 text-amber-400 mr-1" />
-                  <span className="font-bold">{avgRating.toFixed(1)}</span>
-                  <span className="text-slate-400 ml-1">({reviews?.length || 0} reviews)</span>
-                </div>
-                <div className="flex items-center">
-                  <Users className="w-5 h-5 mr-2" />
-                  <span>1,234 students</span>
-                </div>
-              </div>
-
-              <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-lg px-8 py-6">
-                Enroll Now - ${course.price || 'Free'}
-              </Button>
-            </div>
-
-            <div className="relative">
-              <Card className="overflow-hidden shadow-2xl">
-                <div className="aspect-video bg-slate-800 flex items-center justify-center relative">
-                  {course.thumbnail_url ? (
-                    <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <PlayCircle className="w-24 h-24 text-white opacity-50" />
-                  )}
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/20 transition-colors cursor-pointer">
-                    <PlayCircle className="w-20 h-20 text-white" />
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* What You'll Learn */}
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-slate-900 mb-8">What You'll Learn</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {['Deep understanding of Rebbe Nachman\'s teachings', 
-            'Practical application to daily life',
-            'Hebrew and Aramaic text study',
-            'Connection to Breslov chassidus',
-            'Spiritual growth techniques',
-            'Prayer and meditation practices'].map((item, idx) => (
-            <div key={idx} className="flex items-start space-x-3">
-              <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
-              <span className="text-slate-700">{item}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Course Content */}
-      <div className="bg-white py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-slate-900 mb-8">Course Content</h2>
-          <div className="space-y-2">
-            {lessons?.slice(0, 5).map((lesson, idx) => (
-              <Card key={lesson.id}>
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="font-bold text-blue-600">{idx + 1}</span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold">{lesson.title}</h4>
-                      {lesson.duration_minutes && (
-                        <p className="text-sm text-slate-600">{lesson.duration_minutes} min</p>
-                      )}
-                    </div>
-                  </div>
-                  {lesson.is_preview && (
-                    <Badge variant="outline">Preview</Badge>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-            {lessons?.length > 5 && (
-              <p className="text-center text-slate-600 pt-4">+ {lessons.length - 5} more lessons</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Instructor */}
-      {instructorInfo && (
-        <div className="max-w-7xl mx-auto px-4 py-16">
-          <h2 className="text-3xl font-bold text-slate-900 mb-8">Your Instructor</h2>
-          <Card>
-            <CardContent className="p-8 flex items-start space-x-6">
-              {instructorInfo.photo_url && (
-                <img src={instructorInfo.photo_url} alt={instructorInfo.name} className="w-24 h-24 rounded-full" />
-              )}
-              <div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">{instructorInfo.name}</h3>
-                <p className="text-slate-600 mb-4">{instructorInfo.title}</p>
-                <p className="text-slate-700">{instructorInfo.bio}</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* CTA */}
-      <div className="bg-gradient-to-r from-blue-900 to-purple-900 text-white py-16">
-        <div className="max-w-4xl mx-auto text-center px-4">
-          <h2 className="text-4xl font-bold mb-4">Ready to Begin Your Journey?</h2>
-          <p className="text-xl text-blue-200 mb-8">
-            Join thousands of students learning Torah with Breslov Academy
-          </p>
-          <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-lg px-12 py-6">
-            Enroll Now
+    <div className="space-y-12">
+      {/* Video Preview */}
+      <Card className="glass-effect border-0 premium-shadow-lg rounded-[2rem] overflow-hidden">
+        <div className="aspect-video bg-gradient-to-br from-slate-900 to-blue-900 relative flex items-center justify-center">
+          <PlayCircle className="w-24 h-24 text-white/30" />
+          <Button className="absolute bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white">
+            <PlayCircle className="w-5 h-5 mr-2" />
+            Watch Preview
           </Button>
         </div>
-      </div>
+      </Card>
+
+      {/* Benefits */}
+      <Card className="glass-effect border-0 premium-shadow-lg rounded-[2rem]">
+        <CardContent className="p-8">
+          <h2 className="text-3xl font-black text-slate-900 mb-6">What's Included</h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            {[
+              'Lifetime access to all lessons',
+              'Downloadable resources',
+              'Certificate of completion',
+              'Interactive quizzes',
+              'Discussion forum',
+              'Mobile app access'
+            ].map((benefit, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className="flex items-center gap-3"
+              >
+                <div className="p-1 bg-green-100 rounded-lg">
+                  <Check className="w-5 h-5 text-green-600" />
+                </div>
+                <span className="text-slate-700">{benefit}</span>
+              </motion.div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Social Proof */}
+      <Card className="glass-effect border-0 premium-shadow-lg rounded-[2rem]">
+        <CardContent className="p-8">
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <div className="text-center">
+              <div className="text-4xl font-black text-slate-900 mb-2">2,456</div>
+              <div className="flex items-center justify-center gap-1 text-amber-500 mb-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-current" />
+                ))}
+              </div>
+              <div className="text-slate-600">Happy Students</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-black text-slate-900 mb-2">4.9</div>
+              <div className="flex items-center justify-center gap-1 text-amber-500 mb-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-current" />
+                ))}
+              </div>
+              <div className="text-slate-600">Average Rating</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-black text-slate-900 mb-2">98%</div>
+              <Award className="w-8 h-8 text-amber-500 mx-auto mb-1" />
+              <div className="text-slate-600">Completion Rate</div>
+            </div>
+          </div>
+
+          <h3 className="text-2xl font-black text-slate-900 mb-6">What Students Say</h3>
+          <div className="space-y-4">
+            {testimonials.map((t, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className="p-4 bg-white rounded-xl"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                    {t.name[0]}
+                  </div>
+                  <div>
+                    <div className="font-bold text-slate-900">{t.name}</div>
+                    <div className="flex">
+                      {[...Array(t.rating)].map((_, i) => (
+                        <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-slate-700">{t.text}</p>
+              </motion.div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* CTA */}
+      <Card className="glass-effect border-0 premium-shadow-xl rounded-[2rem] overflow-hidden">
+        <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-8 text-center">
+          <h2 className="text-3xl font-black text-white mb-4">Ready to Begin Your Journey?</h2>
+          <p className="text-white/90 mb-6 text-lg">Join thousands of students already learning</p>
+          <Button
+            onClick={onEnroll}
+            className="bg-white text-blue-600 hover:bg-slate-100 font-bold px-8 py-6 rounded-2xl text-lg"
+          >
+            {course?.price ? `Enroll Now - $${course.price}` : 'Enroll Free'}
+          </Button>
+        </div>
+      </Card>
     </div>
   );
 }

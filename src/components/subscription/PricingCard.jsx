@@ -1,116 +1,78 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check, Crown, Sparkles } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Check, Crown, Star } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-export default function PricingCard({ tier, isCurrentTier, onSubscribe }) {
-  const tiers = {
-    free: {
-      name: 'Free',
-      price: 0,
-      period: '',
-      description: 'Start your Torah learning journey',
-      icon: Sparkles,
-      color: 'from-slate-500 to-slate-600',
-      features: [
-        'Access to free courses',
-        'Selected preview lessons',
-        'Basic progress tracking',
-        'Community access'
-      ]
-    },
-    premium: {
-      name: 'Premium',
-      price: 18,
-      period: '/month',
-      description: 'Unlock the full library',
-      icon: Crown,
-      color: 'from-blue-500 to-blue-600',
-      badge: 'Most Popular',
-      features: [
-        'All free tier features',
-        'Full access to premium courses',
-        'Downloadable audio lessons',
-        'Study notes & resources',
-        'Priority support',
-        'Advanced progress tracking'
-      ]
-    },
-    elite: {
-      name: 'Elite',
-      price: 36,
-      period: '/month',
-      description: 'The ultimate learning experience',
-      icon: Crown,
-      color: 'from-amber-500 to-amber-600',
-      badge: 'Best Value',
-      features: [
-        'All premium tier features',
-        'Exclusive elite-only courses',
-        'Live Q&A sessions with Rabbis',
-        'Private study groups',
-        'Early access to new content',
-        'Personal learning consultation',
-        'Certificate of completion'
-      ]
-    }
+export default function PricingCard({ tier, price, features, isPopular, onSelect }) {
+  const icons = {
+    free: Star,
+    premium: Crown,
+    elite: Crown
   };
 
-  const config = tiers[tier];
-  const Icon = config.icon;
+  const Icon = icons[tier] || Star;
+
+  const colors = {
+    free: 'from-slate-500 to-slate-600',
+    premium: 'from-blue-500 to-blue-600',
+    elite: 'from-amber-500 to-amber-600'
+  };
 
   return (
-    <Card className={`relative overflow-hidden transition-all hover:shadow-2xl ${
-      isCurrentTier ? 'ring-2 ring-amber-500 shadow-xl' : ''
-    }`}>
-      {config.badge && (
-        <div className="absolute top-4 right-4">
-          <span className="bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-            {config.badge}
-          </span>
-        </div>
+    <motion.div
+      whileHover={{ y: -8, scale: isPopular ? 1.02 : 1.0 }}
+      className={isPopular ? 'relative' : ''}
+    >
+      {isPopular && (
+        <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-600 text-white z-10">
+          Most Popular
+        </Badge>
       )}
       
-      <CardHeader className="text-center pb-4">
-        <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${config.color} flex items-center justify-center shadow-lg`}>
-          <Icon className="w-8 h-8 text-white" />
-        </div>
-        <CardTitle className="text-2xl font-bold text-slate-900">{config.name}</CardTitle>
-        <p className="text-sm text-slate-600 mt-2">{config.description}</p>
-      </CardHeader>
-
-      <CardContent className="space-y-6">
-        <div className="text-center">
-          <div className="flex items-baseline justify-center">
-            <span className="text-5xl font-bold text-slate-900">${config.price}</span>
-            <span className="text-slate-600 ml-2">{config.period}</span>
-          </div>
-          {config.price > 0 && (
-            <p className="text-xs text-slate-500 mt-2">Billed monthly • Cancel anytime</p>
-          )}
-        </div>
-
-        <div className="space-y-3">
-          {config.features.map((feature, index) => (
-            <div key={index} className="flex items-start space-x-3">
-              <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-              <span className="text-sm text-slate-700">{feature}</span>
+      <Card className={`card-modern border-white/60 premium-shadow hover:premium-shadow-xl transition-all rounded-[2rem] overflow-hidden h-full ${
+        isPopular ? 'border-4 border-amber-500' : ''
+      }`}>
+        <div className={`h-2 bg-gradient-to-r ${colors[tier]}`} />
+        <CardContent className="p-8 space-y-6">
+          <div className="text-center">
+            <div className={`w-16 h-16 bg-gradient-to-br ${colors[tier]} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
+              <Icon className="w-8 h-8 text-white" />
             </div>
-          ))}
-        </div>
+            <h3 className="text-2xl font-black text-slate-900 capitalize">{tier}</h3>
+          </div>
 
-        <Button
-          onClick={() => onSubscribe(tier)}
-          disabled={isCurrentTier}
-          className={`w-full ${
-            isCurrentTier
-              ? 'bg-slate-300 cursor-not-allowed'
-              : `bg-gradient-to-r ${config.color} hover:shadow-lg`
-          } text-white font-semibold`}
-        >
-          {isCurrentTier ? 'Current Plan' : `Get ${config.name}`}
-        </Button>
-      </CardContent>
-    </Card>
+          <div className="text-center">
+            <div className="text-5xl font-black text-slate-900">
+              ${price}
+              <span className="text-lg text-slate-600 font-normal">/month</span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {features.map((feature, idx) => (
+              <div key={idx} className="flex items-start gap-3">
+                <div className="p-1 bg-green-100 rounded-lg mt-0.5">
+                  <Check className="w-4 h-4 text-green-600" />
+                </div>
+                <span className="text-slate-700 text-sm">{feature}</span>
+              </div>
+            ))}
+          </div>
+
+          <Button
+            onClick={() => onSelect?.(tier)}
+            className={`w-full font-bold rounded-2xl py-6 ${
+              isPopular
+                ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white'
+                : 'bg-gradient-to-r from-slate-600 to-slate-700 text-white'
+            }`}
+          >
+            Choose {tier}
+          </Button>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }

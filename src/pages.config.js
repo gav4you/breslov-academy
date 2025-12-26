@@ -47,6 +47,9 @@ import Assignments from './pages/Assignments';
 import GradeBook from './pages/GradeBook';
 import TeacherMessaging from './pages/TeacherMessaging';
 import InstructorAnalytics from './pages/InstructorAnalytics';
+import CourseSalesPage from './pages/CourseSalesPage';
+import Certificates from './pages/Certificates';
+import Pricing from './pages/Pricing';
 import __Layout from './Layout.jsx';
 
 
@@ -100,6 +103,9 @@ export const PAGES = {
     "GradeBook": GradeBook,
     "TeacherMessaging": TeacherMessaging,
     "InstructorAnalytics": InstructorAnalytics,
+    "CourseSalesPage": CourseSalesPage,
+    "Certificates": Certificates,
+    "Pricing": Pricing,
 }
 
 export const pagesConfig = {
