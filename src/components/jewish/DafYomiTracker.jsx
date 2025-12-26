@@ -1,80 +1,79 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Flame, Trophy, Calendar } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { BookOpen, CheckCircle, Award } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 
-export default function DafYomiTracker({ progress, onMarkComplete }) {
-  if (!progress) return null;
+export default function DafYomiTracker({ userProgress = 0 }) {
+  const totalDapim = 2711; // Total pages in Shas
+  const currentCycle = Math.floor(userProgress / totalDapim) + 1;
+  const currentDaf = (userProgress % totalDapim) || 1;
+  const progressPercent = (currentDaf / totalDapim) * 100;
 
-  const cycleProgress = (progress.total_dapim_completed / 2711) * 100; // 2711 pages in Shas
+  const masechtos = {
+    current: 'Berachot',
+    currentHebrew: 'ברכות',
+    dafInMasechta: currentDaf,
+    totalDafim: 64
+  };
 
   return (
-    <Card className="glass-card border-0 shadow-xl">
-      <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-xl">
-        <CardTitle className="flex items-center space-x-3">
-          <Calendar className="w-6 h-6" />
-          <span>Daf Yomi - Daily Talmud</span>
+    <Card className="glass-effect border-0 premium-shadow-lg rounded-[2rem]">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 font-serif">
+          <BookOpen className="w-5 h-5 text-blue-600" />
+          <div>
+            <div>Daf Yomi Journey</div>
+            <div className="text-sm text-slate-600 font-normal" dir="rtl">מסע הדף היומי</div>
+          </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-6">
-        <div className="space-y-6">
-          {/* Current Daf */}
-          <div className="text-center">
-            <p className="text-slate-600 text-sm font-medium mb-2">Today's Daf</p>
-            <h2 className="text-4xl font-bold text-slate-900">
-              {progress.current_masechta} {progress.current_daf}
-            </h2>
+      <CardContent className="space-y-6">
+        <div className="p-6 bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 rounded-2xl text-white">
+          <div className="text-sm opacity-80 mb-2">Current Masechta</div>
+          <div className="text-3xl font-black mb-1">{masechtos.current}</div>
+          <div className="text-2xl text-blue-300 font-serif" dir="rtl">{masechtos.currentHebrew}</div>
+          <div className="mt-4 text-sm">
+            Daf {masechtos.dafInMasechta} of {masechtos.totalDafim}
           </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4">
-            <motion.div 
-              whileHover={{ scale: 1.05 }}
-              className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 text-center"
-            >
-              <CheckCircle className="w-6 h-6 text-green-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-green-900">{progress.total_dapim_completed}</div>
-              <div className="text-xs text-green-700">Dapim</div>
-            </motion.div>
-
-            <motion.div 
-              whileHover={{ scale: 1.05 }}
-              className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-4 text-center"
-            >
-              <Flame className="w-6 h-6 text-amber-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-amber-900">{progress.current_streak}</div>
-              <div className="text-xs text-amber-700">Day Streak</div>
-            </motion.div>
-
-            <motion.div 
-              whileHover={{ scale: 1.05 }}
-              className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 text-center"
-            >
-              <Trophy className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-blue-900">{Math.round(cycleProgress)}%</div>
-              <div className="text-xs text-blue-700">Cycle</div>
-            </motion.div>
-          </div>
-
-          {/* Cycle Progress */}
-          <div>
-            <div className="flex justify-between text-sm text-slate-600 mb-2">
-              <span>Shas Cycle Progress</span>
-              <span className="font-bold">{progress.total_dapim_completed} / 2711</span>
-            </div>
-            <Progress value={cycleProgress} className="h-3" />
-          </div>
-
-          <Button 
-            onClick={onMarkComplete}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold"
-          >
-            Mark Today's Daf Complete
-          </Button>
         </div>
+
+        <div className="space-y-3">
+          <div className="flex justify-between text-sm font-bold text-slate-700">
+            <span>Shas Progress</span>
+            <span>{currentDaf} / {totalDapim}</span>
+          </div>
+          <Progress value={progressPercent} className="h-3" />
+          <div className="text-xs text-slate-600">
+            Cycle {currentCycle} • {Math.round(progressPercent)}% Complete
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3">
+          <div className="text-center p-3 bg-green-50 rounded-xl border border-green-200">
+            <CheckCircle className="w-5 h-5 text-green-600 mx-auto mb-1" />
+            <div className="text-2xl font-black text-slate-900">{currentDaf}</div>
+            <div className="text-xs text-slate-600">Completed</div>
+          </div>
+          <div className="text-center p-3 bg-blue-50 rounded-xl border border-blue-200">
+            <BookOpen className="w-5 h-5 text-blue-600 mx-auto mb-1" />
+            <div className="text-2xl font-black text-slate-900">{totalDapim - currentDaf}</div>
+            <div className="text-xs text-slate-600">Remaining</div>
+          </div>
+          <div className="text-center p-3 bg-amber-50 rounded-xl border border-amber-200">
+            <Award className="w-5 h-5 text-amber-600 mx-auto mb-1" />
+            <div className="text-2xl font-black text-slate-900">{currentCycle}</div>
+            <div className="text-xs text-slate-600">Cycles</div>
+          </div>
+        </div>
+
+        <Link to={createPageUrl('TalmudStudy')}>
+          <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-bold py-4 rounded-xl">
+            Continue Learning
+          </Button>
+        </Link>
       </CardContent>
     </Card>
   );
