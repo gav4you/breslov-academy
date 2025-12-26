@@ -645,6 +645,17 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Perspective for 3D transforms */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+/* Backface visibility */
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
 /* Focus visible only */
 *:focus:not(:focus-visible) {
   outline: none;

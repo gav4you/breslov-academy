@@ -305,9 +305,7 @@ export default function Dashboard() {
           </Card>
         </motion.div>
 
-        {/* Jewish Learning Paths */}
-
-        {/* Jewish Learning Paths */}
+        {/* Torah Learning Paths */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

@@ -77,7 +77,7 @@ export default function SpacedRepetition({ card, onComplete, userEmail, language
   };
 
   return (
-    <div className="perspective-1000">
+    <div className="perspective-1000 w-full">
       <motion.div
         animate={{ rotateY: isFlipped ? 180 : 0 }}
         transition={{ duration: 0.6, type: 'spring' }}
@@ -85,7 +85,7 @@ export default function SpacedRepetition({ card, onComplete, userEmail, language
         className="relative w-full h-96"
       >
         {/* Front */}
-        <Card className={`absolute inset-0 backface-hidden ${!isFlipped ? '' : 'invisible'}`}>
+        <Card className={`absolute inset-0 glass-effect border-0 premium-shadow-xl rounded-[2.5rem] ${!isFlipped ? '' : 'invisible'}`} style={{ backfaceVisibility: 'hidden' }}>
           <CardContent className="flex flex-col items-center justify-center h-full p-8 space-y-6">
             <div className="text-8xl font-bold text-slate-900" dir="rtl">
               {card.word_hebrew}
@@ -107,7 +107,7 @@ export default function SpacedRepetition({ card, onComplete, userEmail, language
         </Card>
 
         {/* Back */}
-        <Card className={`absolute inset-0 backface-hidden ${isFlipped ? '' : 'invisible'}`} style={{ transform: 'rotateY(180deg)' }}>
+        <Card className={`absolute inset-0 glass-effect border-0 premium-shadow-xl rounded-[2.5rem] ${isFlipped ? '' : 'invisible'}`} style={{ transform: 'rotateY(180deg)', backfaceVisibility: 'hidden' }}>
           <CardContent className="flex flex-col items-center justify-center h-full p-8 space-y-6">
             <div className="text-5xl font-bold text-slate-900">{card.translation}</div>
             {card.example_sentence && (

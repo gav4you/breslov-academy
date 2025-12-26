@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, BookOpen, MessageCircle, PenTool, Repeat, FileText, Trophy } from 'lucide-react';
 import SpacedRepetition from '../components/language/SpacedRepetition';
 import ConversationSimulator from '../components/language/ConversationSimulator';
@@ -188,27 +189,57 @@ export default function LanguageLearning() {
 
           <TabsContent value="achievements">
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="glass-effect border-0 premium-shadow-xl rounded-[2.5rem] p-8">
-                <h3 className="text-2xl font-black mb-4">Your Stats</h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Level</span>
-                    <span className="font-bold text-blue-600">{progress?.level || 1}</span>
+              <Card className="glass-effect border-0 premium-shadow-xl rounded-[2.5rem]">
+                <CardContent className="p-8">
+                  <h3 className="text-2xl font-black mb-6">Your Stats</h3>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-600 font-medium">Level</span>
+                      <span className="font-black text-2xl text-blue-600">{progress?.level || 1}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-600 font-medium">Words Mastered</span>
+                      <span className="font-black text-2xl text-green-600">{progress?.vocabulary_mastered?.length || 0}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-600 font-medium">Study Time</span>
+                      <span className="font-black text-2xl text-purple-600">{progress?.total_minutes_studied || 0} min</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-600 font-medium">Streak</span>
+                      <span className="font-black text-2xl text-orange-600">{progress?.daily_streak || 0} days</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Words Mastered</span>
-                    <span className="font-bold text-green-600">{progress?.vocabulary_mastered?.length || 0}</span>
+                </CardContent>
+              </Card>
+              <Card className="glass-effect border-0 premium-shadow-xl rounded-[2.5rem]">
+                <CardContent className="p-8">
+                  <h3 className="text-2xl font-black mb-6">Achievements</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 p-3 bg-amber-50 rounded-xl">
+                      <div className="text-3xl">🏆</div>
+                      <div>
+                        <div className="font-bold text-slate-900">First Steps</div>
+                        <div className="text-sm text-slate-600">Complete first lesson</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
+                      <div className="text-3xl">📚</div>
+                      <div>
+                        <div className="font-bold text-slate-900">Scholar</div>
+                        <div className="text-sm text-slate-600">Master 50 words</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-xl">
+                      <div className="text-3xl">🔥</div>
+                      <div>
+                        <div className="font-bold text-slate-900">Dedicated</div>
+                        <div className="text-sm text-slate-600">7-day streak</div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Study Time</span>
-                    <span className="font-bold text-purple-600">{progress?.total_minutes_studied || 0} min</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Streak</span>
-                    <span className="font-bold text-orange-600">{progress?.daily_streak || 0} days</span>
-                  </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
         </Tabs>
