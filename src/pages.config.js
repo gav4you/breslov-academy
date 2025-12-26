@@ -14,6 +14,8 @@ import Events from './pages/Events';
 import Feed from './pages/Feed';
 import Forums from './pages/Forums';
 import HabitTracker from './pages/HabitTracker';
+import HalachaGuide from './pages/HalachaGuide';
+import KabbalahStudy from './pages/KabbalahStudy';
 import LanguageLearning from './pages/LanguageLearning';
 import Languages from './pages/Languages';
 import Leaderboard from './pages/Leaderboard';
@@ -26,6 +28,7 @@ import Messages from './pages/Messages';
 import Microlearning from './pages/Microlearning';
 import MyProgress from './pages/MyProgress';
 import Portfolio from './pages/Portfolio';
+import ResourceLibrary from './pages/ResourceLibrary';
 import RewardsShop from './pages/RewardsShop';
 import Scholarships from './pages/Scholarships';
 import Skills from './pages/Skills';
@@ -33,12 +36,9 @@ import StudyBuddies from './pages/StudyBuddies';
 import StudySet from './pages/StudySet';
 import StudySets from './pages/StudySets';
 import Subscription from './pages/Subscription';
-import Tournaments from './pages/Tournaments';
 import TalmudStudy from './pages/TalmudStudy';
-import KabbalahStudy from './pages/KabbalahStudy';
-import HalachaGuide from './pages/HalachaGuide';
 import TorahStudy from './pages/TorahStudy';
-import ResourceLibrary from './pages/ResourceLibrary';
+import Tournaments from './pages/Tournaments';
 import __Layout from './Layout.jsx';
 
 
@@ -59,6 +59,8 @@ export const PAGES = {
     "Feed": Feed,
     "Forums": Forums,
     "HabitTracker": HabitTracker,
+    "HalachaGuide": HalachaGuide,
+    "KabbalahStudy": KabbalahStudy,
     "LanguageLearning": LanguageLearning,
     "Languages": Languages,
     "Leaderboard": Leaderboard,
@@ -71,6 +73,7 @@ export const PAGES = {
     "Microlearning": Microlearning,
     "MyProgress": MyProgress,
     "Portfolio": Portfolio,
+    "ResourceLibrary": ResourceLibrary,
     "RewardsShop": RewardsShop,
     "Scholarships": Scholarships,
     "Skills": Skills,
@@ -78,12 +81,9 @@ export const PAGES = {
     "StudySet": StudySet,
     "StudySets": StudySets,
     "Subscription": Subscription,
-    "Tournaments": Tournaments,
     "TalmudStudy": TalmudStudy,
-    "KabbalahStudy": KabbalahStudy,
-    "HalachaGuide": HalachaGuide,
     "TorahStudy": TorahStudy,
-    "ResourceLibrary": ResourceLibrary,
+    "Tournaments": Tournaments,
 }
 
 export const pagesConfig = {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import { base44 } from '@/api/base44Client';
-import { BookOpen, Menu, X, LogOut } from 'lucide-react';
+import { BookOpen, Menu, X, LogOut, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ThemeToggle from '@/components/theme/ThemeToggle';
 import NotificationCenter from '@/components/notifications/NotificationCenter';
