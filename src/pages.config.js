@@ -52,6 +52,7 @@ import Certificates from './pages/Certificates';
 import Pricing from './pages/Pricing';
 import StudyGroups from './pages/StudyGroups';
 import MyAchievements from './pages/MyAchievements';
+import TeamDashboard from './pages/TeamDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -110,6 +111,7 @@ export const PAGES = {
     "Pricing": Pricing,
     "StudyGroups": StudyGroups,
     "MyAchievements": MyAchievements,
+    "TeamDashboard": TeamDashboard,
 }
 
 export const pagesConfig = {
