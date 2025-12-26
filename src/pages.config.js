@@ -50,6 +50,8 @@ import InstructorAnalytics from './pages/InstructorAnalytics';
 import CourseSalesPage from './pages/CourseSalesPage';
 import Certificates from './pages/Certificates';
 import Pricing from './pages/Pricing';
+import StudyGroups from './pages/StudyGroups';
+import MyAchievements from './pages/MyAchievements';
 import __Layout from './Layout.jsx';
 
 
@@ -106,6 +108,8 @@ export const PAGES = {
     "CourseSalesPage": CourseSalesPage,
     "Certificates": Certificates,
     "Pricing": Pricing,
+    "StudyGroups": StudyGroups,
+    "MyAchievements": MyAchievements,
 }
 
 export const pagesConfig = {
