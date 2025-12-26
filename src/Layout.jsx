@@ -26,10 +26,9 @@ export default function Layout({ children, currentPageName }) {
   const navigation = [
     { name: 'Dashboard', path: 'Dashboard', icon: BookOpen },
     { name: 'Courses', path: 'Courses', icon: GraduationCap },
+    { name: 'Study Sets', path: 'StudySets', icon: BookOpen },
     { name: 'Languages', path: 'Languages', icon: Menu },
     { name: 'Community', path: 'Community', icon: Menu },
-    { name: 'Analytics', path: 'Analytics', icon: TrendingUp },
-    { name: 'Affiliate', path: 'AffiliateProgram', icon: Crown },
   ];
 
   return (

@@ -11,6 +11,8 @@ import LanguageLearning from './pages/LanguageLearning';
 import Languages from './pages/Languages';
 import Analytics from './pages/Analytics';
 import AffiliateProgram from './pages/AffiliateProgram';
+import StudySets from './pages/StudySets';
+import StudySet from './pages/StudySet';
 import __Layout from './Layout.jsx';
 
 
@@ -28,6 +30,8 @@ export const PAGES = {
     "Languages": Languages,
     "Analytics": Analytics,
     "AffiliateProgram": AffiliateProgram,
+    "StudySets": StudySets,
+    "StudySet": StudySet,
 }
 
 export const pagesConfig = {
