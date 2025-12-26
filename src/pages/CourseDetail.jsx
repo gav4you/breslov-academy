@@ -106,7 +106,7 @@ export default function CourseDetail() {
         </div>
         <div className="relative p-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          <div className="md:col-span-2">
+            <div className="md:col-span-2">
             <div className="flex items-center space-x-3 mb-4">
               <Badge className="bg-amber-500 text-white">
                 {course.category?.replace(/_/g, ' ')}
@@ -142,9 +142,9 @@ export default function CourseDetail() {
                 <span>{lessons.length} lessons</span>
               </div>
             </div>
-          </div>
+            </div>
 
-          <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center">
             {hasAccess ? (
               <Card className="w-full bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200/60 rounded-3xl premium-shadow-lg">
                 <CardContent className="p-8 text-center space-y-4">
