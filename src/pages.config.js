@@ -35,6 +35,7 @@ import StudySets from './pages/StudySets';
 import Subscription from './pages/Subscription';
 import Tournaments from './pages/Tournaments';
 import oauth2callback from './pages/oauth2callback';
+import Integrations from './pages/Integrations';
 import __Layout from './Layout.jsx';
 
 
@@ -76,6 +77,7 @@ export const PAGES = {
     "Subscription": Subscription,
     "Tournaments": Tournaments,
     "oauth2callback": oauth2callback,
+    "Integrations": Integrations,
 }
 
 export const pagesConfig = {
