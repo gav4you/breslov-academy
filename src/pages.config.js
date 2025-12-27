@@ -37,6 +37,10 @@ import Tournaments from './pages/Tournaments';
 import oauth2callback from './pages/oauth2callback';
 import Integrations from './pages/Integrations';
 import Vault from './pages/Vault';
+import SchoolSelect from './pages/SchoolSelect';
+import SchoolNew from './pages/SchoolNew';
+import SchoolJoin from './pages/SchoolJoin';
+import SchoolAdmin from './pages/SchoolAdmin';
 import __Layout from './Layout.jsx';
 
 
@@ -80,6 +84,10 @@ export const PAGES = {
     "oauth2callback": oauth2callback,
     "Integrations": Integrations,
     "Vault": Vault,
+    "SchoolSelect": SchoolSelect,
+    "SchoolNew": SchoolNew,
+    "SchoolJoin": SchoolJoin,
+    "SchoolAdmin": SchoolAdmin,
 }
 
 export const pagesConfig = {
