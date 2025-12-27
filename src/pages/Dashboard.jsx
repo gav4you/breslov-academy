@@ -13,12 +13,17 @@ import LearningInsights from '../components/insights/LearningInsights';
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [userTier, setUserTier] = useState('free');
+  const [activeSchoolId, setActiveSchoolId] = useState(null);
 
   useEffect(() => {
     const loadUser = async () => {
       try {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+        
+        // Get active school
+        const schoolId = localStorage.getItem('active_school_id');
+        setActiveSchoolId(schoolId);
       } catch (error) {
         base44.auth.redirectToLogin();
       }
@@ -37,8 +42,28 @@ export default function Dashboard() {
   });
 
   const { data: courses = [] } = useQuery({
-    queryKey: ['courses'],
-    queryFn: () => base44.entities.Course.filter({ is_published: true }, '-created_date', 6)
+    queryKey: ['courses', activeSchoolId],
+    queryFn: async () => {
+      if (!activeSchoolId) return [];
+      let schoolCourses = await base44.entities.Course.filter({ 
+        is_published: true, 
+        school_id: activeSchoolId 
+      }, '-created_date', 6);
+      
+      // Fallback to legacy school if no courses
+      if (schoolCourses.length === 0) {
+        const legacySchools = await base44.entities.School.filter({ slug: 'legacy' });
+        if (legacySchools.length > 0) {
+          schoolCourses = await base44.entities.Course.filter({ 
+            is_published: true, 
+            school_id: legacySchools[0].id 
+          }, '-created_date', 6);
+        }
+      }
+      
+      return schoolCourses;
+    },
+    enabled: !!activeSchoolId
   });
 
   const { data: progress = [] } = useQuery({
