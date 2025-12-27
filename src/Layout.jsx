@@ -2,27 +2,79 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import { base44 } from '@/api/base44Client';
-import { BookOpen, GraduationCap, Users, Menu, X, LogOut, User, Plug, Beaker, ChevronDown } from 'lucide-react';
+import { BookOpen, GraduationCap, Users, Menu, X, LogOut, User, Plug, Beaker, ChevronDown, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import ThemeToggle from '@/components/theme/ThemeToggle';
 import NotificationCenter from '@/components/notifications/NotificationCenter';
+import SchoolSwitcher from '@/components/school/SchoolSwitcher';
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeSchool, setActiveSchool] = useState(null);
+  const [memberships, setMemberships] = useState([]);
+  const [isSchoolAdmin, setIsSchoolAdmin] = useState(false);
 
   useEffect(() => {
     const loadUser = async () => {
       try {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+        loadSchoolData(currentUser);
       } catch (error) {
         setUser(null);
       }
     };
     loadUser();
   }, []);
+
+  const loadSchoolData = async (currentUser) => {
+    try {
+      // Get user memberships
+      const userMemberships = await base44.entities.SchoolMembership.filter({
+        user_email: currentUser.email
+      });
+      setMemberships(userMemberships);
+
+      // Get active school
+      const activeSchoolId = localStorage.getItem('active_school_id');
+      if (activeSchoolId) {
+        const schools = await base44.entities.School.filter({ id: activeSchoolId });
+        if (schools.length > 0) {
+          setActiveSchool(schools[0]);
+          
+          // Check if admin
+          const membership = userMemberships.find(m => m.school_id === activeSchoolId);
+          setIsSchoolAdmin(membership?.role === 'OWNER' || membership?.role === 'ADMIN');
+        }
+      }
+    } catch (error) {
+      console.error('Error loading school data:', error);
+    }
+  };
+
+  const handleSchoolChange = async (schoolId) => {
+    // Update preference
+    const prefs = await base44.entities.UserSchoolPreference.filter({
+      user_email: user.email
+    });
+
+    if (prefs.length > 0) {
+      await base44.entities.UserSchoolPreference.update(prefs[0].id, {
+        active_school_id: schoolId,
+        updated_at: new Date().toISOString()
+      });
+    } else {
+      await base44.entities.UserSchoolPreference.create({
+        user_email: user.email,
+        active_school_id: schoolId,
+        updated_at: new Date().toISOString()
+      });
+    }
+
+    localStorage.setItem('active_school_id', schoolId);
+  };
 
   // Core navigation - minimal and focused
   const coreNavigation = [
@@ -149,12 +201,29 @@ export default function Layout({ children, currentPageName }) {
             <div className="hidden md:flex items-center space-x-2">
               {user && (
                 <>
+                  <SchoolSwitcher 
+                    activeSchool={activeSchool}
+                    memberships={memberships}
+                    onSchoolChange={handleSchoolChange}
+                    isAdmin={isSchoolAdmin}
+                  />
                   <NotificationCenter user={user} />
                   <ThemeToggle userEmail={user.email} />
                   <div className="text-right ml-2">
                     <p className="text-sm font-medium text-white">{user.full_name}</p>
                     <p className="text-xs text-slate-400">{user.email}</p>
                   </div>
+                  {isSchoolAdmin && (
+                    <Link to={createPageUrl('SchoolAdmin')}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-slate-400 hover:text-white"
+                      >
+                        <Settings className="w-4 h-4" />
+                      </Button>
+                    </Link>
+                  )}
                   <Button
                     variant="ghost"
                     size="icon"
