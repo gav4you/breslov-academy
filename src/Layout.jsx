@@ -49,6 +49,7 @@ export default function Layout({ children, currentPageName }) {
           // Check if admin
           const membership = userMemberships.find(m => m.school_id === activeSchoolId);
           setIsSchoolAdmin(membership?.role === 'OWNER' || membership?.role === 'ADMIN');
+          setCanTeach(membership ? canCreateCourses(membership.role) : false);
         }
       }
     } catch (error) {
