@@ -40,9 +40,24 @@ export default function CourseDetail() {
     queryKey: ['course', courseId],
     queryFn: async () => {
       const courses = await base44.entities.Course.filter({ id: courseId });
+      if (courses.length === 0) return null;
+      
+      // Verify user has membership to this course's school
+      const activeSchoolId = localStorage.getItem('active_school_id');
+      if (courses[0].school_id && courses[0].school_id !== activeSchoolId) {
+        // Check if user has membership in course's school
+        const memberships = await base44.entities.SchoolMembership.filter({
+          user_email: user?.email,
+          school_id: courses[0].school_id
+        });
+        if (memberships.length === 0) {
+          return null; // No access
+        }
+      }
+      
       return courses[0];
     },
-    enabled: !!courseId
+    enabled: !!courseId && !!user
   });
 
   const { data: lessons = [] } = useQuery({
