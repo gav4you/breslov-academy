@@ -45,6 +45,14 @@ export default function LessonViewerPremium() {
     enabled: !!lessonId
   });
 
+  // Access control
+  const access = useLessonAccess(
+    lesson?.course_id,
+    lessonId,
+    user,
+    lesson?.school_id
+  );
+
   const { data: course } = useQuery({
     queryKey: ['course', lesson?.course_id],
     queryFn: async () => {

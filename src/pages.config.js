@@ -62,6 +62,10 @@ import Tournaments from './pages/Tournaments';
 import Vault from './pages/Vault';
 import oauth2callback from './pages/oauth2callback';
 import Integrity from './pages/Integrity';
+import SchoolPricing from './pages/SchoolPricing';
+import Affiliate from './pages/Affiliate';
+import CohortDetail from './pages/CohortDetail';
+import StudySetNew from './pages/StudySetNew';
 import __Layout from './Layout.jsx';
 
 
@@ -130,6 +134,10 @@ export const PAGES = {
     "Vault": Vault,
     "oauth2callback": oauth2callback,
     "Integrity": Integrity,
+    "SchoolPricing": SchoolPricing,
+    "Affiliate": Affiliate,
+    "CohortDetail": CohortDetail,
+    "StudySetNew": StudySetNew,
 }
 
 export const pagesConfig = {

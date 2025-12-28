@@ -18,6 +18,7 @@ import SchoolModeration from '../components/school/SchoolModeration';
 import SchoolAuditLog from '../components/school/SchoolAuditLog';
 import SchoolPayouts from '../components/school/SchoolPayouts';
 import ContentProtectionSettings from '../components/admin/ContentProtectionSettings';
+import TerminologySettings from '../components/school/TerminologySettings';
 
 export default function SchoolAdmin() {
   const [user, setUser] = useState(null);
@@ -166,7 +167,7 @@ export default function SchoolAdmin() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-11">
+        <TabsList className="grid w-full grid-cols-12">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="branding">Branding</TabsTrigger>
@@ -177,6 +178,7 @@ export default function SchoolAdmin() {
           <TabsTrigger value="moderation">Moderation</TabsTrigger>
           <TabsTrigger value="audit">Audit</TabsTrigger>
           <TabsTrigger value="protection">Protection</TabsTrigger>
+          <TabsTrigger value="terminology">Terms</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
@@ -408,6 +410,10 @@ export default function SchoolAdmin() {
               <ContentProtectionSettings schoolId={school.id} />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="terminology">
+          <TerminologySettings school={school} onSave={loadSchoolData} />
         </TabsContent>
 
         <TabsContent value="settings">

@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { createPageUrl } from './utils';
+import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
-import { BookOpen, GraduationCap, Users, Menu, X, LogOut, User, Plug, Beaker, ChevronDown, Settings, BookMarked } from 'lucide-react';
+import { BookOpen, GraduationCap, Users, Menu, X, LogOut, User, Plug, Beaker, ChevronDown, Settings, BookMarked, Search, Archive } from 'lucide-react';
 import { canCreateCourses } from '@/components/utils/permissions';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import ThemeToggle from '@/components/theme/ThemeToggle';
 import NotificationCenter from '@/components/notifications/NotificationCenter';
 import SchoolSwitcher from '@/components/school/SchoolSwitcher';
+import CommandPalette from '@/components/navigation/CommandPalette';
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
@@ -79,13 +80,18 @@ export default function Layout({ children, currentPageName }) {
     localStorage.setItem('active_school_id', schoolId);
   };
 
+  // Determine audience
+  const userAudience = isSchoolAdmin ? 'admin' : (canTeach ? 'teacher' : 'student');
+
   // Core navigation - minimal and focused
   const coreNavigation = [
     { name: 'Dashboard', path: 'Dashboard', icon: BookOpen },
     { name: 'Courses', path: 'Courses', icon: GraduationCap },
+    { name: 'Reader', path: 'Reader', icon: BookMarked },
     { name: 'Community', path: 'Feed', icon: Users },
-    ...(canTeach ? [{ name: 'Teach', path: 'Teach', icon: BookMarked }] : []),
-    ...(canTeach ? [{ name: 'Analytics', path: 'TeachAnalytics', icon: BookMarked }] : []),
+    { name: 'Search', path: 'SchoolSearch', icon: Search },
+    ...(canTeach ? [{ name: 'Teach', path: 'Teach', icon: GraduationCap }] : []),
+    ...(canTeach ? [{ name: 'Analytics', path: 'TeachAnalytics', icon: GraduationCap }] : []),
   ];
 
   // Labs features - advanced/experimental
@@ -176,30 +182,21 @@ export default function Layout({ children, currentPageName }) {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Integrations & Profile */}
+              {/* Vault Link */}
               <Link
-                to={createPageUrl('Integrations')}
+                to={createPageUrl('Vault')}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
-                  currentPageName === 'Integrations'
+                  currentPageName === 'Vault'
                     ? 'bg-amber-500 text-slate-900 shadow-lg'
                     : 'text-slate-300 hover:text-white hover:bg-slate-700'
                 }`}
               >
-                <Plug className="w-4 h-4" />
-                <span className="font-medium text-sm">Integrations</span>
+                <Archive className="w-4 h-4" />
+                <span className="font-medium text-sm">Vault</span>
               </Link>
 
-              <Link
-                to={createPageUrl('Portfolio')}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
-                  currentPageName === 'Portfolio'
-                    ? 'bg-amber-500 text-slate-900 shadow-lg'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-700'
-                }`}
-              >
-                <User className="w-4 h-4" />
-                <span className="font-medium text-sm">Profile</span>
-              </Link>
+              {/* Command Palette */}
+              <CommandPalette audience={userAudience} />
             </nav>
 
             {/* User Menu */}
@@ -214,29 +211,41 @@ export default function Layout({ children, currentPageName }) {
                   />
                   <NotificationCenter user={user} />
                   <ThemeToggle userEmail={user.email} />
-                  <div className="text-right ml-2">
-                    <p className="text-sm font-medium text-white">{user.full_name}</p>
-                    <p className="text-xs text-slate-400">{user.email}</p>
-                  </div>
-                  {isSchoolAdmin && (
-                    <Link to={createPageUrl('SchoolAdmin')}>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-slate-400 hover:text-white"
-                      >
-                        <Settings className="w-4 h-4" />
-                      </Button>
-                    </Link>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => base44.auth.logout()}
-                    className="text-slate-400 hover:text-white"
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </Button>
+                  <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="text-slate-300">
+                              <User className="w-4 h-4 mr-2" />
+                              {user.full_name}
+                              <ChevronDown className="w-3 h-3 ml-1" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-56">
+                            <DropdownMenuLabel>
+                              <div className="text-sm">{user.full_name}</div>
+                              <div className="text-xs text-slate-500">{user.email}</div>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
+                              <Link to={createPageUrl('Portfolio')}>Profile</Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link to={createPageUrl('Integrations')}>Integrations</Link>
+                            </DropdownMenuItem>
+                            {isSchoolAdmin && (
+                              <DropdownMenuItem asChild>
+                                <Link to={createPageUrl('SchoolAdmin')}>School Admin</Link>
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem asChild>
+                              <Link to={createPageUrl('Vault')}>Vault (All Features)</Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => base44.auth.logout()}>
+                              <LogOut className="w-4 h-4 mr-2" />
+                              Sign Out
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                 </>
               )}
             </div>
