@@ -20,6 +20,11 @@ This is an append-only file - never delete previous entries.
 - School-scoped pricing with bundle grouping
 - Subscription management and tracking
 - Upsell optimization on thank-you page
+- Created Bundle, SubscriptionPlan, CouponRedemption, PayoutBatch, AnalyticsEvent entities
+- Referral commission processing on transaction approval
+- Download audit logging
+- SchoolPricing page with tiered offers (subscriptions, bundles, courses, add-ons)
+- Feature registry expanded to cover all 40+ pages
 
 ---
 

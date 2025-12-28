@@ -40,11 +40,12 @@ export const FEATURES = {
   legacyMigration: { key: 'LegacyMigration', label: 'Legacy Migration', route: '/legacymigration', area: 'admin', audiences: ['admin'], icon: 'Database', vaultOnly: true },
   
   // MARKETING & STOREFRONT
-  schoolLanding: { key: 'schoollanding', label: 'Landing Page', route: '/schoollanding', area: 'marketing', audiences: ['public', 'student', 'teacher', 'admin'], icon: 'Globe' },
-  schoolCourses: { key: 'schoolcourses', label: 'Course Catalog', route: '/schoolcourses', area: 'marketing', audiences: ['public', 'student', 'teacher', 'admin'], icon: 'Library' },
-  courseSales: { key: 'coursesales', label: 'Sales Page', route: '/coursesales', area: 'marketing', audiences: ['public', 'student', 'teacher', 'admin'], icon: 'ShoppingBag', hidden: true },
-  schoolCheckout: { key: 'schoolcheckout', label: 'Checkout', route: '/schoolcheckout', area: 'marketing', audiences: ['public', 'student', 'teacher', 'admin'], icon: 'CreditCard', hidden: true },
-  schoolThankYou: { key: 'schoolthankyou', label: 'Thank You', route: '/schoolthankyou', area: 'marketing', audiences: ['public', 'student', 'teacher', 'admin'], hidden: true },
+  schoolLanding: { key: 'SchoolLanding', label: 'Landing Page', route: '/schoollanding', area: 'marketing', audiences: ['public', 'student', 'teacher', 'admin'], icon: 'Globe' },
+  schoolCourses: { key: 'SchoolCourses', label: 'Course Catalog', route: '/schoolcourses', area: 'marketing', audiences: ['public', 'student', 'teacher', 'admin'], icon: 'Library' },
+  courseSales: { key: 'CourseSales', label: 'Sales Page', route: '/coursesales', area: 'marketing', audiences: ['public', 'student', 'teacher', 'admin'], icon: 'ShoppingBag', hidden: true },
+  schoolPricing: { key: 'SchoolPricing', label: 'Pricing', route: '/schoolpricing', area: 'marketing', audiences: ['public', 'student', 'teacher', 'admin'], icon: 'DollarSign', hidden: true },
+  schoolCheckout: { key: 'SchoolCheckout', label: 'Checkout', route: '/schoolcheckout', area: 'marketing', audiences: ['public', 'student', 'teacher', 'admin'], icon: 'CreditCard', hidden: true },
+  schoolThankYou: { key: 'SchoolThankYou', label: 'Thank You', route: '/schoolthankyou', area: 'marketing', audiences: ['public', 'student', 'teacher', 'admin'], hidden: true },
   
   // LABS
   languageLearning: { key: 'LanguageLearning', label: 'Languages', route: '/languagelearning', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Globe' },
@@ -65,7 +66,29 @@ export const FEATURES = {
   vault: { key: 'Vault', label: 'Vault', route: '/vault', area: 'system', audiences: ['student', 'teacher', 'admin'], icon: 'Archive' },
   oauth2callback: { key: 'oauth2callback', label: 'OAuth Callback', route: '/oauth2callback', area: 'system', audiences: ['public'], hidden: true },
   integrity: { key: 'Integrity', label: 'Integrity Check', route: '/integrity', area: 'system', audiences: ['admin'], icon: 'CheckCircle', vaultOnly: true },
-  subscription: { key: 'Subscription', label: 'Subscription', route: '/subscription', area: 'system', audiences: ['student', 'teacher', 'admin'], hidden: true }
+  subscription: { key: 'Subscription', label: 'Subscription', route: '/subscription', area: 'system', audiences: ['student', 'teacher', 'admin'], hidden: true },
+  
+  // Additional pages from router
+  analytics: { key: 'Analytics', label: 'Analytics', route: '/analytics', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'BarChart', vaultOnly: true },
+  careerPaths: { key: 'CareerPaths', label: 'Career Paths', route: '/careerpaths', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Briefcase', vaultOnly: true },
+  community: { key: 'Community', label: 'Community', route: '/community', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'Users', vaultOnly: true },
+  events: { key: 'Events', label: 'Events', route: '/events', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Calendar', vaultOnly: true },
+  forums: { key: 'Forums', label: 'Forums', route: '/forums', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'MessageSquare', vaultOnly: true },
+  habitTracker: { key: 'HabitTracker', label: 'Habit Tracker', route: '/habittracker', area: 'labs', audiences: ['student'], icon: 'CheckSquare', vaultOnly: true },
+  leaderboard: { key: 'Leaderboard', label: 'Leaderboard', route: '/leaderboard', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Trophy', vaultOnly: true },
+  learningPaths: { key: 'LearningPaths', label: 'Learning Paths', route: '/learningpaths', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'Map', vaultOnly: true },
+  liveStreams: { key: 'LiveStreams', label: 'Live Streams', route: '/livestreams', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Video', vaultOnly: true },
+  marketplace: { key: 'Marketplace', label: 'Marketplace', route: '/marketplace', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Store', vaultOnly: true },
+  mentorship: { key: 'Mentorship', label: 'Mentorship', route: '/mentorship', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Users', vaultOnly: true },
+  messages: { key: 'Messages', label: 'Messages', route: '/messages', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'Mail', vaultOnly: true },
+  microlearning: { key: 'Microlearning', label: 'Microlearning', route: '/microlearning', area: 'labs', audiences: ['student'], icon: 'Zap', vaultOnly: true },
+  rewardsShop: { key: 'RewardsShop', label: 'Rewards Shop', route: '/rewardsshop', area: 'labs', audiences: ['student'], icon: 'Gift', vaultOnly: true },
+  scholarships: { key: 'Scholarships', label: 'Scholarships', route: '/scholarships', area: 'labs', audiences: ['student'], icon: 'Award', vaultOnly: true },
+  skills: { key: 'Skills', label: 'Skills', route: '/skills', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Target', vaultOnly: true },
+  studyBuddies: { key: 'StudyBuddies', label: 'Study Buddies', route: '/studybuddies', area: 'labs', audiences: ['student'], icon: 'Users', vaultOnly: true },
+  studySet: { key: 'StudySet', label: 'Study Set', route: '/studyset', area: 'labs', audiences: ['student', 'teacher', 'admin'], hidden: true },
+  tournaments: { key: 'Tournaments', label: 'Tournaments', route: '/tournaments', area: 'labs', audiences: ['student'], icon: 'Swords', vaultOnly: true },
+  affiliateProgram: { key: 'AffiliateProgram', label: 'Affiliate Program Info', route: '/affiliateprogram', area: 'marketing', audiences: ['public', 'student', 'teacher', 'admin'], icon: 'Share', vaultOnly: true }
 };
 
 // Helper functions

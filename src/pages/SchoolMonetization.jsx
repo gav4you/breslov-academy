@@ -7,7 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { DollarSign, Tag, ShoppingCart, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
-import { createEntitlementsForPurchase } from '../components/utils/entitlements';
+import { createEntitlementsForPurchase, processReferral } from '../components/utils/entitlements';
+import ConversionFunnel from '../components/analytics/ConversionFunnel';
+import RevenueChart from '../components/analytics/RevenueChart';
 
 export default function SchoolMonetization() {
   const [user, setUser] = useState(null);
@@ -277,7 +279,14 @@ export default function SchoolMonetization() {
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
+
+        <TabsContent value="analytics">
+          <div className="space-y-6">
+            <RevenueChart schoolId={school.id} />
+            <ConversionFunnel schoolId={school.id} />
+          </div>
+        </TabsContent>
+        </Tabs>
+        </div>
+        );
+        }

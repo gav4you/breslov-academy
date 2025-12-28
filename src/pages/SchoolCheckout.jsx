@@ -64,33 +64,22 @@ export default function SchoolCheckout() {
   });
 
   const createTransactionMutation = useMutation({
-    mutationFn: async (data) => {
-      // Store referral code in metadata if present
-      const refCode = localStorage.getItem('referral_code');
-      const metadata = refCode ? { referral_code: refCode } : {};
-      
-      const transaction = await base44.entities.Transaction.create({
-        ...data,
-        metadata
-      });
-      
-      // Log event
+    mutationFn: async (data) => base44.entities.Transaction.create(data),
+    onSuccess: (transaction) => {
+      // Log purchase initiation
       try {
-        await base44.entities.EventLog.create({
+        base44.entities.EventLog.create({
           school_id: school.id,
-          user_email: user.email,
+          user_email: transaction.user_email,
           event_type: 'purchase_initiated',
           entity_type: 'TRANSACTION',
           entity_id: transaction.id,
           metadata: { offer_id: offer.id }
         });
       } catch (e) {
-        // EventLog optional
+        // Optional log
       }
       
-      return transaction;
-    },
-    onSuccess: (transaction) => {
       navigate(createPageUrl(`SchoolThankYou?slug=${slug}&transactionId=${transaction.id}`));
     }
   });

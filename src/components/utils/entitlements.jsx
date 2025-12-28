@@ -80,24 +80,49 @@ export async function checkCourseAccess(course, userEmail, userRole) {
 }
 
 /**
- * Create entitlements for a purchase
- * @param {object} purchase - Purchase object
+ * Create entitlements for a purchase or transaction
+ * @param {object} transaction - Transaction object
  * @param {object} offer - Offer object
  * @param {string} schoolId - School ID
  */
-export async function createEntitlementsForPurchase(purchase, offer, schoolId) {
+export async function createEntitlementsForPurchase(transaction, offer, schoolId) {
   const startsAt = new Date().toISOString();
   
-  if (offer.access_scope === 'ALL_COURSES') {
+  // Handle different offer types
+  if (offer.offer_type === 'ADDON') {
+    // Grant license entitlement
+    if (offer.name.toLowerCase().includes('copy')) {
+      await base44.entities.Entitlement.create({
+        school_id: schoolId,
+        user_email: transaction.user_email,
+        type: 'COPY_LICENSE',
+        source: 'PURCHASE',
+        source_id: transaction.id,
+        starts_at: startsAt
+      });
+    } else if (offer.name.toLowerCase().includes('download')) {
+      await base44.entities.Entitlement.create({
+        school_id: schoolId,
+        user_email: transaction.user_email,
+        type: 'DOWNLOAD_LICENSE',
+        source: 'PURCHASE',
+        source_id: transaction.id,
+        starts_at: startsAt
+      });
+    }
+    return;
+  }
+  
+  if (offer.access_scope === 'ALL_COURSES' || offer.offer_type === 'SUBSCRIPTION') {
     await base44.entities.Entitlement.create({
       school_id: schoolId,
-      user_email: purchase.user_email,
+      user_email: transaction.user_email,
       type: 'ALL_COURSES',
       source: 'PURCHASE',
-      source_id: purchase.id,
+      source_id: transaction.id,
       starts_at: startsAt
     });
-  } else if (offer.access_scope === 'SELECTED_COURSES') {
+  } else if (offer.access_scope === 'SELECTED_COURSES' || offer.offer_type === 'COURSE' || offer.offer_type === 'BUNDLE') {
     const offerCourses = await base44.entities.OfferCourse.filter({ 
       offer_id: offer.id 
     });
@@ -105,11 +130,11 @@ export async function createEntitlementsForPurchase(purchase, offer, schoolId) {
     for (const oc of offerCourses) {
       await base44.entities.Entitlement.create({
         school_id: schoolId,
-        user_email: purchase.user_email,
+        user_email: transaction.user_email,
         type: 'COURSE',
         course_id: oc.course_id,
         source: 'PURCHASE',
-        source_id: purchase.id,
+        source_id: transaction.id,
         starts_at: startsAt
       });
     }
@@ -186,7 +211,8 @@ export function canCopy({ policy, entitlements, accessLevel }) {
   if (policy.copy_mode === 'INCLUDED_WITH_ACCESS') {
     return accessLevel === 'FULL';
   } else if (policy.copy_mode === 'ADDON') {
-    return hasCopyLicense(entitlements);
+    // CRITICAL: Require BOTH course access AND license
+    return accessLevel === 'FULL' && hasCopyLicense(entitlements);
   }
   
   return false;
@@ -204,8 +230,51 @@ export function canDownload({ policy, entitlements, accessLevel }) {
   if (policy.download_mode === 'INCLUDED_WITH_ACCESS') {
     return accessLevel === 'FULL';
   } else if (policy.download_mode === 'ADDON') {
-    return hasDownloadLicense(entitlements);
+    // CRITICAL: Require BOTH course access AND license
+    return accessLevel === 'FULL' && hasDownloadLicense(entitlements);
   }
   
   return false;
+}
+
+/**
+ * Process referral and create commission
+ * @param {object} transaction - Transaction object
+ * @param {string} schoolId - School ID
+ */
+export async function processReferral(transaction, schoolId) {
+  try {
+    const refCode = transaction.metadata?.referral_code;
+    if (!refCode) return;
+    
+    // Find affiliate
+    const affiliates = await base44.entities.Affiliate.filter({
+      school_id: schoolId,
+      code: refCode
+    });
+    
+    if (affiliates.length === 0) return;
+    
+    const affiliate = affiliates[0];
+    const commissionCents = Math.floor(transaction.amount_cents * (affiliate.commission_rate / 100));
+    
+    // Create referral record
+    await base44.entities.Referral.create({
+      school_id: schoolId,
+      affiliate_id: affiliate.id,
+      referred_email: transaction.user_email,
+      transaction_id: transaction.id,
+      commission_cents: commissionCents,
+      status: 'completed',
+      converted_at: new Date().toISOString()
+    });
+    
+    // Update affiliate totals
+    await base44.entities.Affiliate.update(affiliate.id, {
+      total_earnings_cents: (affiliate.total_earnings_cents || 0) + commissionCents,
+      total_referrals: (affiliate.total_referrals || 0) + 1
+    });
+  } catch (error) {
+    console.error('Failed to process referral:', error);
+  }
 }

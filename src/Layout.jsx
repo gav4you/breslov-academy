@@ -10,6 +10,7 @@ import ThemeToggle from '@/components/theme/ThemeToggle';
 import NotificationCenter from '@/components/notifications/NotificationCenter';
 import SchoolSwitcher from '@/components/school/SchoolSwitcher';
 import CommandPalette from '@/components/navigation/CommandPalette';
+import { FEATURES, getNavGroupsForAudience } from '@/components/config/features';
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
@@ -83,16 +84,38 @@ export default function Layout({ children, currentPageName }) {
   // Determine audience
   const userAudience = isSchoolAdmin ? 'admin' : (canTeach ? 'teacher' : 'student');
 
-  // Core navigation - minimal and focused
-  const coreNavigation = [
-    { name: 'Dashboard', path: 'Dashboard', icon: BookOpen },
-    { name: 'Courses', path: 'Courses', icon: GraduationCap },
-    { name: 'Reader', path: 'Reader', icon: BookMarked },
-    { name: 'Community', path: 'Feed', icon: Users },
-    { name: 'Search', path: 'SchoolSearch', icon: Search },
-    ...(canTeach ? [{ name: 'Teach', path: 'Teach', icon: GraduationCap }] : []),
-    ...(canTeach ? [{ name: 'Analytics', path: 'TeachAnalytics', icon: GraduationCap }] : []),
-  ];
+  // Build nav from registry
+  const navGroups = getNavGroupsForAudience(userAudience);
+  const coreNav = navGroups.find(g => g.label === 'Core Learning')?.features || [];
+  const teachNav = navGroups.find(g => g.label === 'Teaching Tools')?.features || [];
+
+  // Core navigation (registry-driven, fallback to hardcoded)
+  const coreNavigation = coreNav.length > 0 
+    ? coreNav.map(f => ({
+        name: f.label,
+        path: f.key,
+        icon: BookOpen
+      }))
+    : [
+        { name: 'Dashboard', path: 'Dashboard', icon: BookOpen },
+        { name: 'Courses', path: 'Courses', icon: GraduationCap },
+        { name: 'Reader', path: 'Reader', icon: BookMarked },
+        { name: 'Community', path: 'Feed', icon: Users },
+        { name: 'Search', path: 'SchoolSearch', icon: Search },
+      ];
+
+  // Add teaching nav if applicable
+  if (canTeach && teachNav.length > 0) {
+    teachNav.forEach(f => {
+      if (!f.hidden && !f.vaultOnly) {
+        coreNavigation.push({
+          name: f.label,
+          path: f.key,
+          icon: BookOpen
+        });
+      }
+    });
+  }
 
   // Labs features - advanced/experimental
   const labsFeatures = [

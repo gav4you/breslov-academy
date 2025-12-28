@@ -69,6 +69,11 @@ Access to ALL features, including vault-only pages.
 
 **Types:** ALL_COURSES, COURSE, COPY_LICENSE, DOWNLOAD_LICENSE, SUBSCRIPTION
 
+**Granting Functions:**
+- `createEntitlementsForPurchase(transaction, offer, schoolId)`
+- `createEntitlementsForSubscription(subscription, offer, schoolId)`
+- `processReferral(transaction, schoolId)` - handles affiliate commissions
+
 ---
 
 ## Security Verification
