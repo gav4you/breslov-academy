@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { createEntitlementsForPurchase, processReferral } from '../components/utils/entitlements';
 import ConversionFunnel from '../components/analytics/ConversionFunnel';
 import RevenueChart from '../components/analytics/RevenueChart';
+import PayoutBatchManager from '../components/payouts/PayoutBatchManager';
 
 export default function SchoolMonetization() {
   const [user, setUser] = useState(null);
@@ -66,43 +67,11 @@ export default function SchoolMonetization() {
 
       // Grant entitlements using helper
       if (offer) {
-        // Create purchase record for tracking
-        const purchase = await base44.entities.Purchase.create({
-          school_id: activeSchoolId,
-          user_email: transaction.user_email,
-          offer_id: offer.id,
-          price_cents: transaction.amount_cents
-        });
-        
-        // Grant entitlements
-        await createEntitlementsForPurchase(purchase, offer, activeSchoolId);
-        
-        // Process referral if present
-        if (transaction.metadata?.referral_code) {
-          const affiliates = await base44.entities.Affiliate.filter({
-            school_id: activeSchoolId,
-            code: transaction.metadata.referral_code
-          });
-          
-          if (affiliates[0]) {
-            const commissionCents = Math.floor(transaction.amount_cents * (affiliates[0].commission_rate / 100));
-            
-            await base44.entities.Referral.create({
-              school_id: activeSchoolId,
-              affiliate_id: affiliates[0].id,
-              referred_email: transaction.user_email,
-              transaction_id: transactionId,
-              commission_cents: commissionCents,
-              status: 'completed',
-              converted_at: new Date().toISOString()
-            });
-            
-            await base44.entities.Affiliate.update(affiliates[0].id, {
-              total_earnings_cents: (affiliates[0].total_earnings_cents || 0) + commissionCents,
-              total_referrals: (affiliates[0].total_referrals || 0) + 1
-            });
-          }
-        }
+        // Grant entitlements (handles all offer types)
+        await createEntitlementsForPurchase(transaction, offer, activeSchoolId);
+
+        // Process referral commission
+        await processReferral(transaction, activeSchoolId);
       }
 
       // Log event
@@ -280,13 +249,17 @@ export default function SchoolMonetization() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="payouts">
+          <PayoutBatchManager schoolId={activeSchoolId} user={user} />
+        </TabsContent>
+
         <TabsContent value="analytics">
           <div className="space-y-6">
-            <RevenueChart schoolId={school.id} />
-            <ConversionFunnel schoolId={school.id} />
+            <RevenueChart schoolId={activeSchoolId} />
+            <ConversionFunnel schoolId={activeSchoolId} />
           </div>
         </TabsContent>
-        </Tabs>
-        </div>
-        );
-        }
+      </Tabs>
+    </div>
+  );
+}

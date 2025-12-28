@@ -88,7 +88,12 @@ export const FEATURES = {
   studyBuddies: { key: 'StudyBuddies', label: 'Study Buddies', route: '/studybuddies', area: 'labs', audiences: ['student'], icon: 'Users', vaultOnly: true },
   studySet: { key: 'StudySet', label: 'Study Set', route: '/studyset', area: 'labs', audiences: ['student', 'teacher', 'admin'], hidden: true },
   tournaments: { key: 'Tournaments', label: 'Tournaments', route: '/tournaments', area: 'labs', audiences: ['student'], icon: 'Swords', vaultOnly: true },
-  affiliateProgram: { key: 'AffiliateProgram', label: 'Affiliate Program Info', route: '/affiliateprogram', area: 'marketing', audiences: ['public', 'student', 'teacher', 'admin'], icon: 'Share', vaultOnly: true }
+  affiliateProgram: { key: 'AffiliateProgram', label: 'Affiliate Program Info', route: '/affiliateprogram', area: 'marketing', audiences: ['public', 'student', 'teacher', 'admin'], icon: 'Share', vaultOnly: true },
+  
+  // v8.3 additions
+  account: { key: 'Account', label: 'My Account', route: '/account', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'User', order: 10 },
+  networkAdmin: { key: 'NetworkAdmin', label: 'Network Admin', route: '/networkadmin', area: 'admin', audiences: ['admin'], icon: 'Globe', vaultOnly: true },
+  certificateView: { key: 'CertificateView', label: 'Certificate Verification', route: '/certificateview', area: 'system', audiences: ['public'], hidden: true }
 };
 
 // Helper functions

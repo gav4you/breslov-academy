@@ -44,18 +44,25 @@ export const useLessonAccess = (courseId, lessonId, user, schoolId) => {
     enabled: !!lessonId
   });
 
-  // Compute access (normalize field names)
-  const hasCourseAccess = entitlements.some(e => {
+  // Import expiry check
+  const { isEntitlementActive } = require('../utils/entitlements');
+  const now = new Date();
+
+  // Filter to active entitlements only
+  const activeEntitlements = entitlements.filter(e => isEntitlementActive(e, now));
+
+  // Compute access (normalize field names, expiry-aware)
+  const hasCourseAccess = activeEntitlements.some(e => {
     const type = e.entitlement_type || e.type;
     return (type === 'COURSE' && e.course_id === courseId) || type === 'ALL_COURSES';
   });
 
-  const hasCopyLicense = entitlements.some(e => {
+  const hasCopyLicense = activeEntitlements.some(e => {
     const type = e.entitlement_type || e.type;
     return type === 'COPY_LICENSE';
   });
 
-  const hasDownloadLicense = entitlements.some(e => {
+  const hasDownloadLicense = activeEntitlements.some(e => {
     const type = e.entitlement_type || e.type;
     return type === 'DOWNLOAD_LICENSE';
   });

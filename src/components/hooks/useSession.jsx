@@ -34,6 +34,17 @@ export const SessionProvider = ({ children }) => {
       const storedSchoolId = localStorage.getItem('active_school_id');
       if (storedSchoolId) {
         await loadActiveSchool(storedSchoolId, userMemberships);
+        
+        // Reconcile subscriptions (best effort, background)
+        try {
+          const { reconcileSubscriptions } = await import('../subscriptions/subscriptionEngine');
+          reconcileSubscriptions({
+            school_id: storedSchoolId,
+            user_email: currentUser.email
+          });
+        } catch (e) {
+          console.warn('Subscription reconciliation failed:', e);
+        }
       }
     } catch (error) {
       console.error('Session load error:', error);

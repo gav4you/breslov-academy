@@ -27,6 +27,21 @@ export default function CourseSales() {
     loadUser();
   }, []);
 
+  // Track page view
+  useEffect(() => {
+    if (school && courseId) {
+      import('../components/analytics/track').then(({ trackEvent }) => {
+        trackEvent({
+          school_id: school.id,
+          user_email: user?.email,
+          event_type: 'viewed_course_sales',
+          entity_type: 'Course',
+          entity_id: courseId
+        });
+      });
+    }
+  }, [school, courseId, user]);
+
   const { data: school } = useQuery({
     queryKey: ['school-by-slug', slug],
     queryFn: async () => {

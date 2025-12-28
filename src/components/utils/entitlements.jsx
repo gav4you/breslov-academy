@@ -3,6 +3,24 @@
 import { base44 } from '@/api/base44Client';
 
 /**
+ * Check if entitlement is active (expiry-aware)
+ * @param {object} ent - Entitlement record
+ * @param {Date} now - Current date
+ * @returns {boolean}
+ */
+export function isEntitlementActive(ent, now = new Date()) {
+  if (!ent) return false;
+  
+  const startsAt = ent.starts_at ? new Date(ent.starts_at) : null;
+  const endsAt = ent.ends_at ? new Date(ent.ends_at) : null;
+  
+  if (startsAt && startsAt > now) return false;
+  if (endsAt && endsAt <= now) return false;
+  
+  return true;
+}
+
+/**
  * Check if user has access to a course based on entitlements
  * @param {string} userEmail - User's email
  * @param {string} courseId - Course ID
@@ -12,6 +30,8 @@ import { base44 } from '@/api/base44Client';
 export async function hasAccessToCourse(userEmail, courseId, schoolId) {
   if (!userEmail || !courseId || !schoolId) return false;
 
+  const now = new Date();
+
   // Check for ALL_COURSES entitlement
   const allCoursesEntitlements = await base44.entities.Entitlement.filter({
     user_email: userEmail,
@@ -19,13 +39,7 @@ export async function hasAccessToCourse(userEmail, courseId, schoolId) {
     type: 'ALL_COURSES'
   });
 
-  // Check if any are currently valid
-  const now = new Date();
-  const validAllCourses = allCoursesEntitlements.some(e => {
-    const starts = new Date(e.starts_at);
-    const ends = e.ends_at ? new Date(e.ends_at) : null;
-    return starts <= now && (!ends || ends > now);
-  });
+  const validAllCourses = allCoursesEntitlements.some(e => isEntitlementActive(e, now));
 
   if (validAllCourses) return true;
 
@@ -37,11 +51,7 @@ export async function hasAccessToCourse(userEmail, courseId, schoolId) {
     course_id: courseId
   });
 
-  const validCourse = courseEntitlements.some(e => {
-    const starts = new Date(e.starts_at);
-    const ends = e.ends_at ? new Date(e.ends_at) : null;
-    return starts <= now && (!ends || ends > now);
-  });
+  const validCourse = courseEntitlements.some(e => isEntitlementActive(e, now));
 
   return validCourse;
 }

@@ -37,6 +37,22 @@ export default function SchoolThankYou() {
     loadUser();
   }, []);
 
+  // Track purchase completion
+  useEffect(() => {
+    if (transaction && school) {
+      import('../components/analytics/track').then(({ trackEvent }) => {
+        trackEvent({
+          school_id: school.id,
+          user_email: transaction.user_email,
+          event_type: 'completed_purchase',
+          entity_type: 'Transaction',
+          entity_id: transaction.id,
+          metadata: { amount_cents: transaction.amount_cents }
+        });
+      });
+    }
+  }, [transaction, school]);
+
   const { data: school } = useQuery({
     queryKey: ['school-by-slug', slug],
     queryFn: async () => {

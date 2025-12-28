@@ -246,15 +246,16 @@ export default function Integrity() {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-amber-900 space-y-2">
-          <p>• All 40+ features are preserved in the registry and accessible via Vault</p>
-          <p>• Multi-tenant isolation enforced via components/api/scoped.js</p>
-          <p>• Content protection policies per-school in School Admin → Protection</p>
-          <p>• Legacy routes preserved; canonical routes added for storefront</p>
-          <p>• OAuth callback uses env vars (no secrets in frontend code)</p>
-          <p>• Feature registry consolidated to components/config/features.js</p>
-          <p>• Documentation: components/utils/CHANGELOG.md, RECOVERY.md, ARCHITECTURE.md</p>
-          <p>• Bundles, Subscriptions, Coupons, Affiliates, Payouts: All entities created</p>
-          <p>• SchoolPricing page: Tiered offers with Best Value highlighting</p>
+          <p>• All 40+ features preserved in registry, accessible via Vault</p>
+          <p>• Multi-tenant isolation: components/api/scoped.js injects school_id</p>
+          <p>• Content protection: FULL/PREVIEW/LOCKED + copy/download licensing</p>
+          <p>• Subscriptions: Auto-reconciliation on load, expiry enforcement, grace periods</p>
+          <p>• Payouts: Batch creation, CSV export, mark paid (idempotent)</p>
+          <p>• Analytics: Event tracking on all storefront + learning pages</p>
+          <p>• Network Admin: Global school management (/networkadmin)</p>
+          <p>• Customer portal: /account (purchases, subscriptions, licenses)</p>
+          <p>• Documentation: components/utils/ (CHANGELOG, RECOVERY, ARCHITECTURE)</p>
+          <p>• v8.3 entities: SubscriptionInvoice, Certificate, CouponRedemption, PayoutBatch, AnalyticsEvent</p>
         </CardContent>
       </Card>
 
@@ -263,7 +264,7 @@ export default function Integrity() {
         <Link to={createPageUrl('Vault')}>
           <Button variant="outline">
             <Archive className="w-4 h-4 mr-2" />
-            Open Vault
+            Vault
           </Button>
         </Link>
         <Link to={createPageUrl('SchoolAdmin')}>
@@ -276,16 +277,16 @@ export default function Integrity() {
             Monetization
           </Button>
         </Link>
-        <Link to={createPageUrl('Affiliate')}>
+        <Link to={createPageUrl('Account')}>
           <Button variant="outline">
-            Affiliates
+            My Account
           </Button>
         </Link>
-        <a href="/components/utils/CHANGELOG.md" target="_blank" rel="noopener">
+        <Link to={createPageUrl('NetworkAdmin')}>
           <Button variant="outline">
-            View CHANGELOG
+            Network Admin
           </Button>
-        </a>
+        </Link>
       </div>
     </div>
   );

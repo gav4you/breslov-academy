@@ -24,6 +24,24 @@ export default function SchoolLanding() {
     loadUser();
   }, []);
 
+  // Track page view
+  useEffect(() => {
+    if (slug) {
+      import('../components/analytics/track').then(({ trackPageView }) => {
+        base44.entities.School.filter({ slug }).then(schools => {
+          if (schools[0]) {
+            trackPageView({
+              school_id: schools[0].id,
+              user_email: user?.email,
+              path: '/schoollanding',
+              meta: { slug }
+            });
+          }
+        });
+      });
+    }
+  }, [slug, user]);
+
   const { data: school } = useQuery({
     queryKey: ['school-by-slug', slug],
     queryFn: async () => {

@@ -25,6 +25,19 @@ export default function SchoolPricing() {
     loadUser();
   }, []);
 
+  // Track page view
+  useEffect(() => {
+    if (school) {
+      import('../components/analytics/track').then(({ trackEvent }) => {
+        trackEvent({
+          school_id: school.id,
+          user_email: user?.email,
+          event_type: 'viewed_pricing'
+        });
+      });
+    }
+  }, [school, user]);
+
   const { data: school } = useQuery({
     queryKey: ['school-by-slug', slug],
     queryFn: async () => {

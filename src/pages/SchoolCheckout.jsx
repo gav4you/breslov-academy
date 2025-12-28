@@ -32,6 +32,21 @@ export default function SchoolCheckout() {
     loadUser();
   }, []);
 
+  // Track checkout started
+  useEffect(() => {
+    if (school && offer) {
+      import('../components/analytics/track').then(({ trackEvent }) => {
+        trackEvent({
+          school_id: school.id,
+          user_email: user?.email,
+          event_type: 'started_checkout',
+          entity_type: 'Offer',
+          entity_id: offer.id
+        });
+      });
+    }
+  }, [school, offer, user]);
+
   const { data: school } = useQuery({
     queryKey: ['school-by-slug', slug],
     queryFn: async () => {
@@ -91,6 +106,16 @@ export default function SchoolCheckout() {
         : coupon.discount_value * 100;
       setDiscount(discountAmount);
       toast.success('Coupon applied!');
+      
+      // Track coupon applied
+      import('../components/analytics/track').then(({ trackEvent }) => {
+        trackEvent({
+          school_id: school.id,
+          user_email: user?.email,
+          event_type: 'applied_coupon',
+          metadata: { coupon_code: couponCode, discount_cents: discountAmount }
+        });
+      });
     } else {
       toast.error('Invalid coupon code');
     }
