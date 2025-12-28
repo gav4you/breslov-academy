@@ -68,6 +68,7 @@ import Vault from './pages/Vault';
 import oauth2callback from './pages/oauth2callback';
 import Account from './pages/Account';
 import NetworkAdmin from './pages/NetworkAdmin';
+import CertificateVerify from './pages/CertificateVerify';
 import __Layout from './Layout.jsx';
 
 
@@ -142,6 +143,7 @@ export const PAGES = {
     "oauth2callback": oauth2callback,
     "Account": Account,
     "NetworkAdmin": NetworkAdmin,
+    "CertificateVerify": CertificateVerify,
 }
 
 export const pagesConfig = {

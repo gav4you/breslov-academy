@@ -1,6 +1,7 @@
 // Lesson Access Control Hook
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { getEnrollDate, computeLessonAvailability, formatAvailabilityCountdown } from '../drip/dripEngine';
 
 export const useLessonAccess = (courseId, lessonId, user, schoolId) => {
   // Fetch content protection policy
@@ -69,7 +70,42 @@ export const useLessonAccess = (courseId, lessonId, user, schoolId) => {
 
   const previewAllowed = policy?.allow_previews && lesson?.is_preview;
   
-  const accessLevel = hasCourseAccess ? 'FULL' : (previewAllowed ? 'PREVIEW' : 'LOCKED');
+  let accessLevel = hasCourseAccess ? 'FULL' : (previewAllowed ? 'PREVIEW' : 'LOCKED');
+  let dripInfo = { isAvailable: true, availableAt: null, countdownLabel: null };
+  
+  // DRIP SCHEDULING: Check if lesson is drip-locked
+  if (hasCourseAccess && lesson && activeSchoolId && user) {
+    // Get enrollment date (cached query to avoid repeated calls)
+    const enrollQuery = useQuery({
+      queryKey: ['enroll-date', activeSchoolId, user.email, courseId],
+      queryFn: () => getEnrollDate({ 
+        school_id: activeSchoolId, 
+        user_email: user.email, 
+        course_id: courseId 
+      }),
+      enabled: !!activeSchoolId && !!user && !!courseId,
+      staleTime: 5 * 60 * 1000 // 5 min cache
+    });
+    
+    const enrollDate = enrollQuery.data;
+    
+    if (enrollDate) {
+      const availability = computeLessonAvailability({ 
+        lesson, 
+        enrollDate, 
+        now: new Date() 
+      });
+      
+      if (!availability.isAvailable) {
+        accessLevel = 'DRIP_LOCKED';
+        dripInfo = {
+          isAvailable: false,
+          availableAt: availability.availableAt,
+          countdownLabel: formatAvailabilityCountdown(availability.availableAt).label
+        };
+      }
+    }
+  }
   
   // CRITICAL: Add-ons require BOTH course access AND the license
   const canCopy = policy?.copy_mode === 'INCLUDED_WITH_ACCESS' 

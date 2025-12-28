@@ -28,8 +28,14 @@ export default function SchoolThankYou() {
           origin: { y: 0.6 }
         });
         
-        // Clear referral code
+        // Clear referral code and attribution
         localStorage.removeItem('referral_code');
+        
+        if (slug) {
+          import('../components/analytics/attribution').then(({ clearAttribution }) => {
+            clearAttribution({ schoolSlug: slug });
+          });
+        }
       } catch (error) {
         // Guest ok
       }
@@ -194,7 +200,20 @@ export default function SchoolThankYou() {
                       <p className="font-medium text-sm">{addOn.name}</p>
                       <p className="text-xs text-slate-600">{addOn.description}</p>
                     </div>
-                    <Link to={createPageUrl(`SchoolCheckout?slug=${slug}&offerId=${addOn.id}`)}>
+                    <Link 
+                      to={createPageUrl(`SchoolCheckout?slug=${slug}&offerId=${addOn.id}`)}
+                      onClick={() => {
+                        import('../components/analytics/track').then(({ trackEvent }) => {
+                          trackEvent({
+                            school_id: school.id,
+                            user_email: user?.email,
+                            event_type: 'upsell_clicked',
+                            entity_type: 'Offer',
+                            entity_id: addOn.id
+                          });
+                        });
+                      }}
+                    >
                       <Button size="sm" className="bg-amber-600 hover:bg-amber-700">
                         ${(addOn.price_cents / 100).toFixed(2)}
                       </Button>

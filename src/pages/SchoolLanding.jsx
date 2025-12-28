@@ -24,19 +24,28 @@ export default function SchoolLanding() {
     loadUser();
   }, []);
 
-  // Track page view
+  // Track page view + capture attribution
   useEffect(() => {
     if (slug) {
+      // Capture attribution from URL
+      import('../components/analytics/attribution').then(({ captureAttributionFromUrl }) => {
+        captureAttributionFromUrl({ schoolSlug: slug });
+      });
+      
+      // Track page view
       import('../components/analytics/track').then(({ trackPageView }) => {
-        base44.entities.School.filter({ slug }).then(schools => {
-          if (schools[0]) {
-            trackPageView({
-              school_id: schools[0].id,
-              user_email: user?.email,
-              path: '/schoollanding',
-              meta: { slug }
-            });
-          }
+        import('../components/analytics/attribution').then(({ getAttribution, attachAttribution }) => {
+          base44.entities.School.filter({ slug }).then(schools => {
+            if (schools[0]) {
+              const attribution = getAttribution({ schoolSlug: slug });
+              trackPageView({
+                school_id: schools[0].id,
+                user_email: user?.email,
+                path: '/schoollanding',
+                meta: attachAttribution({ slug }, attribution)
+              });
+            }
+          });
         });
       });
     }

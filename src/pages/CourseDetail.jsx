@@ -97,6 +97,19 @@ export default function CourseDetail() {
 
   const completedLessons = progress.filter(p => p.completed).length;
   const progressPercentage = lessons.length > 0 ? Math.round((completedLessons / lessons.length) * 100) : 0;
+  const courseCompleted = progressPercentage === 100 && lessons.length > 0;
+
+  const { data: certificate } = useQuery({
+    queryKey: ['certificate', user?.email, courseId],
+    queryFn: async () => {
+      const certs = await base44.entities.Certificate.filter({
+        user_email: user.email,
+        course_id: courseId
+      });
+      return certs[0];
+    },
+    enabled: !!user && !!courseId && courseCompleted
+  });
 
   const getLessonStatus = (lesson) => {
     const lessonProgress = progress.find(p => p.lesson_id === lesson.id);
@@ -164,12 +177,36 @@ export default function CourseDetail() {
                     <div className="text-3xl font-bold text-green-900">{progressPercentage}%</div>
                     <div className="text-sm text-green-700">Complete</div>
                   </div>
-                  <div className="w-full bg-green-200 rounded-full h-2">
+                  <div className="w-full bg-green-200 rounded-full h-2 mb-4">
                     <div 
                       className="bg-green-600 h-2 rounded-full transition-all"
                       style={{ width: `${progressPercentage}%` }}
                     />
                   </div>
+                  
+                  {courseCompleted && certificate && (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="w-full border-green-600 text-green-900 hover:bg-green-100"
+                      onClick={async () => {
+                        const { issueCertificateIfEligible } = await import('../components/certificates/certificatesEngine');
+                        try {
+                          const cert = await issueCertificateIfEligible({
+                            school_id: course.school_id,
+                            user_email: user.email,
+                            user_name: user.full_name,
+                            course_id: course.id
+                          });
+                          window.open(createPageUrl(`CertificateVerify?certificateId=${cert.certificate_id}`), '_blank');
+                        } catch (e) {
+                          console.error(e);
+                        }
+                      }}
+                    >
+                      View Certificate
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ) : (

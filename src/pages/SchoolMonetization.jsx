@@ -59,19 +59,37 @@ export default function SchoolMonetization() {
     mutationFn: async (transactionId) => {
       const transaction = transactions.find(t => t.id === transactionId);
       const offer = offers.find(o => o.id === transaction.offer_id);
-      
+
       // Update transaction
       await base44.entities.Transaction.update(transactionId, {
         status: 'completed'
       });
 
-      // Grant entitlements using helper
+      // Grant entitlements using helper (idempotent)
       if (offer) {
-        // Grant entitlements (handles all offer types)
-        await createEntitlementsForPurchase(transaction, offer, activeSchoolId);
+        const entResult = await createEntitlementsForPurchase(transaction, offer, activeSchoolId);
 
-        // Process referral commission
-        await processReferral(transaction, activeSchoolId);
+        // Process referral commission (idempotent)
+        const refResult = await processReferral(transaction, activeSchoolId);
+
+        // Record coupon redemption if applicable (idempotent)
+        if (transaction.coupon_code) {
+          const coupons = await base44.entities.Coupon.filter({
+            school_id: activeSchoolId,
+            code: transaction.coupon_code
+          });
+          if (coupons[0]) {
+            const { recordCouponRedemption } = await import('../components/utils/entitlements');
+            await recordCouponRedemption({
+              school_id: activeSchoolId,
+              coupon: coupons[0],
+              transaction,
+              user_email: transaction.user_email
+            });
+          }
+        }
+
+        console.log('Approval result:', { entitlements: entResult, referral: refResult });
       }
 
       // Log event

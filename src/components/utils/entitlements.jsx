@@ -90,65 +90,90 @@ export async function checkCourseAccess(course, userEmail, userRole) {
 }
 
 /**
- * Create entitlements for a purchase or transaction
+ * Create entitlements for a purchase or transaction (IDEMPOTENT)
  * @param {object} transaction - Transaction object
  * @param {object} offer - Offer object
  * @param {string} schoolId - School ID
+ * @returns {Promise<object>} - {created, skipped}
  */
 export async function createEntitlementsForPurchase(transaction, offer, schoolId) {
   const startsAt = new Date().toISOString();
+  const created = [];
+  const skipped = [];
   
+  // Check existing entitlements to avoid duplicates
+  const existing = await base44.entities.Entitlement.filter({
+    school_id: schoolId,
+    user_email: transaction.user_email,
+    source_id: transaction.id
+  });
+
   // Handle different offer types
   if (offer.offer_type === 'ADDON') {
-    // Grant license entitlement
-    if (offer.name.toLowerCase().includes('copy')) {
-      await base44.entities.Entitlement.create({
+    // Grant license entitlement (idempotent)
+    const licenseType = offer.name.toLowerCase().includes('copy') ? 'COPY_LICENSE' : 'DOWNLOAD_LICENSE';
+    
+    const alreadyExists = existing.some(e => (e.type || e.entitlement_type) === licenseType);
+    if (alreadyExists) {
+      skipped.push({ type: licenseType, reason: 'already_exists' });
+    } else {
+      const ent = await base44.entities.Entitlement.create({
         school_id: schoolId,
         user_email: transaction.user_email,
-        type: 'COPY_LICENSE',
+        type: licenseType,
         source: 'PURCHASE',
         source_id: transaction.id,
         starts_at: startsAt
       });
-    } else if (offer.name.toLowerCase().includes('download')) {
-      await base44.entities.Entitlement.create({
-        school_id: schoolId,
-        user_email: transaction.user_email,
-        type: 'DOWNLOAD_LICENSE',
-        source: 'PURCHASE',
-        source_id: transaction.id,
-        starts_at: startsAt
-      });
+      created.push(ent);
     }
-    return;
+    return { created, skipped };
   }
   
   if (offer.access_scope === 'ALL_COURSES' || offer.offer_type === 'SUBSCRIPTION') {
-    await base44.entities.Entitlement.create({
-      school_id: schoolId,
-      user_email: transaction.user_email,
-      type: 'ALL_COURSES',
-      source: 'PURCHASE',
-      source_id: transaction.id,
-      starts_at: startsAt
-    });
+    const alreadyExists = existing.some(e => (e.type || e.entitlement_type) === 'ALL_COURSES');
+    
+    if (alreadyExists) {
+      skipped.push({ type: 'ALL_COURSES', reason: 'already_exists' });
+    } else {
+      const ent = await base44.entities.Entitlement.create({
+        school_id: schoolId,
+        user_email: transaction.user_email,
+        type: 'ALL_COURSES',
+        source: 'PURCHASE',
+        source_id: transaction.id,
+        starts_at: startsAt
+      });
+      created.push(ent);
+    }
   } else if (offer.access_scope === 'SELECTED_COURSES' || offer.offer_type === 'COURSE' || offer.offer_type === 'BUNDLE') {
     const offerCourses = await base44.entities.OfferCourse.filter({ 
       offer_id: offer.id 
     });
     
     for (const oc of offerCourses) {
-      await base44.entities.Entitlement.create({
-        school_id: schoolId,
-        user_email: transaction.user_email,
-        type: 'COURSE',
-        course_id: oc.course_id,
-        source: 'PURCHASE',
-        source_id: transaction.id,
-        starts_at: startsAt
-      });
+      const alreadyExists = existing.some(e => 
+        (e.type || e.entitlement_type) === 'COURSE' && e.course_id === oc.course_id
+      );
+      
+      if (alreadyExists) {
+        skipped.push({ type: 'COURSE', course_id: oc.course_id, reason: 'already_exists' });
+      } else {
+        const ent = await base44.entities.Entitlement.create({
+          school_id: schoolId,
+          user_email: transaction.user_email,
+          type: 'COURSE',
+          course_id: oc.course_id,
+          source: 'PURCHASE',
+          source_id: transaction.id,
+          starts_at: startsAt
+        });
+        created.push(ent);
+      }
     }
   }
+  
+  return { created, skipped };
 }
 
 /**
@@ -248,14 +273,25 @@ export function canDownload({ policy, entitlements, accessLevel }) {
 }
 
 /**
- * Process referral and create commission
+ * Process referral and create commission (IDEMPOTENT)
  * @param {object} transaction - Transaction object
  * @param {string} schoolId - School ID
+ * @returns {Promise<object>} - {created, skipped}
  */
 export async function processReferral(transaction, schoolId) {
   try {
-    const refCode = transaction.metadata?.referral_code;
-    if (!refCode) return;
+    const refCode = transaction.metadata?.referral_code || transaction.metadata?.attribution?.ref;
+    if (!refCode) return { created: null, skipped: 'no_ref' };
+    
+    // Check if referral already exists for this transaction (idempotent)
+    const existingReferrals = await base44.entities.Referral.filter({
+      school_id: schoolId,
+      transaction_id: transaction.id
+    });
+    
+    if (existingReferrals.length > 0) {
+      return { created: null, skipped: 'already_exists' };
+    }
     
     // Find affiliate
     const affiliates = await base44.entities.Affiliate.filter({
@@ -263,13 +299,13 @@ export async function processReferral(transaction, schoolId) {
       code: refCode
     });
     
-    if (affiliates.length === 0) return;
+    if (affiliates.length === 0) return { created: null, skipped: 'affiliate_not_found' };
     
     const affiliate = affiliates[0];
     const commissionCents = Math.floor(transaction.amount_cents * (affiliate.commission_rate / 100));
     
     // Create referral record
-    await base44.entities.Referral.create({
+    const referral = await base44.entities.Referral.create({
       school_id: schoolId,
       affiliate_id: affiliate.id,
       referred_email: transaction.user_email,
@@ -284,7 +320,46 @@ export async function processReferral(transaction, schoolId) {
       total_earnings_cents: (affiliate.total_earnings_cents || 0) + commissionCents,
       total_referrals: (affiliate.total_referrals || 0) + 1
     });
+    
+    return { created: referral, skipped: null };
   } catch (error) {
     console.error('Failed to process referral:', error);
+    return { created: null, skipped: 'error', error: error.message };
+  }
+}
+
+/**
+ * Record coupon redemption (IDEMPOTENT)
+ * @param {object} params - {school_id, coupon, transaction, user_email}
+ */
+export async function recordCouponRedemption({ school_id, coupon, transaction, user_email }) {
+  try {
+    // Check if already recorded
+    const existing = await base44.entities.CouponRedemption.filter({
+      school_id,
+      transaction_id: transaction.id
+    });
+    
+    if (existing.length > 0) {
+      return { created: false, skipped: 'already_exists' };
+    }
+    
+    await base44.entities.CouponRedemption.create({
+      school_id,
+      coupon_id: coupon.id,
+      user_email,
+      transaction_id: transaction.id,
+      discount_cents: transaction.discount_cents || 0
+    });
+    
+    // Increment coupon usage
+    await base44.entities.Coupon.update(coupon.id, {
+      usage_count: (coupon.usage_count || 0) + 1
+    });
+    
+    return { created: true, skipped: null };
+  } catch (error) {
+    console.error('recordCouponRedemption error:', error);
+    return { created: false, skipped: 'error' };
   }
 }

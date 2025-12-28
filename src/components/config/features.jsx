@@ -1,5 +1,6 @@
 // FEATURE REGISTRY - Single Source of Truth
 // DO NOT delete features from this registry. Only add.
+// Last updated: v8.4 (Drip + Certificates + Attribution + Idempotency)
 
 export const FEATURE_AREAS = {
   core: { label: 'Core Learning', color: 'bg-blue-100 text-blue-800', order: 1 },
@@ -93,7 +94,7 @@ export const FEATURES = {
   // v8.3 additions
   account: { key: 'Account', label: 'My Account', route: '/account', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'User', order: 10 },
   networkAdmin: { key: 'NetworkAdmin', label: 'Network Admin', route: '/networkadmin', area: 'admin', audiences: ['admin'], icon: 'Globe', vaultOnly: true },
-  certificateView: { key: 'CertificateView', label: 'Certificate Verification', route: '/certificateview', area: 'system', audiences: ['public'], hidden: true }
+  certificateVerify: { key: 'CertificateVerify', label: 'Certificate Verification', route: '/certificateverify', area: 'marketing', audiences: ['public'], hidden: true }
 };
 
 // Helper functions

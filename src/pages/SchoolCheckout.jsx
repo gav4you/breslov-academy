@@ -131,19 +131,23 @@ export default function SchoolCheckout() {
     const finalAmount = Math.max(0, offer.price_cents - discount);
     const discountAmount = discount;
     
-    // Attach referral code to transaction metadata
-    const metadata = refCode ? { referral_code: refCode } : {};
-    
-    createTransactionMutation.mutate({
-      school_id: school.id,
-      user_email: email,
-      offer_id: offer.id,
-      amount_cents: finalAmount,
-      discount_cents: discountAmount,
-      coupon_code: couponCode || undefined,
-      provider: 'MANUAL',
-      status: 'pending',
-      metadata
+    // Build metadata with attribution
+    import('../components/analytics/attribution').then(({ getAttribution, attachAttribution }) => {
+      const attribution = getAttribution({ schoolSlug: slug });
+      const baseMetadata = refCode ? { referral_code: refCode } : {};
+      const metadata = attachAttribution(baseMetadata, attribution);
+      
+      createTransactionMutation.mutate({
+        school_id: school.id,
+        user_email: email,
+        offer_id: offer.id,
+        amount_cents: finalAmount,
+        discount_cents: discountAmount,
+        coupon_code: couponCode || undefined,
+        provider: 'MANUAL',
+        status: 'pending',
+        metadata
+      });
     });
   };
 
