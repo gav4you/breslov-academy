@@ -14,8 +14,12 @@ import BookmarkPanel from '../components/learning/BookmarkPanel';
 import TranscriptPanel from '../components/learning/TranscriptPanel';
 import NotesPanel from '../components/learning/NotesPanel';
 import AiTutorPanel from '../components/ai/AiTutorPanel';
+import { useLessonAccess } from '../components/hooks/useLessonAccess';
+import ProtectedContent from '../components/protection/ProtectedContent';
+import AccessGate from '../components/security/AccessGate';
 
 export default function LessonViewerPremium() {
+  const [activeSchool, setActiveSchool] = useState(null);
   const [user, setUser] = useState(null);
   const [currentTime, setCurrentTime] = useState(0);
   const queryClient = useQueryClient();
@@ -29,6 +33,12 @@ export default function LessonViewerPremium() {
       try {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+        
+        const schoolId = localStorage.getItem('active_school_id');
+        if (schoolId) {
+          const schools = await base44.entities.School.filter({ id: schoolId });
+          if (schools[0]) setActiveSchool(schools[0]);
+        }
       } catch (error) {
         base44.auth.redirectToLogin();
       }
@@ -110,12 +120,17 @@ export default function LessonViewerPremium() {
           {lesson.title_hebrew && (
             <h2 className="text-2xl text-amber-300 font-serif" dir="rtl">{lesson.title_hebrew}</h2>
           )}
-          {progress?.completed && (
-            <div className="mt-4 inline-flex items-center px-3 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/30">
-              <CheckCircle className="w-4 h-4 mr-2" />
-              <span className="text-sm font-medium">Completed</span>
-            </div>
-          )}
+          <div className="flex items-center space-x-2 mt-4">
+            {progress?.completed && (
+              <div className="inline-flex items-center px-3 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/30">
+                <CheckCircle className="w-4 h-4 mr-2" />
+                <span className="text-sm font-medium">Completed</span>
+              </div>
+            )}
+            {access.accessLevel === 'PREVIEW' && (
+              <Badge className="bg-amber-500">Preview Mode</Badge>
+            )}
+          </div>
         </div>
       </div>
 
@@ -141,19 +156,36 @@ export default function LessonViewerPremium() {
             </TabsList>
 
             <TabsContent value="content">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <BookOpen className="w-5 h-5 mr-2" />
-                    Lesson Content
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ReactMarkdown className="prose prose-slate max-w-none prose-headings:font-serif">
-                    {lesson.content || 'No content available'}
-                  </ReactMarkdown>
-                </CardContent>
-              </Card>
+              <ProtectedContent
+                policy={access.policy}
+                userEmail={user?.email}
+                schoolName={activeSchool?.name}
+                isEntitled={access.accessLevel === 'FULL'}
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <BookOpen className="w-5 h-5 mr-2" />
+                      Lesson Content
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ReactMarkdown className="prose prose-slate max-w-none prose-headings:font-serif">
+                      {contentToShow || 'No content available'}
+                    </ReactMarkdown>
+                    {access.accessLevel === 'PREVIEW' && (
+                      <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-center">
+                        <p className="text-amber-800 mb-3">Preview limit reached</p>
+                        <Link to={createPageUrl(`CourseSales?slug=${activeSchool?.slug}&courseId=${course.id}`)}>
+                          <Button className="bg-amber-500 hover:bg-amber-600">
+                            Purchase Full Access
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </ProtectedContent>
             </TabsContent>
 
             <TabsContent value="transcript">
