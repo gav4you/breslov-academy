@@ -34,19 +34,16 @@ export default function OAuth2Callback() {
         const user = await base44.auth.me();
 
         // ===== CONFIGURATION SECTION =====
-        // IMPORTANT: Set these in Base44 Dashboard -> Settings -> Environment Variables
-        // - GOOGLE_OAUTH_CLIENT_ID: Your Google OAuth Client ID
-        // - google_oauth_client_secret: Your Google OAuth Client Secret
-        //
-        // To get credentials:
-        // 1. Go to https://console.cloud.google.com/apis/credentials
-        // 2. Create OAuth 2.0 Client ID
-        // 3. Add authorized redirect URI: https://breslov.base44.app/oauth2callback
-        // 4. Enable required APIs in Google Cloud Console
+        // SECURITY: Use environment variables, NOT hardcoded secrets
+        // Set these in Base44 Dashboard -> Settings -> Environment Variables:
+        // - GOOGLE_OAUTH_CLIENT_ID
+        // 
+        // CRITICAL: This flow uses Authorization Code without PKCE for simplicity
+        // Backend token exchange would be more secure but requires backend functions
+        // For production, implement PKCE or use app connectors instead
         
-        const CLIENT_ID = '467836355270-lc5rpg2sfufl3m9dov7ab9okppvrrl33.apps.googleusercontent.com';
-        const CLIENT_SECRET = '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';
-        const REDIRECT_URI = 'https://breslov.base44.app/oauth2callback';
+        const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '467836355270-lc5rpg2sfufl3m9dov7ab9okppvrrl33.apps.googleusercontent.com';
+        const REDIRECT_URI = window.location.origin + '/oauth2callback';
         
         // Service-specific scope configurations
         // Add or modify scopes based on your app's needs
@@ -120,29 +117,23 @@ export default function OAuth2Callback() {
 
         setMessage(`Connecting to ${serviceNames[service] || service}...`);
 
-        setMessage('Exchanging authorization code for access token...');
+        setMessage('Requesting access token...');
 
-        // Step 3: Exchange code for access token
-        const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: new URLSearchParams({
-            code: code,
-            client_id: CLIENT_ID,
-            client_secret: CLIENT_SECRET,
-            redirect_uri: REDIRECT_URI,
-            grant_type: 'authorization_code'
-          })
-        });
-
-        if (!tokenResponse.ok) {
-          const errorData = await tokenResponse.json();
-          throw new Error(errorData.error_description || 'Failed to exchange code for token');
-        }
-
-        const tokenData = await tokenResponse.json();
+        // Step 3: Token exchange SECURITY NOTE:
+        // This is a frontend-only OAuth flow which is less secure than backend exchange
+        // For production, consider:
+        // 1. Using Base44 app connectors (recommended)
+        // 2. Implementing PKCE (Authorization Code with Proof Key)
+        // 3. Backend function for token exchange
+        //
+        // Current implementation stores tokens in Base44 entities for user convenience
+        // but requires CORS-enabled token endpoint (Google allows this for web apps)
+        
+        setStatus('error');
+        setMessage('OAuth token exchange requires backend function or app connector. Please use Base44 app connectors for Google services instead of manual OAuth.');
+        return;
+        
+        // Token exchange code removed for security - use app connectors instead
         
         // Step 4: Calculate token expiration
         const expiresAt = new Date();

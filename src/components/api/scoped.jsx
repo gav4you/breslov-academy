@@ -45,8 +45,8 @@ export const scopedList = async (entityName, schoolId, sort, limit) => {
     return [];
   }
 
-  const filter = requiresSchoolScope(entityName) ? { school_id: schoolId } : {};
-  return base44.entities[entityName].list(sort, limit);
+  const filters = requiresSchoolScope(entityName) ? { school_id: schoolId } : {};
+  return base44.entities[entityName].filter(filters, sort, limit);
 };
 
 /**

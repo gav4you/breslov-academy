@@ -20,7 +20,8 @@ export default function ProtectedContent({
   policy = {}, 
   userEmail, 
   schoolName,
-  isEntitled = false,
+  canCopy = false,
+  canDownload = false,
   children 
 }) {
   const [watermarkText, setWatermarkText] = useState('');
@@ -33,7 +34,7 @@ export default function ProtectedContent({
   }, [policy, userEmail, schoolName]);
 
   useEffect(() => {
-    if (!policy.protect_content || isEntitled) return;
+    if (!policy.protect_content) return;
 
     const handleContextMenu = (e) => {
       if (policy.block_right_click) {
@@ -43,7 +44,7 @@ export default function ProtectedContent({
     };
 
     const handleCopy = (e) => {
-      if (policy.block_copy) {
+      if (policy.block_copy && !canCopy) {
         e.preventDefault();
         return false;
       }
@@ -51,7 +52,7 @@ export default function ProtectedContent({
 
     const handleKeyDown = (e) => {
       // Block Ctrl/Cmd + C (copy)
-      if (policy.block_copy && (e.ctrlKey || e.metaKey) && e.key === 'c') {
+      if (policy.block_copy && !canCopy && (e.ctrlKey || e.metaKey) && e.key === 'c') {
         e.preventDefault();
         return false;
       }
@@ -76,9 +77,8 @@ export default function ProtectedContent({
     };
 
     const handleSelectStart = (e) => {
-      if (policy.block_copy) {
-        // Allow selection but block clipboard
-        // This way users can still read but not copy
+      if (policy.block_copy && !canCopy) {
+        // Allow selection for reading but clipboard is blocked via handleCopy
       }
     };
 
@@ -140,7 +140,7 @@ export default function ProtectedContent({
 
       {/* Screen reader only notice */}
       <div className="sr-only" role="status" aria-live="polite">
-        {policy.protect_content && !isEntitled && (
+        {policy.protect_content && !canCopy && (
           <p>This content is protected. Copying and downloading may be restricted.</p>
         )}
       </div>

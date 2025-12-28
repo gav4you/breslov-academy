@@ -10,13 +10,20 @@ import OfflineMode from '../components/mobile/OfflineMode';
 import AdvancedVideoPlayer from '../components/video/AdvancedVideoPlayer';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
+import { useLessonAccess } from '../components/hooks/useLessonAccess';
+import ProtectedContent from '../components/protection/ProtectedContent';
+import AccessGate from '../components/security/AccessGate';
+import { scopedFilter } from '../components/api/scoped';
 
 export default function LessonViewer() {
   const [user, setUser] = useState(null);
+  const [activeSchoolId, setActiveSchoolId] = useState(null);
+  const [activeSchool, setActiveSchool] = useState(null);
   const [notes, setNotes] = useState('');
   const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);
@@ -27,6 +34,14 @@ export default function LessonViewer() {
       try {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+        
+        const schoolId = localStorage.getItem('active_school_id');
+        setActiveSchoolId(schoolId);
+        
+        if (schoolId) {
+          const schools = await base44.entities.School.filter({ id: schoolId });
+          if (schools[0]) setActiveSchool(schools[0]);
+        }
       } catch (error) {
         base44.auth.redirectToLogin();
       }
@@ -35,49 +50,52 @@ export default function LessonViewer() {
   }, []);
 
   const { data: lesson } = useQuery({
-    queryKey: ['lesson', lessonId],
+    queryKey: ['lesson', lessonId, activeSchoolId],
     queryFn: async () => {
-      const lessons = await base44.entities.Lesson.filter({ id: lessonId });
+      const lessons = await scopedFilter('Lesson', activeSchoolId, { id: lessonId });
       return lessons[0];
     },
-    enabled: !!lessonId
+    enabled: !!lessonId && !!activeSchoolId
   });
 
   const { data: course } = useQuery({
-    queryKey: ['course', lesson?.course_id],
+    queryKey: ['course', lesson?.course_id, activeSchoolId],
     queryFn: async () => {
-      const courses = await base44.entities.Course.filter({ id: lesson.course_id });
+      const courses = await scopedFilter('Course', activeSchoolId, { id: lesson.course_id });
       return courses[0];
     },
-    enabled: !!lesson?.course_id
+    enabled: !!lesson?.course_id && !!activeSchoolId
   });
 
   const { data: allLessons = [] } = useQuery({
-    queryKey: ['lessons', lesson?.course_id],
-    queryFn: () => base44.entities.Lesson.filter({ course_id: lesson.course_id }, 'order'),
-    enabled: !!lesson?.course_id
+    queryKey: ['lessons', lesson?.course_id, activeSchoolId],
+    queryFn: () => scopedFilter('Lesson', activeSchoolId, { course_id: lesson.course_id }, 'order'),
+    enabled: !!lesson?.course_id && !!activeSchoolId
   });
 
   const { data: progress } = useQuery({
-    queryKey: ['progress', user?.email, lessonId],
+    queryKey: ['progress', user?.email, lessonId, activeSchoolId],
     queryFn: async () => {
-      const progs = await base44.entities.UserProgress.filter({ 
+      const progs = await scopedFilter('UserProgress', activeSchoolId, { 
         user_email: user.email,
         lesson_id: lessonId 
       });
       return progs[0];
     },
-    enabled: !!user?.email && !!lessonId
+    enabled: !!user?.email && !!lessonId && !!activeSchoolId
   });
 
   const { data: discussions = [] } = useQuery({
-    queryKey: ['discussions', lesson?.course_id, lessonId],
-    queryFn: () => base44.entities.Discussion.filter({ 
+    queryKey: ['discussions', lesson?.course_id, lessonId, activeSchoolId],
+    queryFn: () => scopedFilter('Discussion', activeSchoolId, { 
       course_id: lesson.course_id,
       lesson_id: lessonId 
     }, '-created_date'),
-    enabled: !!lesson?.course_id
+    enabled: !!lesson?.course_id && !!activeSchoolId
   });
+
+  // Access control
+  const access = useLessonAccess(lesson?.course_id, lessonId, user, activeSchoolId);
 
   useEffect(() => {
     if (progress?.notes) {
@@ -159,11 +177,14 @@ export default function LessonViewer() {
           {lesson.title_hebrew && (
             <h2 className="text-xl text-amber-300" dir="rtl">{lesson.title_hebrew}</h2>
           )}
+          {access.accessLevel === 'PREVIEW' && (
+            <Badge className="mt-2 bg-amber-500">Preview Mode</Badge>
+          )}
         </div>
       </div>
 
       {/* Video/Audio Player */}
-      {lesson.video_url && (
+      {lesson.video_url && access.accessLevel !== 'LOCKED' && (
         <AdvancedVideoPlayer
           src={lesson.video_url}
           onTimeUpdate={(time) => {
@@ -193,12 +214,30 @@ export default function LessonViewer() {
       )}
 
       {/* Lesson Content */}
-      {lesson.content && (
-        <div className="bg-white rounded-xl shadow-md p-8">
-          <ReactMarkdown className="prose prose-slate max-w-none prose-headings:font-serif">
-            {lesson.content}
-          </ReactMarkdown>
-        </div>
+      {contentToShow && (
+        <ProtectedContent
+          policy={access.policy}
+          userEmail={user?.email}
+          schoolName={activeSchool?.name}
+          canCopy={access.canCopy}
+          canDownload={access.canDownload}
+        >
+          <div className="bg-white rounded-xl shadow-md p-8">
+            <ReactMarkdown className="prose prose-slate max-w-none prose-headings:font-serif">
+              {contentToShow}
+            </ReactMarkdown>
+            {access.accessLevel === 'PREVIEW' && (
+              <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-center">
+                <p className="text-amber-800 mb-3">Preview limit reached</p>
+                <Link to={createPageUrl(`CourseSales?slug=${activeSchool?.slug}&courseId=${course.id}`)}>
+                  <Button className="bg-amber-500 hover:bg-amber-600">
+                    Purchase Full Access
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
+        </ProtectedContent>
       )}
 
       {/* Discussion Section */}

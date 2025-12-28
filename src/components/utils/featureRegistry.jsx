@@ -1,7 +1,12 @@
-// Feature Registry - Single Source of Truth for all platform features
-// This ensures no feature is ever lost during refactoring
+// ADAPTER: Re-exports from canonical feature registry
+// This file preserved for backwards compatibility
+// DO NOT add features here - add to @/config/features instead
 
-export const FEATURES = {
+export * from '../config/features';
+
+// Legacy FEATURES export (adapter)
+import { FEATURES as CANONICAL_FEATURES } from '../config/features';
+export const FEATURES_OLD = {
   // Core Learning (Everyone)
   dashboard: {
     key: 'dashboard',

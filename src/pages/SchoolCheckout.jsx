@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 
 export default function SchoolCheckout() {
   const [user, setUser] = useState(null);
+  const [guestEmail, setGuestEmail] = useState('');
   const [couponCode, setCouponCode] = useState('');
   const [discount, setDiscount] = useState(0);
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export default function SchoolCheckout() {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
       } catch (error) {
-        base44.auth.redirectToLogin();
+        // Guest checkout allowed - no redirect
       }
     };
     loadUser();
@@ -109,12 +110,18 @@ export default function SchoolCheckout() {
   };
 
   const handleCheckout = () => {
+    const email = user?.email || guestEmail;
+    if (!email) {
+      toast.error('Please provide an email address');
+      return;
+    }
+    
     const finalAmount = Math.max(0, offer.price_cents - discount);
     const discountAmount = discount;
     
     createTransactionMutation.mutate({
       school_id: school.id,
-      user_email: user.email,
+      user_email: email,
       offer_id: offer.id,
       amount_cents: finalAmount,
       discount_cents: discountAmount,
@@ -189,6 +196,30 @@ export default function SchoolCheckout() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Email (for guests) */}
+          {!user && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Contact Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <Label>Email Address</Label>
+                  <Input
+                    type="email"
+                    value={guestEmail}
+                    onChange={(e) => setGuestEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    required
+                  />
+                  <p className="text-xs text-slate-500">
+                    We'll send payment instructions and access details to this email
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Payment Method */}
           <Card>

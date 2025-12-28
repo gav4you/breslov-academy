@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tantml:react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -8,10 +8,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { BookMarked, Search, Highlighter, FileText, Lock } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { useLessonAccess } from '../components/hooks/useLessonAccess';
 import ProtectedContent from '../components/protection/ProtectedContent';
 import AccessGate from '../components/security/AccessGate';
 import AiTutorPanel from '../components/ai/AiTutorPanel';
+import { scopedFilter } from '../components/api/scoped';
 
 export default function Reader() {
   const [user, setUser] = useState(null);
@@ -44,23 +44,41 @@ export default function Reader() {
   const { data: texts = [] } = useQuery({
     queryKey: ['texts', activeSchoolId, searchQuery],
     queryFn: async () => {
-      const filter = { school_id: activeSchoolId };
-      if (searchQuery) {
-        // Note: Base44 doesn't support full-text search, so we fetch all and filter client-side
-        // In production, implement server-side search
-      }
-      return base44.entities.Text.filter(filter, '-created_date', 50);
+      return scopedFilter('Text', activeSchoolId, {}, '-created_date', 50);
     },
     enabled: !!activeSchoolId
   });
 
   const { data: highlights = [] } = useQuery({
     queryKey: ['highlights', user?.email, activeSchoolId],
-    queryFn: () => base44.entities.Highlight.filter({
-      school_id: activeSchoolId,
+    queryFn: () => scopedFilter('Highlight', activeSchoolId, {
       user_email: user.email
     }),
     enabled: !!user && !!activeSchoolId
+  });
+
+  const { data: entitlements = [] } = useQuery({
+    queryKey: ['entitlements', user?.email, activeSchoolId],
+    queryFn: () => scopedFilter('Entitlement', activeSchoolId, {
+      user_email: user.email
+    }),
+    enabled: !!user && !!activeSchoolId
+  });
+
+  const { data: policy } = useQuery({
+    queryKey: ['protection-policy', activeSchoolId],
+    queryFn: async () => {
+      const policies = await scopedFilter('ContentProtectionPolicy', activeSchoolId, {});
+      return policies[0] || {
+        protect_content: true,
+        allow_previews: true,
+        max_preview_chars: 1500,
+        block_copy: true,
+        copy_mode: 'ADDON',
+        download_mode: 'ADDON'
+      };
+    },
+    enabled: !!activeSchoolId
   });
 
   const highlightMutation = useMutation({
@@ -74,20 +92,58 @@ export default function Reader() {
     }
   });
 
+  // Pure helper (not hook) to compute access
+  const computeTextAccess = (text) => {
+    if (!text.course_id) {
+      // Public text - allow viewing but respect copy/download policy
+      return {
+        accessLevel: 'FULL',
+        canCopy: policy?.copy_mode !== 'DISALLOW',
+        canDownload: policy?.download_mode !== 'DISALLOW',
+        maxPreviewChars: policy?.max_preview_chars || 1500
+      };
+    }
+    
+    // Text tied to course - check entitlements
+    const hasCourseAccess = entitlements.some(e => {
+      const type = e.entitlement_type || e.type;
+      return (type === 'COURSE' && e.course_id === text.course_id) || type === 'ALL_COURSES';
+    });
+
+    const hasCopyLicense = entitlements.some(e => {
+      const type = e.entitlement_type || e.type;
+      return type === 'COPY_LICENSE';
+    });
+
+    const hasDownloadLicense = entitlements.some(e => {
+      const type = e.entitlement_type || e.type;
+      return type === 'DOWNLOAD_LICENSE';
+    });
+
+    const previewAllowed = policy?.allow_previews && text.is_preview;
+    const accessLevel = hasCourseAccess ? 'FULL' : (previewAllowed ? 'PREVIEW' : 'LOCKED');
+    
+    const canCopy = policy?.copy_mode === 'INCLUDED_WITH_ACCESS' 
+      ? hasCourseAccess 
+      : policy?.copy_mode === 'ADDON' 
+      ? (hasCourseAccess && hasCopyLicense)
+      : false;
+
+    const canDownload = policy?.download_mode === 'INCLUDED_WITH_ACCESS' 
+      ? hasCourseAccess 
+      : policy?.download_mode === 'ADDON' 
+      ? (hasCourseAccess && hasDownloadLicense)
+      : false;
+
+    return { accessLevel, canCopy, canDownload, maxPreviewChars: policy?.max_preview_chars || 1500 };
+  };
+
   const filteredTexts = searchQuery
     ? texts.filter(t => 
         t.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        t.content?.toLowerCase().includes(searchQuery.toLowerCase())
+        t.source?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : texts;
-
-  // Access control for text content
-  const getTextAccess = (text) => {
-    if (!text.course_id) return { accessLevel: 'FULL', canCopy: true, canDownload: true };
-    
-    // Use lesson access hook logic (texts tied to courses/lessons)
-    return useLessonAccess(text.course_id, text.lesson_id, user, activeSchoolId);
-  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -122,7 +178,7 @@ export default function Reader() {
             <CardContent>
               <div className="space-y-2">
                 {filteredTexts.map((text) => {
-                  const access = getTextAccess(text);
+                  const access = computeTextAccess(text);
                   const isLocked = access.accessLevel === 'LOCKED';
                   
                   return (
@@ -168,7 +224,7 @@ export default function Reader() {
         <div className="lg:col-span-2">
           {selectedText ? (
             (() => {
-              const access = getTextAccess(selectedText);
+              const access = computeTextAccess(selectedText);
               
               if (access.accessLevel === 'LOCKED') {
                 return (
@@ -205,10 +261,11 @@ export default function Reader() {
                     </CardHeader>
                     <CardContent className="pt-6">
                       <ProtectedContent
-                        policy={access.policy}
+                        policy={policy}
                         userEmail={user?.email}
                         schoolName={activeSchool?.name}
-                        isEntitled={access.accessLevel === 'FULL'}
+                        canCopy={access.canCopy}
+                        canDownload={access.canDownload}
                       >
                         <Tabs defaultValue="text">
                           <TabsList>

@@ -85,10 +85,16 @@ export default function Vault() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {areaFeatures.map((feature) => (
+                {areaFeatures.map((feature) => {
+                  // Use feature.route if it's already a path, otherwise createPageUrl
+                  const href = feature.route && feature.route.startsWith('/') 
+                    ? feature.route 
+                    : createPageUrl(feature.key);
+                  
+                  return (
                   <Link 
                     key={feature.key} 
-                    to={createPageUrl(feature.route || feature.key)}
+                    to={href}
                     className="p-3 border rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all group"
                   >
                     <div className="flex items-center justify-between">
@@ -106,7 +112,8 @@ export default function Vault() {
                       {feature.audiences.join(', ')}
                     </div>
                   </Link>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>

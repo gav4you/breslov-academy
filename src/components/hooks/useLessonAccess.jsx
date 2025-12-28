@@ -44,34 +44,37 @@ export const useLessonAccess = (courseId, lessonId, user, schoolId) => {
     enabled: !!lessonId
   });
 
-  // Compute access
-  const hasCourseAccess = entitlements.some(e => 
-    (e.entitlement_type === 'COURSE' && e.course_id === courseId) ||
-    e.entitlement_type === 'ALL_COURSES'
-  );
+  // Compute access (normalize field names)
+  const hasCourseAccess = entitlements.some(e => {
+    const type = e.entitlement_type || e.type;
+    return (type === 'COURSE' && e.course_id === courseId) || type === 'ALL_COURSES';
+  });
 
-  const hasCopyLicense = entitlements.some(e => 
-    e.entitlement_type === 'COPY_LICENSE'
-  );
+  const hasCopyLicense = entitlements.some(e => {
+    const type = e.entitlement_type || e.type;
+    return type === 'COPY_LICENSE';
+  });
 
-  const hasDownloadLicense = entitlements.some(e => 
-    e.entitlement_type === 'DOWNLOAD_LICENSE'
-  );
+  const hasDownloadLicense = entitlements.some(e => {
+    const type = e.entitlement_type || e.type;
+    return type === 'DOWNLOAD_LICENSE';
+  });
 
   const previewAllowed = policy?.allow_previews && lesson?.is_preview;
   
   const accessLevel = hasCourseAccess ? 'FULL' : (previewAllowed ? 'PREVIEW' : 'LOCKED');
   
+  // CRITICAL: Add-ons require BOTH course access AND the license
   const canCopy = policy?.copy_mode === 'INCLUDED_WITH_ACCESS' 
     ? hasCourseAccess 
     : policy?.copy_mode === 'ADDON' 
-    ? hasCopyLicense 
+    ? (hasCourseAccess && hasCopyLicense)
     : false;
 
   const canDownload = policy?.download_mode === 'INCLUDED_WITH_ACCESS' 
     ? hasCourseAccess 
     : policy?.download_mode === 'ADDON' 
-    ? hasDownloadLicense 
+    ? (hasCourseAccess && hasDownloadLicense)
     : false;
 
   const watermarkText = user ? `${user.email} • ${new Date().toLocaleDateString()}` : '';

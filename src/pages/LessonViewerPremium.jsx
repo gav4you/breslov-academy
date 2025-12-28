@@ -160,7 +160,8 @@ export default function LessonViewerPremium() {
                 policy={access.policy}
                 userEmail={user?.email}
                 schoolName={activeSchool?.name}
-                isEntitled={access.accessLevel === 'FULL'}
+                canCopy={access.canCopy}
+                canDownload={access.canDownload}
               >
                 <Card>
                   <CardHeader>
