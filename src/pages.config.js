@@ -51,6 +51,12 @@ import LessonViewerPremium from './pages/LessonViewerPremium';
 import Reader from './pages/Reader';
 import SchoolAnalytics from './pages/SchoolAnalytics';
 import TeachAnalytics from './pages/TeachAnalytics';
+import SchoolLanding from './pages/SchoolLanding';
+import SchoolCourses from './pages/SchoolCourses';
+import CourseSales from './pages/CourseSales';
+import SchoolCheckout from './pages/SchoolCheckout';
+import SchoolThankYou from './pages/SchoolThankYou';
+import SchoolSearch from './pages/SchoolSearch';
 import __Layout from './Layout.jsx';
 
 
@@ -108,6 +114,12 @@ export const PAGES = {
     "Reader": Reader,
     "SchoolAnalytics": SchoolAnalytics,
     "TeachAnalytics": TeachAnalytics,
+    "SchoolLanding": SchoolLanding,
+    "SchoolCourses": SchoolCourses,
+    "CourseSales": CourseSales,
+    "SchoolCheckout": SchoolCheckout,
+    "SchoolThankYou": SchoolThankYou,
+    "SchoolSearch": SchoolSearch,
 }
 
 export const pagesConfig = {
