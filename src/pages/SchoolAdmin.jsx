@@ -17,6 +17,7 @@ import SchoolAnnouncements from '../components/school/SchoolAnnouncements';
 import SchoolModeration from '../components/school/SchoolModeration';
 import SchoolAuditLog from '../components/school/SchoolAuditLog';
 import SchoolPayouts from '../components/school/SchoolPayouts';
+import ContentProtectionSettings from '../components/admin/ContentProtectionSettings';
 
 export default function SchoolAdmin() {
   const [user, setUser] = useState(null);
@@ -165,7 +166,7 @@ export default function SchoolAdmin() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-10">
+        <TabsList className="grid w-full grid-cols-11">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="branding">Branding</TabsTrigger>
@@ -175,6 +176,7 @@ export default function SchoolAdmin() {
           <TabsTrigger value="announcements">Announcements</TabsTrigger>
           <TabsTrigger value="moderation">Moderation</TabsTrigger>
           <TabsTrigger value="audit">Audit</TabsTrigger>
+          <TabsTrigger value="protection">Protection</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
@@ -394,18 +396,44 @@ export default function SchoolAdmin() {
           <SchoolAuditLog school={school} />
         </TabsContent>
 
-        <TabsContent value="settings">
+        <TabsContent value="protection">
           <Card>
             <CardHeader>
-              <CardTitle>School Settings</CardTitle>
-              <CardDescription>Advanced configuration options</CardDescription>
+              <CardTitle>Content Protection & Licensing</CardTitle>
+              <CardDescription>
+                Protect your content and monetize additional usage rights
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <p className="text-slate-600">Additional settings and billing will be available in future updates.</p>
-              </div>
+              <ContentProtectionSettings schoolId={school.id} />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>School Settings</CardTitle>
+                <CardDescription>Advanced configuration options</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-slate-600">Additional settings and billing will be available in future updates.</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Content Protection</CardTitle>
+                <CardDescription>Configure how your content is protected</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ContentProtectionSettings schoolId={school.id} />
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
