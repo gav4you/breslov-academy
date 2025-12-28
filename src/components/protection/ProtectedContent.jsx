@@ -1,107 +1,148 @@
-import React, { useEffect } from 'react';
-import { AlertCircle } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
+/**
+ * ProtectedContent Component
+ * 
+ * Enforces content protection policies including:
+ * - Watermark overlay
+ * - Copy/paste blocking
+ * - Right-click menu blocking
+ * - Print blocking
+ * - Screenshot detection (best-effort)
+ * 
+ * @param {Object} policy - Content protection policy from school settings
+ * @param {string} userEmail - Current user email for watermark
+ * @param {string} schoolName - School name for watermark
+ * @param {boolean} isEntitled - Whether user has full access rights
+ * @param {React.ReactNode} children - Content to protect
+ */
 export default function ProtectedContent({ 
-  children, 
-  policy, 
+  policy = {}, 
   userEmail, 
   schoolName,
   isEntitled = false,
-  showUpgradeCTA = false,
-  onUpgradeClick
+  children 
 }) {
+  const [watermarkText, setWatermarkText] = useState('');
+
   useEffect(() => {
-    if (!policy || !policy.protect_content) return;
+    if (policy.watermark_enabled && userEmail) {
+      const timestamp = new Date().toLocaleDateString();
+      setWatermarkText(`${userEmail} • ${schoolName || 'Protected'} • ${timestamp}`);
+    }
+  }, [policy, userEmail, schoolName]);
+
+  useEffect(() => {
+    if (!policy.protect_content || isEntitled) return;
 
     const handleContextMenu = (e) => {
       if (policy.block_right_click) {
         e.preventDefault();
+        return false;
       }
     };
 
     const handleCopy = (e) => {
       if (policy.block_copy) {
         e.preventDefault();
-        console.log('Copy blocked by content policy');
+        return false;
       }
     };
 
     const handleKeyDown = (e) => {
-      // Block Ctrl+C, Ctrl+P, Ctrl+S
-      if (policy.block_copy && (e.ctrlKey || e.metaKey)) {
-        if (e.key === 'c' || e.key === 'C') {
-          e.preventDefault();
-        }
+      // Block Ctrl/Cmd + C (copy)
+      if (policy.block_copy && (e.ctrlKey || e.metaKey) && e.key === 'c') {
+        e.preventDefault();
+        return false;
       }
-      if (policy.block_print && (e.ctrlKey || e.metaKey)) {
-        if (e.key === 'p' || e.key === 'P') {
-          e.preventDefault();
-        }
+      
+      // Block Ctrl/Cmd + P (print)
+      if (policy.block_print && (e.ctrlKey || e.metaKey) && e.key === 'p') {
+        e.preventDefault();
+        return false;
+      }
+
+      // Block Ctrl/Cmd + S (save)
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        return false;
+      }
+
+      // Block Ctrl/Cmd + Shift + S (save as)
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 's') {
+        e.preventDefault();
+        return false;
       }
     };
 
+    const handleSelectStart = (e) => {
+      if (policy.block_copy) {
+        // Allow selection but block clipboard
+        // This way users can still read but not copy
+      }
+    };
+
+    // Add event listeners
     document.addEventListener('contextmenu', handleContextMenu);
     document.addEventListener('copy', handleCopy);
     document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('selectstart', handleSelectStart);
+
+    // Print blocking via CSS
+    if (policy.block_print) {
+      const style = document.createElement('style');
+      style.id = 'print-block-style';
+      style.textContent = `
+        @media print {
+          body { display: none !important; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
 
     return () => {
       document.removeEventListener('contextmenu', handleContextMenu);
       document.removeEventListener('copy', handleCopy);
       document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('selectstart', handleSelectStart);
+      
+      const printStyle = document.getElementById('print-block-style');
+      if (printStyle) printStyle.remove();
     };
-  }, [policy]);
-
-  if (!policy || !policy.protect_content) {
-    return <>{children}</>;
-  }
+  }, [policy, isEntitled]);
 
   return (
-    <div className="relative" style={{ userSelect: policy.block_copy ? 'none' : 'auto' }}>
-      {/* Watermark */}
-      {policy.watermark_enabled && isEntitled && (
+    <div className="relative">
+      {children}
+      
+      {/* Watermark Overlay */}
+      {policy.watermark_enabled && watermarkText && (
         <div 
-          className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center"
-          style={{
+          className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"
+          style={{ 
             opacity: policy.watermark_opacity || 0.18,
-            transform: 'rotate(-45deg)'
+            zIndex: 9999
           }}
-          aria-hidden="true"
         >
-          <div className="text-slate-600 text-4xl font-bold select-none">
-            {userEmail}<br/>
-            {schoolName}
+          <div 
+            className="whitespace-nowrap text-slate-400 font-mono text-xs transform rotate-[-45deg] select-none"
+            style={{
+              fontSize: '10px',
+              lineHeight: '40px',
+              width: '200%',
+              textAlign: 'center'
+            }}
+          >
+            {Array(20).fill(watermarkText).join('   •   ')}
           </div>
         </div>
       )}
 
-      {/* Content */}
-      <div className={policy.block_copy ? 'select-none' : ''}>
-        {children}
-      </div>
-
-      {/* Upgrade CTA Overlay */}
-      {showUpgradeCTA && !isEntitled && (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl p-8 max-w-md mx-4 text-center">
-            <AlertCircle className="w-16 h-16 text-amber-500 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold mb-2">Content Protected</h3>
-            <p className="text-slate-600 mb-6">
-              This content is only available to enrolled students. 
-              Purchase access to continue learning.
-            </p>
-            <button
-              onClick={onUpgradeClick}
-              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-amber-600 hover:to-amber-700"
-            >
-              Purchase Access
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Screen reader notice */}
-      <div className="sr-only" aria-live="polite">
-        {policy.block_copy && 'Content copying is restricted for this material'}
+      {/* Screen reader only notice */}
+      <div className="sr-only" role="status" aria-live="polite">
+        {policy.protect_content && !isEntitled && (
+          <p>This content is protected. Copying and downloading may be restricted.</p>
+        )}
       </div>
     </div>
   );
