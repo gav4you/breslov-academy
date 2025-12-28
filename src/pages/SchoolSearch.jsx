@@ -36,13 +36,12 @@ export default function SchoolSearch() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // SECURITY: Search metadata only (titles, descriptions) - never content bodies
   const searchFilter = (query) => ({
     school_id: activeSchoolId,
     $or: [
       { title: { $regex: query, $options: 'i' } },
-      { description: { $regex: query, $options: 'i' } },
-      { content: { $regex: query, $options: 'i' } },
-      { body: { $regex: query, $options: 'i' } }
+      { description: { $regex: query, $options: 'i' } }
     ]
   });
 
@@ -67,7 +66,10 @@ export default function SchoolSearch() {
     queryFn: async () => {
       if (!debouncedQuery) return [];
       // SECURITY: Only search lesson titles/metadata, never content (prevents leakage)
-      const results = await base44.entities.Lesson.filter({ school_id: activeSchoolId });
+      const results = await base44.entities.Lesson.filter({ 
+        school_id: activeSchoolId,
+        status: 'published'
+      }, '-order', 100); // Limit to prevent performance issues
       return results.filter(l => 
         l.title?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
         l.title_hebrew?.includes(debouncedQuery)
@@ -80,7 +82,9 @@ export default function SchoolSearch() {
     queryKey: ['search-posts', activeSchoolId, debouncedQuery],
     queryFn: async () => {
       if (!debouncedQuery) return [];
-      const results = await base44.entities.Post.filter({ school_id: activeSchoolId });
+      const results = await base44.entities.Post.filter({ 
+        school_id: activeSchoolId 
+      }, '-created_date', 100); // Limit for performance
       return results.filter(p => 
         p.content?.toLowerCase().includes(debouncedQuery.toLowerCase())
       ).slice(0, 20);
@@ -92,11 +96,13 @@ export default function SchoolSearch() {
     queryKey: ['search-texts', activeSchoolId, debouncedQuery],
     queryFn: async () => {
       if (!debouncedQuery) return [];
-      const results = await base44.entities.Text.filter({ school_id: activeSchoolId });
+      // SECURITY: Search titles/metadata only, not full text bodies
+      const results = await base44.entities.Text.filter({ 
+        school_id: activeSchoolId 
+      }, '-created_date', 100); // Limit for performance
       return results.filter(t => 
         t.title?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-        t.hebrew?.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-        t.english?.toLowerCase().includes(debouncedQuery.toLowerCase())
+        t.source_ref?.toLowerCase().includes(debouncedQuery.toLowerCase())
       ).slice(0, 20);
     },
     enabled: !!activeSchoolId && debouncedQuery.length > 2

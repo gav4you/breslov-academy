@@ -197,19 +197,29 @@ export default function Account() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {copyLicenses.map((lic) => (
-                  <div key={lic.id} className="flex items-center justify-between p-4 border rounded">
-                    <div>
-                      <p className="font-semibold">{lic.type === 'COPY_LICENSE' ? 'Copy License' : 'Download License'}</p>
-                      <p className="text-sm text-slate-600">
-                        {lic.ends_at ? `Expires ${new Date(lic.ends_at).toLocaleDateString()}` : 'Lifetime'}
-                      </p>
+                {copyLicenses.map((lic) => {
+                  const { isEntitlementActive } = require('../components/utils/entitlements');
+                  const active = isEntitlementActive(lic);
+                  
+                  return (
+                    <div key={lic.id} className="flex items-center justify-between p-4 border rounded">
+                      <div>
+                        <p className="font-semibold">{lic.type === 'COPY_LICENSE' ? 'Copy License' : 'Download License'}</p>
+                        <p className="text-sm text-slate-600">
+                          {lic.ends_at ? `${active ? 'Expires' : 'Expired'} ${new Date(lic.ends_at).toLocaleDateString()}` : 'Lifetime'}
+                        </p>
+                      </div>
+                      <Badge variant={active ? 'default' : 'secondary'}>
+                        {active ? 'Active' : 'Expired'}
+                      </Badge>
                     </div>
-                    <Badge variant="default">Active</Badge>
-                  </div>
-                ))}
+                  );
+                })}
                 {copyLicenses.length === 0 && (
-                  <p className="text-slate-500 text-center py-8">No licenses purchased</p>
+                  <div className="text-center py-8">
+                    <p className="text-slate-500 mb-3">No licenses purchased</p>
+                    <p className="text-xs text-slate-400">Licenses unlock copy/download rights for owned courses</p>
+                  </div>
                 )}
               </div>
             </CardContent>

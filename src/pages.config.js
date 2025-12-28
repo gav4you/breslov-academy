@@ -69,6 +69,9 @@ import oauth2callback from './pages/oauth2callback';
 import Account from './pages/Account';
 import NetworkAdmin from './pages/NetworkAdmin';
 import CertificateVerify from './pages/CertificateVerify';
+import SchoolStaff from './pages/SchoolStaff';
+import InviteAccept from './pages/InviteAccept';
+import AuditLogViewer from './pages/AuditLogViewer';
 import __Layout from './Layout.jsx';
 
 
@@ -144,6 +147,9 @@ export const PAGES = {
     "Account": Account,
     "NetworkAdmin": NetworkAdmin,
     "CertificateVerify": CertificateVerify,
+    "SchoolStaff": SchoolStaff,
+    "InviteAccept": InviteAccept,
+    "AuditLogViewer": AuditLogViewer,
 }
 
 export const pagesConfig = {

@@ -22,10 +22,9 @@ export default function Downloads() {
         const schoolId = localStorage.getItem('active_school_id');
         setActiveSchoolId(schoolId);
         
-        // Load entitlements
+        // Load entitlements (use scoped helper)
         if (schoolId && currentUser) {
-          const ents = await base44.entities.Entitlement.filter({
-            school_id: schoolId,
+          const ents = await scopedFilter('Entitlement', schoolId, {
             user_email: currentUser.email
           });
           setEntitlements(ents);
@@ -39,7 +38,7 @@ export default function Downloads() {
 
   const { data: downloads = [] } = useQuery({
     queryKey: ['downloads', activeSchoolId],
-    queryFn: () => scopedFilter('Download', activeSchoolId, {}),
+    queryFn: () => scopedFilter('Download', activeSchoolId, {}, '-created_date', 50),
     enabled: !!activeSchoolId
   });
 
@@ -76,13 +75,20 @@ export default function Downloads() {
         {downloads.map((download) => {
           const Icon = iconMap[download.type] || FileText;
           
-          // Check download access
-          const hasDownloadLicense = entitlements.some(e => e.entitlement_type === 'DOWNLOAD_LICENSE');
+          // Import entitlement helper
+          const { isEntitlementActive } = require('../components/utils/entitlements');
+          const activeEnts = entitlements.filter(e => isEntitlementActive(e));
+          
+          // Check download access (expiry-aware)
+          const hasDownloadLicense = activeEnts.some(e => {
+            const type = e.type || e.entitlement_type;
+            return type === 'DOWNLOAD_LICENSE';
+          });
           const hasCourseAccess = download.course_id 
-            ? entitlements.some(e => 
-                (e.entitlement_type === 'COURSE' && e.course_id === download.course_id) ||
-                e.entitlement_type === 'ALL_COURSES'
-              )
+            ? activeEnts.some(e => {
+                const type = e.type || e.entitlement_type;
+                return (type === 'COURSE' && e.course_id === download.course_id) || type === 'ALL_COURSES';
+              })
             : true;
           
           const canDownload = policy?.download_mode === 'INCLUDED_WITH_ACCESS' 
@@ -115,12 +121,26 @@ export default function Downloads() {
                   </span>
                   {finalCanDownload ? (
                     <Button
-                      onClick={() => {
-                        window.open(download.file_url, '_blank');
-                        // Log download
-                        base44.entities.Download.update(download.id, {
-                          download_count: (download.download_count || 0) + 1
-                        }).catch(() => {});
+                      onClick={async () => {
+                        // Secure retrieval
+                        const { getSecureDownloadUrl } = await import('../components/materials/materialsEngine');
+                        const result = await getSecureDownloadUrl({
+                          school_id: activeSchoolId,
+                          download_id: download.id,
+                          user_email: user.email,
+                          entitlements,
+                          policy
+                        });
+                        
+                        if (result.allowed && result.url) {
+                          window.open(result.url, '_blank');
+                          // Update count
+                          base44.entities.Download.update(download.id, {
+                            download_count: (download.download_count || 0) + 1
+                          }).catch(() => {});
+                        } else {
+                          toast.error(`Download blocked: ${result.reason}`);
+                        }
                       }}
                       className="bg-green-600 hover:bg-green-700"
                     >

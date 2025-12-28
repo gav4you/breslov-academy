@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Building2, Users, DollarSign, Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { createPageUrl } from '@/utils';
 
 // GLOBAL ADMIN LIST (env var or hardcoded)
 const GLOBAL_ADMINS = (import.meta.env.VITE_GLOBAL_ADMINS || 'admin@breslov.com').split(',').map(e => e.trim());
@@ -26,11 +27,13 @@ export default function NetworkAdmin() {
         setUser(currentUser);
         
         // Check global admin status
-        const isAdmin = GLOBAL_ADMINS.includes(currentUser.email) || currentUser.role === 'admin';
+        const { isGlobalAdmin: checkGlobalAdmin } = await import('../components/auth/roles');
+        const isAdmin = checkGlobalAdmin(currentUser.email) || currentUser.role === 'admin';
         setIsGlobalAdmin(isAdmin);
         
         if (!isAdmin) {
           toast.error('Global admin access required');
+          window.location.href = createPageUrl('Dashboard');
         }
       } catch (error) {
         base44.auth.redirectToLogin();

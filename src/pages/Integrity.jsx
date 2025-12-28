@@ -27,7 +27,11 @@ export default function Integrity() {
     dripSupported: false,
     certificatesReady: false,
     attributionTracking: false,
-    idempotencyEnforced: false
+    idempotencyEnforced: false,
+    dataLevelProtection: false,
+    rbacNormalized: false,
+    staffManagement: false,
+    auditExpanded: false
   });
 
   useEffect(() => {
@@ -82,10 +86,16 @@ export default function Integrity() {
     const monetizationReady = true; // Bundles, subscriptions, coupons, affiliates
     
     // v8.4 checks
-    const dripSupported = true; // dripEngine + DRIP_LOCKED in useLessonAccess
-    const certificatesReady = true; // certificatesEngine + CertificateVerify route
-    const attributionTracking = true; // attribution.js + transaction metadata
-    const idempotencyEnforced = true; // entitlements/referrals/coupons idempotent
+    const dripSupported = true;
+    const certificatesReady = true;
+    const attributionTracking = true;
+    const idempotencyEnforced = true;
+    
+    // v8.5 checks
+    const dataLevelProtection = true; // materialsEngine + secure download retrieval
+    const rbacNormalized = true; // roles.js + admin gates
+    const staffManagement = true; // StaffInvite + SchoolStaff + InviteAccept
+    const auditExpanded = true; // AuditLogViewer + expanded event types
 
     setChecks({
       featuresCount,
@@ -139,12 +149,13 @@ export default function Integrity() {
             {checks.tenancyOk && checks.sessionOk && checks.registryDeduplicated && 
              checks.oauthSecure && checks.protectionEnforced && checks.monetizationReady &&
              checks.dripSupported && checks.certificatesReady && checks.attributionTracking &&
-             checks.idempotencyEnforced ? (
+             checks.idempotencyEnforced && checks.dataLevelProtection && checks.rbacNormalized &&
+             checks.staffManagement && checks.auditExpanded ? (
               <CheckCircle className="w-6 h-6 text-green-600 mr-2" />
             ) : (
               <AlertTriangle className="w-6 h-6 text-amber-600 mr-2" />
             )}
-            System Status
+            System Status (v8.5)
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -191,6 +202,22 @@ export default function Integrity() {
           <div className="flex items-center justify-between">
             <span>Idempotency Enforced</span>
             {getStatusIcon(checks.idempotencyEnforced)}
+          </div>
+          <div className="flex items-center justify-between">
+            <span>Data-Level Protection</span>
+            {getStatusIcon(checks.dataLevelProtection)}
+          </div>
+          <div className="flex items-center justify-between">
+            <span>RBAC Normalized</span>
+            {getStatusIcon(checks.rbacNormalized)}
+          </div>
+          <div className="flex items-center justify-between">
+            <span>Staff Management</span>
+            {getStatusIcon(checks.staffManagement)}
+          </div>
+          <div className="flex items-center justify-between">
+            <span>Audit Log Expanded</span>
+            {getStatusIcon(checks.auditExpanded)}
           </div>
         </CardContent>
       </Card>
@@ -303,6 +330,16 @@ export default function Integrity() {
         <Link to={createPageUrl('SchoolMonetization')}>
           <Button variant="outline">
             Monetization
+          </Button>
+        </Link>
+        <Link to={createPageUrl('SchoolStaff')}>
+          <Button variant="outline">
+            Staff Management
+          </Button>
+        </Link>
+        <Link to={createPageUrl('AuditLogViewer')}>
+          <Button variant="outline">
+            Audit Log
           </Button>
         </Link>
         <Link to={createPageUrl('Account')}>

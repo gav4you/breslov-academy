@@ -94,7 +94,12 @@ export const FEATURES = {
   // v8.3 additions
   account: { key: 'Account', label: 'My Account', route: '/account', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'User', order: 10 },
   networkAdmin: { key: 'NetworkAdmin', label: 'Network Admin', route: '/networkadmin', area: 'admin', audiences: ['admin'], icon: 'Globe', vaultOnly: true },
-  certificateVerify: { key: 'CertificateVerify', label: 'Certificate Verification', route: '/certificateverify', area: 'marketing', audiences: ['public'], hidden: true }
+  certificateVerify: { key: 'CertificateVerify', label: 'Certificate Verification', route: '/certificateverify', area: 'marketing', audiences: ['public'], hidden: true },
+  
+  // v8.5 additions
+  schoolStaff: { key: 'SchoolStaff', label: 'Staff Management', route: '/schoolstaff', area: 'admin', audiences: ['admin'], icon: 'Users', vaultOnly: true },
+  auditLogViewer: { key: 'AuditLogViewer', label: 'Audit Log', route: '/auditlogviewer', area: 'admin', audiences: ['admin'], icon: 'Shield', vaultOnly: true },
+  inviteAccept: { key: 'InviteAccept', label: 'Accept Invite', route: '/inviteaccept', area: 'system', audiences: ['public'], hidden: true }
 };
 
 // Helper functions

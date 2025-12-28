@@ -7,10 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { DollarSign, Tag, ShoppingCart, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
-import { createEntitlementsForPurchase, processReferral } from '../components/utils/entitlements';
+import { createEntitlementsForPurchase, processReferral, recordCouponRedemption } from '../components/utils/entitlements';
 import ConversionFunnel from '../components/analytics/ConversionFunnel';
 import RevenueChart from '../components/analytics/RevenueChart';
 import PayoutBatchManager from '../components/payouts/PayoutBatchManager';
+import { createPageUrl } from '@/utils';
 
 export default function SchoolMonetization() {
   const [user, setUser] = useState(null);
@@ -24,6 +25,20 @@ export default function SchoolMonetization() {
         setUser(currentUser);
         const schoolId = localStorage.getItem('active_school_id');
         setActiveSchoolId(schoolId);
+        
+        // RBAC: Require school admin
+        const memberships = await base44.entities.SchoolMembership.filter({
+          school_id: schoolId,
+          user_email: currentUser.email
+        });
+        
+        if (memberships.length > 0) {
+          const { isSchoolAdmin } = await import('../components/auth/roles');
+          if (!isSchoolAdmin(memberships[0].role)) {
+            toast.error('School admin access required');
+            window.location.href = createPageUrl('Dashboard');
+          }
+        }
       } catch (error) {
         base44.auth.redirectToLogin();
       }

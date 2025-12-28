@@ -11,14 +11,16 @@ const SCHOOL_SCOPED_ENTITIES = [
   'Offer', 'Coupon', 'Transaction', 'Entitlement', 'Purchase',
   'StudySet', 'StudyCard', 'LanguageVariant', 'SpacedRepetitionItem',
   'Cohort', 'CohortMember', 'CohortScheduleItem',
-  'SchoolMembership', 'SchoolInvite', 'ContentProtectionPolicy',
+  'SchoolMembership', 'SchoolInvite', 'StaffInvite', 'ContentProtectionPolicy',
   'Testimonial', 'InstructorPayout', 'AuditLog', 'EventLog',
   'Announcement', 'UserAnnouncementRead', 'Affiliate', 'Referral',
   'AiTutorSession', 'AiTutorPolicyLog', 'RateLimitLog',
   'Bookmark', 'LessonNote', 'Highlight', 'Transcript',
   'Text', 'CourseReview', 'Discussion', 'ContentReport',
   'ModerationAction', 'SchoolMetricDaily', 'CourseMetricDaily',
-  'Assignment', 'Submission', 'Quiz', 'QuizAttempt'
+  'Assignment', 'Submission', 'Quiz', 'QuizAttempt',
+  'Download', 'Bundle', 'SubscriptionPlan', 'PayoutBatch',
+  'AnalyticsEvent', 'SubscriptionInvoice', 'Certificate', 'StudySession'
 ];
 
 /**
