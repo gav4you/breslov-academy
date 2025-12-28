@@ -61,6 +61,7 @@ import TeachLesson from './pages/TeachLesson';
 import Tournaments from './pages/Tournaments';
 import Vault from './pages/Vault';
 import oauth2callback from './pages/oauth2callback';
+import Integrity from './pages/Integrity';
 import __Layout from './Layout.jsx';
 
 
@@ -128,6 +129,7 @@ export const PAGES = {
     "Tournaments": Tournaments,
     "Vault": Vault,
     "oauth2callback": oauth2callback,
+    "Integrity": Integrity,
 }
 
 export const pagesConfig = {
