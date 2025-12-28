@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, BookOpen, Award, Flame } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import FlashcardPractice from '../components/language/FlashcardPractice';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { BookOpen, Plus, TrendingUp } from 'lucide-react';
 
 export default function LanguageLearning() {
   const [user, setUser] = useState(null);
-  const urlParams = new URLSearchParams(window.location.search);
-  const language = urlParams.get('lang');
-  const [practiceMode, setPracticeMode] = useState(null);
+  const [activeSchoolId, setActiveSchoolId] = useState(null);
 
   useEffect(() => {
     const loadUser = async () => {
       try {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+        
+        const schoolId = localStorage.getItem('active_school_id');
+        setActiveSchoolId(schoolId);
       } catch (error) {
         base44.auth.redirectToLogin();
       }
@@ -26,148 +27,115 @@ export default function LanguageLearning() {
     loadUser();
   }, []);
 
-  const { data: lessons = [] } = useQuery({
-    queryKey: ['language-lessons', language],
-    queryFn: () => base44.entities.LanguageLesson.filter({ language }, 'lesson_number'),
-    enabled: !!language
+  const { data: variants = [] } = useQuery({
+    queryKey: ['language-variants', activeSchoolId],
+    queryFn: () => base44.entities.LanguageVariant.filter({
+      school_id: activeSchoolId,
+      enabled: true
+    }),
+    enabled: !!activeSchoolId
   });
 
-  const { data: langProgress } = useQuery({
-    queryKey: ['language-progress', user?.email, language],
-    queryFn: async () => {
-      const progs = await base44.entities.LanguageProgress.filter({ 
-        user_email: user.email,
-        language 
-      });
-      return progs[0];
-    },
-    enabled: !!user?.email && !!language
+  const { data: mySets = [] } = useQuery({
+    queryKey: ['my-study-sets', user?.email, activeSchoolId],
+    queryFn: () => base44.entities.StudySet.filter({
+      school_id: activeSchoolId,
+      creator_user: user.email
+    }),
+    enabled: !!user && !!activeSchoolId
   });
 
-  const languageNames = {
-    biblical_hebrew: { name: 'Biblical Hebrew', hebrew: 'עברית מקראית' },
-    torah_hebrew: { name: 'Torah Hebrew', hebrew: 'עברית תורנית' },
-    talmud_bavli: { name: 'Talmud Bavli', hebrew: 'תלמוד בבלי' },
-    modern_hebrew: { name: 'Modern Hebrew', hebrew: 'עברית חדשה' },
-    aramaic: { name: 'Aramaic', hebrew: 'ארמית' },
-    yiddish: { name: 'Yiddish', hebrew: 'אידיש' },
-    ancient_hebrew: { name: 'Ancient Hebrew', hebrew: 'עברית עתיקה' }
-  };
-
-  const currentLang = languageNames[language];
-
-  if (practiceMode && lessons.length > 0) {
-    const allVocabulary = lessons.flatMap(l => l.vocabulary || []);
-    
-    return (
-      <div className="max-w-4xl mx-auto space-y-6">
-        <Button variant="ghost" onClick={() => setPracticeMode(null)}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Lessons
-        </Button>
-        <FlashcardPractice 
-          vocabulary={allVocabulary}
-          onComplete={(results) => {
-            setPracticeMode(null);
-            // Save progress
-          }}
-        />
-      </div>
-    );
-  }
+  const { data: schoolSets = [] } = useQuery({
+    queryKey: ['school-study-sets', activeSchoolId],
+    queryFn: () => base44.entities.StudySet.filter({
+      school_id: activeSchoolId,
+      visibility: { $in: ['SCHOOL', 'PUBLIC_WITHIN_SCHOOL'] }
+    }),
+    enabled: !!activeSchoolId
+  });
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <Link to={createPageUrl('Languages')}>
-          <Button variant="ghost" className="mb-4">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            All Languages
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Language Learning</h1>
+          <p className="text-slate-600 mt-2">Master Hebrew, Aramaic, and more</p>
+        </div>
+        <Link to={createPageUrl('StudySetNew')}>
+          <Button>
+            <Plus className="w-4 h-4 mr-2" />
+            Create Study Set
           </Button>
         </Link>
+      </div>
 
-        <div className="bg-gradient-to-r from-blue-900 to-purple-900 rounded-2xl p-8 text-white">
-          <h1 className="text-4xl font-bold mb-2">{currentLang?.name}</h1>
-          <p className="text-2xl text-blue-200 mb-4" dir="rtl">{currentLang?.hebrew}</p>
-          <div className="flex items-center space-x-6 text-blue-100">
-            <div className="flex items-center">
-              <Flame className="w-5 h-5 mr-2" />
-              <span>{langProgress?.streak_days || 0} day streak</span>
-            </div>
-            <div className="flex items-center">
-              <Award className="w-5 h-5 mr-2" />
-              <span>{langProgress?.words_learned || 0} words learned</span>
-            </div>
-            <div className="flex items-center">
-              <BookOpen className="w-5 h-5 mr-2" />
-              <span>{langProgress?.lessons_completed || 0} lessons completed</span>
-            </div>
-          </div>
+      {/* Language Variants */}
+      <div>
+        <h2 className="text-2xl font-bold mb-4">Available Languages</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {variants.map((variant) => (
+            <Card key={variant.id} className="hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <h3 className="font-bold text-lg mb-2">{variant.label}</h3>
+                <Link to={createPageUrl(`LanguageStudy?variant=${variant.key}`)}>
+                  <Button variant="outline" size="sm" className="w-full">
+                    Start Learning
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        {variants.length === 0 && (
+          <p className="text-slate-500 text-center py-8">No languages enabled yet</p>
+        )}
+      </div>
+
+      {/* My Study Sets */}
+      <div>
+        <h2 className="text-2xl font-bold mb-4">My Study Sets</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {mySets.map((set) => (
+            <Card key={set.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-lg">{set.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-slate-600 mb-4">{set.description}</p>
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline">{set.visibility}</Badge>
+                  <Link to={createPageUrl(`StudySetPractice?id=${set.id}`)}>
+                    <Button size="sm">Study</Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        {mySets.length === 0 && (
+          <p className="text-slate-500 text-center py-8">No study sets yet</p>
+        )}
+      </div>
+
+      {/* School Study Sets */}
+      <div>
+        <h2 className="text-2xl font-bold mb-4">School Study Sets</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {schoolSets.slice(0, 6).map((set) => (
+            <Card key={set.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-lg">{set.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-slate-600 mb-4">{set.description}</p>
+                <Link to={createPageUrl(`StudySetPractice?id=${set.id}`)}>
+                  <Button size="sm" className="w-full">Study</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
-
-      {/* Practice Options */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setPracticeMode('flashcards')}>
-          <CardContent className="p-6 text-center">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">🃏</span>
-            </div>
-            <h3 className="font-bold text-lg mb-2">Flashcards</h3>
-            <p className="text-slate-600 text-sm">Practice vocabulary with interactive flashcards</p>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-          <CardContent className="p-6 text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">✍️</span>
-            </div>
-            <h3 className="font-bold text-lg mb-2">Writing Practice</h3>
-            <p className="text-slate-600 text-sm">Learn to write in Hebrew script</p>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-          <CardContent className="p-6 text-center">
-            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">🗣️</span>
-            </div>
-            <h3 className="font-bold text-lg mb-2">Speaking</h3>
-            <p className="text-slate-600 text-sm">Practice pronunciation and speaking</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Lessons */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Lessons</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {lessons.length === 0 ? (
-            <div className="text-center py-12 text-slate-500">
-              <BookOpen className="w-16 h-16 mx-auto mb-4 text-slate-400" />
-              <p>Lessons coming soon!</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {lessons.map((lesson) => (
-                <div key={lesson.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50">
-                  <div>
-                    <h4 className="font-semibold">Lesson {lesson.lesson_number}: {lesson.title}</h4>
-                    <p className="text-sm text-slate-600 mt-1">
-                      {lesson.vocabulary?.length || 0} new words • {lesson.level}
-                    </p>
-                  </div>
-                  <Button size="sm">Start Lesson</Button>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }

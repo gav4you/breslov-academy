@@ -13,6 +13,7 @@ import PremiumVideoPlayer from '../components/learning/PremiumVideoPlayer';
 import BookmarkPanel from '../components/learning/BookmarkPanel';
 import TranscriptPanel from '../components/learning/TranscriptPanel';
 import NotesPanel from '../components/learning/NotesPanel';
+import AiTutorPanel from '../components/ai/AiTutorPanel';
 
 export default function LessonViewerPremium() {
   const [user, setUser] = useState(null);
@@ -155,6 +156,15 @@ export default function LessonViewerPremium() {
 
         {/* Sidebar Tools */}
         <div className="space-y-6">
+          <AiTutorPanel
+            contextType="LESSON"
+            contextId={lesson.id}
+            contextTitle={lesson.title}
+            contextContent={lesson.content}
+            user={user}
+            schoolId={lesson.school_id}
+          />
+
           <BookmarkPanel
             lesson={lesson}
             user={user}

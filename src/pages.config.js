@@ -57,6 +57,10 @@ import CourseSales from './pages/CourseSales';
 import SchoolCheckout from './pages/SchoolCheckout';
 import SchoolThankYou from './pages/SchoolThankYou';
 import SchoolSearch from './pages/SchoolSearch';
+import StudySetPractice from './pages/StudySetPractice';
+import Cohorts from './pages/Cohorts';
+import Offline from './pages/Offline';
+import AdminHardening from './pages/AdminHardening';
 import __Layout from './Layout.jsx';
 
 
@@ -120,6 +124,10 @@ export const PAGES = {
     "SchoolCheckout": SchoolCheckout,
     "SchoolThankYou": SchoolThankYou,
     "SchoolSearch": SchoolSearch,
+    "StudySetPractice": StudySetPractice,
+    "Cohorts": Cohorts,
+    "Offline": Offline,
+    "AdminHardening": AdminHardening,
 }
 
 export const pagesConfig = {
