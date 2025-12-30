@@ -9,6 +9,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { SessionProvider } from '@/components/hooks/useSession';
+import TenancyBridge from '@/components/api/TenancyBridge';
 
 const RouteFallback = ({ label = 'Loading…' }) => (
   <div className="fixed inset-0 flex items-center justify-center">
@@ -182,6 +183,7 @@ function App() {
   return (
     <AuthProvider>
       <SessionProvider>
+        <TenancyBridge />
         <QueryClientProvider client={queryClientInstance}>
           <Router>
             <NavigationTracker />

@@ -23,11 +23,26 @@ High-level architecture of Breslov Academy platform.
 
 ## Multi-Tenant Scoping
 
-**Module:** `components/api/scoped.js`
+**Module:** `src/components/api/scoped.jsx`
+
+**Entity list:** `src/components/api/scopedEntities.js`
 
 **Rule:** ALL school-scoped queries MUST include `school_id` filter.
 
 **Functions:** scopedList, scopedFilter, scopedCreate
+
+### Runtime Tenancy Guard (Defense-in-depth)
+
+Because legacy code may still call `base44.entities.*` directly, we install a runtime guard
+that auto-injects `school_id` for school-scoped entities.
+
+**Installer:** `src/api/base44Client.js` (calls `installTenancyEnforcer()`)
+
+**Guard:** `src/components/api/tenancyEnforcer.js`
+
+**Runtime context:** `src/components/api/tenancyRuntime.js` (synced via `src/components/api/TenancyBridge.jsx`)
+
+**Global admin escape hatch:** `.filterGlobal()` / `.listGlobal()` on school-scoped entities (used by NetworkAdmin).
 
 ---
 
@@ -111,4 +126,26 @@ High-level architecture of Breslov Academy platform.
 
 ---
 
-Last Updated: 2025-12-28
+Last Updated: 2025-12-30
+
+---
+
+## v8.9 — Contracts + Safety Scans
+
+This version adds a *diagnostics-first* safety layer to reduce the chance of regressions:
+
+### Query Contracts
+
+- `src/components/api/contracts.js` provides `normalizeLimit()` to cap read limits (default 50, max 200).
+- `src/components/api/scoped.jsx` applies `normalizeLimit()` for scoped reads to avoid accidental unbounded queries.
+
+### Runtime Tenant Warning Channel
+
+- `src/components/api/tenancyWarnings.js` stores a bounded list of runtime warnings.
+- `src/components/api/tenancyEnforcer.js` now records warnings when it blocks or coerces queries.
+- `/integrity` displays these warnings and lets admins clear after investigation.
+
+### Static Code Scanner
+
+- `src/components/system/codeScanner.js` runs conservative regex scans on curated high-risk modules loaded as `?raw`.
+- Results appear in `/integrity` alongside other checks.

@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { FEATURES, getAllRoutes } from '@/components/config/features';
+import { base44 } from '@/api/base44Client';
 import { useSession } from '@/components/hooks/useSession';
 import { isSchoolAdmin } from '@/components/auth/roles';
+import { getTenancyWarnings, clearTenancyWarnings, getTenancyWarningsSummary } from '@/components/api/tenancyWarnings';
+import { runScans } from '@/components/system/codeScanner';
 import PageShell from '@/components/ui/PageShell';
 import GlassCard from '@/components/ui/GlassCard';
 import SectionHeader from '@/components/ui/SectionHeader';
@@ -108,8 +111,18 @@ export default function Integrity() {
   const [sources, setSources] = useState(null);
   const [reloading, setReloading] = useState(false);
   const [reloadNonce, setReloadNonce] = useState(0);
+  const [tenancyTick, setTenancyTick] = useState(0);
 
   const canView = !!user && isSchoolAdmin(role);
+
+  // Keep runtime-warning counters fresh while the diagnostics page is open.
+  useEffect(() => {
+    if (!canView) return undefined;
+    const id = window.setInterval(() => {
+      setTenancyTick((t) => (t + 1) % 1_000_000);
+    }, 2000);
+    return () => window.clearInterval(id);
+  }, [canView]);
 
   useEffect(() => {
     if (!canView) return;
@@ -118,18 +131,22 @@ export default function Integrity() {
     const loadSources = async () => {
       try {
         setReloading(true);
-        const [schoolSearch, downloads, reader, scoped] = await Promise.all([
+        const [schoolSearch, downloads, reader, scoped, lessonAccess, tenancyEnforcer] = await Promise.all([
           import('./SchoolSearch.jsx?raw'),
           import('./Downloads.jsx?raw'),
           import('./Reader.jsx?raw'),
-          import('../components/api/scoped.jsx?raw')
+          import('../components/api/scoped.jsx?raw'),
+          import('../components/hooks/useLessonAccess.jsx?raw'),
+          import('../components/api/tenancyEnforcer.js?raw'),
         ]);
         if (!alive) return;
         setSources({
           schoolSearch: schoolSearch.default,
           downloads: downloads.default,
           reader: reader.default,
-          scoped: scoped.default
+          scoped: scoped.default,
+          lessonAccess: lessonAccess.default,
+          tenancyEnforcer: tenancyEnforcer.default,
         });
       } catch (e) {
         console.warn('Integrity scans: failed to load source modules', e);
@@ -159,12 +176,23 @@ export default function Integrity() {
 
   const scans = useMemo(() => {
     if (!sources || sources.error) return [];
-    return [
+    const highSignal = [
       scanSchoolSearch(sources.schoolSearch),
       scanDownloads(sources.downloads),
       scanReader(sources.reader),
       scanScoped(sources.scoped)
     ];
+
+    const generic = runScans({
+      schoolSearch: { label: 'SchoolSearch', source: sources.schoolSearch },
+      downloads: { label: 'Downloads', source: sources.downloads },
+      reader: { label: 'Reader', source: sources.reader },
+      scoped: { label: 'Scoped API', source: sources.scoped },
+      lessonAccess: { label: 'useLessonAccess', source: sources.lessonAccess },
+      tenancyEnforcer: { label: 'TenancyEnforcer', source: sources.tenancyEnforcer },
+    });
+
+    return [...highSignal, ...generic];
   }, [sources]);
 
   const coreChecks = useMemo(() => {
@@ -173,6 +201,8 @@ export default function Integrity() {
     const hasActiveSchool = !!activeSchoolId;
     const hasVault = Object.values(FEATURES).some((f) => f?.key === 'Vault');
     const hasIntegrity = Object.values(FEATURES).some((f) => f?.key === 'Integrity');
+    const hasTenancyEnforcer = typeof base44?.entities?.Course?.filterGlobal === 'function';
+    const tenancySummary = getTenancyWarningsSummary();
 
     return [
       {
@@ -194,6 +224,27 @@ export default function Integrity() {
         detail: [hasIntegrity ? '✅ Integrity is present in registry.' : '❌ Integrity missing from registry.']
       },
       {
+        key: 'tenancy_enforcer',
+        label: 'Tenancy enforcer installed',
+        ok: hasTenancyEnforcer,
+        detail: [
+          hasTenancyEnforcer
+            ? '✅ Runtime tenant guard is active (filter/list auto-scope + global escape hatches).' 
+            : '⚠️ Tenancy enforcer not detected. Unscoped base44.entity calls may leak cross-school data.'
+        ]
+      },
+      {
+        key: 'tenancy_runtime_warnings',
+        label: 'Runtime tenancy warnings (this session)',
+        ok: (tenancySummary?.total || 0) === 0,
+        detail: (tenancySummary?.total || 0) === 0
+          ? ['✅ No tenancy warnings recorded yet.']
+          : [
+              `⚠️ ${tenancySummary.total} warnings recorded. Top types: ${Object.entries(tenancySummary.counts || {}).slice(0, 4).map(([k, v]) => `${k}(${v})`).join(', ')}`,
+              'Open the “Runtime warnings” panel to inspect and clear.'
+            ]
+      },
+      {
         key: 'active_school',
         label: 'Active school selected',
         ok: hasActiveSchool,
@@ -206,7 +257,7 @@ export default function Integrity() {
         detail: registryStats.duplicates.length === 0 ? ['✅ No duplicate registry routes found.'] : registryStats.duplicates.map((r) => `⚠️ Duplicate route: ${r}`)
       }
     ];
-  }, [activeSchoolId, registryStats]);
+  }, [activeSchoolId, registryStats, tenancyTick]);
 
   const report = useMemo(() => {
     const now = new Date().toISOString();
@@ -221,14 +272,19 @@ export default function Integrity() {
       checks: Object.fromEntries(coreChecks.map((c) => [c.key, c.ok])),
       scans: Object.fromEntries(scans.map((s) => [s.key, s.ok]))
     };
+    sections.tenancy_warnings = getTenancyWarningsSummary();
+    sections.tenancy_warnings_recent = getTenancyWarnings().slice(0, 50);
     return sections;
-  }, [user?.email, role, activeSchoolId, registryStats, coreChecks, scans]);
+  }, [user?.email, role, activeSchoolId, registryStats, coreChecks, scans, tenancyTick]);
 
   const overallOk = useMemo(() => {
     const all = [...coreChecks, ...scans];
     if (all.length === 0) return false;
     return all.every((c) => c.ok);
   }, [coreChecks, scans]);
+
+  const tenancySummaryLive = useMemo(() => getTenancyWarningsSummary(), [tenancyTick]);
+  const tenancyWarningsLive = useMemo(() => getTenancyWarnings().slice(0, 25), [tenancyTick]);
 
   const copyReport = async () => {
     const text = safeJson(report);
@@ -343,23 +399,78 @@ export default function Integrity() {
           )}
         </GlassCard>
 
-        <GlassCard className="p-6">
-          <SectionHeader title="Registry" description="Quick registry stats." />
-          <div className="mt-4 space-y-3 text-sm text-slate-300">
-            <div className="flex items-center justify-between"><span>Features</span><span className="text-slate-100">{registryStats.featureCount}</span></div>
-            <div className="flex items-center justify-between"><span>Routes</span><span className="text-slate-100">{registryStats.routeCount}</span></div>
-          </div>
-          <Separator className="my-4" />
-          <div className="text-sm text-slate-300">
-            <div className="font-medium text-slate-100">Guidance</div>
-            <ul className="mt-2 list-disc space-y-1 pl-5">
-              <li>Never inline the feature registry into Vault.</li>
-              <li>All school-owned queries must be scoped to activeSchoolId.</li>
-              <li>Do not expose lesson text, video or download URLs in LOCKED states.</li>
-              <li>When in doubt, validate /integrity before shipping.</li>
-            </ul>
-          </div>
-        </GlassCard>
+        <div className="space-y-4">
+          <GlassCard className="p-6">
+            <SectionHeader title="Registry" description="Quick registry stats." />
+            <div className="mt-4 space-y-3 text-sm text-slate-300">
+              <div className="flex items-center justify-between"><span>Features</span><span className="text-slate-100">{registryStats.featureCount}</span></div>
+              <div className="flex items-center justify-between"><span>Routes</span><span className="text-slate-100">{registryStats.routeCount}</span></div>
+            </div>
+            <Separator className="my-4" />
+            <div className="text-sm text-slate-300">
+              <div className="font-medium text-slate-100">Guidance</div>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                <li>Never inline the feature registry into Vault.</li>
+                <li>All school-owned queries must be scoped to activeSchoolId.</li>
+                <li>Do not expose lesson text, video or download URLs in LOCKED states.</li>
+                <li>When in doubt, validate /integrity before shipping.</li>
+              </ul>
+            </div>
+          </GlassCard>
+
+          <GlassCard className="p-6">
+            <SectionHeader
+              title="Runtime warnings"
+              description="Warnings recorded by the tenancy enforcer during this session. Clear after investigating."
+              right={
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    clearTenancyWarnings();
+                    setTenancyTick((t) => (t + 1) % 1_000_000);
+                  }}
+                >
+                  Clear
+                </Button>
+              }
+            />
+
+            <div className="mt-4 text-sm text-slate-300">
+              <div className="flex items-center justify-between">
+                <span>Total</span>
+                <span className="text-slate-100">{tenancySummaryLive.total}</span>
+              </div>
+              {tenancySummaryLive.total > 0 && (
+                <div className="mt-2 text-xs text-slate-400">
+                  Top types: {Object.entries(tenancySummaryLive.counts || {}).slice(0, 4).map(([k, v]) => `${k}(${v})`).join(', ')}
+                </div>
+              )}
+            </div>
+
+            <Separator className="my-4" />
+
+            {tenancyWarningsLive.length === 0 ? (
+              <div className="text-sm text-slate-400">No warnings yet.</div>
+            ) : (
+              <div className="space-y-2">
+                {tenancyWarningsLive.map((w) => (
+                  <div key={`${w.ts}-${w.type}`} className="rounded-xl border border-white/10 bg-black/10 p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="text-xs text-slate-400">{new Date(w.ts).toLocaleString()}</div>
+                        <div className="mt-1 font-medium text-slate-100">{w.type}{w.entity ? ` · ${w.entity}` : ''}</div>
+                        {w.detail && (
+                          <div className="mt-1 text-xs text-slate-300 whitespace-pre-wrap">{safeJson(w.detail)}</div>
+                        )}
+                      </div>
+                      <StatusBadge variant="warn">WARN</StatusBadge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </GlassCard>
+        </div>
       </div>
     </PageShell>
   );

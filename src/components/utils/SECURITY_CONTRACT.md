@@ -161,3 +161,16 @@ If data leakage or unauthorized access detected:
 4. Teacher → SchoolStaff (expect: access denied if not admin)
 
 ## End of Security Contract
+
+---
+
+## v8.9 Additions (Diagnostics Hardening)
+
+Add these files to the “high-risk” review set:
+
+- components/api/contracts.js
+- components/api/tenancyWarnings.js
+- components/system/codeScanner.js
+
+New invariant:
+- The tenancy enforcer must record runtime warnings for any blocked or coerced school_id operation.

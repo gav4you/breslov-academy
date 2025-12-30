@@ -2,41 +2,8 @@
 // Ensures all data queries respect school boundaries
 
 import { base44 } from '@/api/base44Client';
-
-/**
- * Entities that have school_id and must be scoped
- */
-const SCHOOL_SCOPED_ENTITIES = [
-  'Course', 'Lesson', 'Post', 'Comment', 'UserProgress',
-  'Offer', 'Coupon', 'Transaction', 'Entitlement', 'Purchase',
-  'StudySet', 'StudyCard', 'LanguageVariant', 'SpacedRepetitionItem',
-  'Cohort', 'CohortMember', 'CohortScheduleItem',
-  'SchoolMembership', 'SchoolInvite', 'StaffInvite', 'ContentProtectionPolicy',
-  'Testimonial', 'InstructorPayout', 'AuditLog', 'EventLog',
-  'Announcement', 'UserAnnouncementRead', 'Affiliate', 'Referral',
-  'AiTutorSession', 'AiTutorPolicyLog', 'RateLimitLog',
-  'Bookmark', 'LessonNote', 'Highlight', 'Transcript',
-  'Text', 'CourseReview', 'Discussion', 'ContentReport',
-  'ModerationAction', 'SchoolMetricDaily', 'CourseMetricDaily',
-  'Assignment', 'Submission', 'Quiz', 'QuizAttempt',
-  'Download', 'Bundle', 'SubscriptionPlan', 'PayoutBatch',
-  'AnalyticsEvent', 'SubscriptionInvoice', 'Certificate', 'StudySession'
-];
-
-/**
- * Global entities (no school_id) - accessible to all or admin-only
- */
-const GLOBAL_ENTITIES = [
-  'User', 'School', 'GoogleOAuthToken', 'GoogleDriveToken',
-  'Notification', 'Integration', 'UserSchoolPreference'
-];
-
-/**
- * Check if entity requires school scoping
- */
-export const requiresSchoolScope = (entityName) => {
-  return SCHOOL_SCOPED_ENTITIES.includes(entityName);
-};
+import { requiresSchoolScope } from './scopedEntities';
+import { normalizeLimit } from './contracts';
 
 /**
  * Scoped list - get all records for entity within school
@@ -48,7 +15,7 @@ export const scopedList = async (entityName, schoolId, sort, limit) => {
   }
 
   const filters = requiresSchoolScope(entityName) ? { school_id: schoolId } : {};
-  return base44.entities[entityName].filter(filters, sort, limit);
+  return base44.entities[entityName].filter(filters, sort, normalizeLimit(limit));
 };
 
 /**
@@ -64,7 +31,7 @@ export const scopedFilter = async (entityName, schoolId, additionalFilters = {},
     ? { school_id: schoolId, ...additionalFilters }
     : additionalFilters;
 
-  return base44.entities[entityName].filter(filters, sort, limit);
+  return base44.entities[entityName].filter(filters, sort, normalizeLimit(limit));
 };
 
 /**

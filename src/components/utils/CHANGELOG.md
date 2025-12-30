@@ -40,6 +40,13 @@ This is an append-only file - never delete previous entries.
 - NetworkAdmin and SchoolMonetization list rendering optimized to prevent main-thread stalls
 - Reader: Text retrieval now entitlement-gated at query-time (avoids fetching protected texts for unentitled users)
 
+## v8.8 (Runtime Tenancy Guard) - 2025-12-30
+- Added tenancy runtime context + installer that patches base44 entity methods at runtime
+  to auto-inject school_id for school-scoped entities (defense-in-depth against accidental unscoped queries)
+- Added explicit global-admin escape hatches for legitimate cross-school operations (.filterGlobal/.listGlobal)
+- Updated NetworkAdmin to use global escape hatches to preserve cross-school reporting
+- Added /integrity check to confirm tenancy enforcer is installed
+
 ---
 
 ## Previous Versions
@@ -84,3 +91,9 @@ This is an append-only file - never delete previous entries.
 ---
 
 Last Updated: 2025-12-30
+
+### v8.9 (Contracts + Automated Safety Scans)
+- Added query contracts (normalizeLimit) to prevent unbounded reads by default
+- TenancyEnforcer now records runtime warnings (blocked/coerced queries) for diagnostics
+- /integrity displays and can clear runtime tenancy warnings
+- Added static regex-based code scanner to flag leakage/list/file_url regressions

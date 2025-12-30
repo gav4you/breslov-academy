@@ -51,13 +51,13 @@ export default function NetworkAdmin() {
 
   const { data: allTransactions = [] } = useQuery({
     queryKey: ['all-transactions'],
-    queryFn: () => base44.entities.Transaction.filter({ status: 'completed' }, '-created_date', 1000),
+    queryFn: () => base44.entities.Transaction.filterGlobal({ status: 'completed' }, '-created_date', 1000),
     enabled: isGlobalAdmin
   });
 
   const { data: allMembers = [] } = useQuery({
     queryKey: ['all-members'],
-    queryFn: () => base44.entities.SchoolMembership.list('-created_date', 1000),
+    queryFn: () => base44.entities.SchoolMembership.listGlobal('-created_date', 1000),
     enabled: isGlobalAdmin
   });
 

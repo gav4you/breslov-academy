@@ -45,7 +45,24 @@ Access to ALL features, including vault-only pages.
 
 ## Multi-Tenant Scoping
 
-**Canonical:** `components/api/scoped.js`
+**Canonical scoped helpers:** `src/components/api/scoped.jsx`
+
+**Scoped entity list:** `src/components/api/scopedEntities.js`
+
+### Runtime Tenancy Guard (v8.8)
+
+Defense-in-depth safety net that auto-injects `school_id` into school-scoped entity reads/writes.
+
+**Installer:** `src/api/base44Client.js` (calls `installTenancyEnforcer()`)
+
+**Guard:** `src/components/api/tenancyEnforcer.js`
+
+**Runtime context:** `src/components/api/tenancyRuntime.js`
+
+**React bridge:** `src/components/api/TenancyBridge.jsx`
+
+**Global admin escape hatches:** `base44.entities.<Entity>.filterGlobal()` and `.listGlobal()`
+(used by NetworkAdmin to query cross-school data).
 
 **Validation:** `/integrity` page
 
@@ -97,14 +114,39 @@ Access to ALL features, including vault-only pages.
 
 ## Critical Files (Never Delete)
 
-- components/config/features.jsx
-- components/api/scoped.js
-- components/hooks/useLessonAccess.js
-- components/protection/ProtectedContent.js
-- components/security/AccessGate.js
-- pages/Vault.jsx
-- pages/Integrity.jsx
+- src/components/config/features.jsx
+- src/components/api/scoped.jsx
+- src/components/api/scopedEntities.js
+- src/components/api/tenancyEnforcer.js
+- src/components/api/tenancyRuntime.js
+- src/components/api/TenancyBridge.jsx
+- src/components/hooks/useLessonAccess.jsx
+- src/components/protection/ProtectedContent.js
+- src/components/security/AccessGate.jsx
+- src/pages/Vault.jsx
+- src/pages/Integrity.jsx
 
 ---
 
-Last Updated: 2025-12-28
+Last Updated: 2025-12-30
+
+---
+
+## v8.9 Recovery Additions
+
+### Runtime warnings
+
+- `src/components/api/tenancyWarnings.js` stores runtime warnings emitted by the tenant guard.
+- If you see warnings in `/integrity`, click “Clear” after investigating the offending code path.
+
+### Static scanning
+
+- `src/components/system/codeScanner.js` runs best-effort static scans on high-risk modules.
+- If a scan trips, treat it as a regression indicator and validate:
+  - Search filters do NOT include lesson content/body
+  - Downloads do NOT expose `file_url` until authorized
+  - No unscoped `.list()` calls on school-owned entities
+
+### Query contracts
+
+- `src/components/api/contracts.js` and `normalizeLimit()` ensure reads remain bounded.
