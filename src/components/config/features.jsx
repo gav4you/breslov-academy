@@ -1,6 +1,6 @@
 // FEATURE REGISTRY - Single Source of Truth
 // DO NOT delete features from this registry. Only add.
-// Last updated: v8.4 (Drip + Certificates + Attribution + Idempotency)
+// Last updated: v9.0 (Quizzes + access hook hardening)
 
 export const FEATURE_AREAS = {
   core: { label: 'Core Learning', color: 'bg-blue-100 text-blue-800', order: 1 },
@@ -23,12 +23,14 @@ export const FEATURES = {
   schoolSearch: { key: 'SchoolSearch', label: 'Search', route: '/schoolsearch', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'Search', order: 5 },
   myProgress: { key: 'MyProgress', label: 'My Progress', route: '/myprogress', area: 'core', audiences: ['student'], icon: 'TrendingUp', vaultOnly: true },
   downloads: { key: 'Downloads', label: 'Downloads', route: '/downloads', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'Download', vaultOnly: true },
+  myQuizzes: { key: 'MyQuizzes', label: 'My Quizzes', route: '/my-quizzes', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'ClipboardCheck', order: 6 },
   
   // TEACHING
   teach: { key: 'Teach', label: 'Teach', route: '/teach', area: 'teach', audiences: ['teacher', 'admin'], icon: 'GraduationCap', order: 1 },
   teachCourse: { key: 'TeachCourse', label: 'Course Builder', route: '/teachcourse', area: 'teach', audiences: ['teacher', 'admin'], icon: 'Edit', hidden: true },
   teachCourseNew: { key: 'TeachCourseNew', label: 'New Course', route: '/teachcoursenew', area: 'teach', audiences: ['teacher', 'admin'], icon: 'Plus', hidden: true },
   teachLesson: { key: 'TeachLesson', label: 'Lesson Editor', route: '/teachlesson', area: 'teach', audiences: ['teacher', 'admin'], icon: 'FileEdit', hidden: true },
+  teachQuizzes: { key: 'TeachQuizzes', label: 'Quizzes', route: '/teach/quizzes', area: 'teach', audiences: ['teacher', 'admin'], icon: 'ClipboardList', order: 3 },
   teachAnalytics: { key: 'TeachAnalytics', label: 'Teaching Analytics', route: '/teachanalytics', area: 'teach', audiences: ['teacher', 'admin'], icon: 'BarChart', order: 2 },
   
   // ADMIN

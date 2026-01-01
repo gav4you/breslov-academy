@@ -61,6 +61,10 @@ import TeachAnalytics from './pages/TeachAnalytics';
 import TeachCourse from './pages/TeachCourse';
 import TeachCourseNew from './pages/TeachCourseNew';
 import TeachLesson from './pages/TeachLesson';
+import TeachQuizzes from './pages/TeachQuizzes';
+import TeachQuizEditor from './pages/TeachQuizEditor';
+import QuizTake from './pages/QuizTake';
+import MyQuizzes from './pages/MyQuizzes';
 import Tournaments from './pages/Tournaments';
 import oauth2callback from './pages/oauth2callback';
 import CertificateVerify from './pages/CertificateVerify';
@@ -145,6 +149,10 @@ export const PAGES = {
     "TeachCourse": TeachCourse,
     "TeachCourseNew": TeachCourseNew,
     "TeachLesson": TeachLesson,
+    "TeachQuizzes": TeachQuizzes,
+    "TeachQuizEditor": TeachQuizEditor,
+    "QuizTake": QuizTake,
+    "MyQuizzes": MyQuizzes,
     "Tournaments": Tournaments,
     "Vault": Vault,
     "oauth2callback": oauth2callback,

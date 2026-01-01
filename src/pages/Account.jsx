@@ -9,6 +9,7 @@ import { User, CreditCard, Award, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { scopedFilter } from '../components/api/scoped';
 import { isSubscriptionActive } from '../components/subscriptions/subscriptionEngine';
+import { isEntitlementActive } from '@/components/utils/entitlements';
 
 export default function Account() {
   const [user, setUser] = useState(null);
@@ -198,7 +199,6 @@ export default function Account() {
             <CardContent>
               <div className="space-y-3">
                 {copyLicenses.map((lic) => {
-                  const { isEntitlementActive } = require('../components/utils/entitlements');
                   const active = isEntitlementActive(lic);
                   
                   return (

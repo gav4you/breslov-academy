@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,12 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Download, FileText, BookOpen, Headphones, Lock } from 'lucide-react';
 import { scopedFilter } from '../components/api/scoped';
+import { isEntitlementActive } from '@/components/utils/entitlements';
 import { toast } from 'sonner';
 
 export default function Downloads() {
   const [user, setUser] = useState(null);
   const [activeSchoolId, setActiveSchoolId] = useState(null);
   const [entitlements, setEntitlements] = useState([]);
+
+  const activeEnts = useMemo(() => (entitlements || []).filter((e) => isEntitlementActive(e)), [entitlements]);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -74,11 +77,7 @@ export default function Downloads() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {downloads.map((download) => {
           const Icon = iconMap[download.type] || FileText;
-          
-          // Import entitlement helper
-          const { isEntitlementActive } = require('../components/utils/entitlements');
-          const activeEnts = entitlements.filter(e => isEntitlementActive(e));
-          
+
           // Check download access (expiry-aware)
           const hasDownloadLicense = activeEnts.some(e => {
             const type = e.type || e.entitlement_type;

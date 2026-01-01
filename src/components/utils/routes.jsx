@@ -1,5 +1,7 @@
 // Route utilities and canonical path helpers
 
+import { createPageUrl } from '@/utils';
+
 /**
  * Create canonical storefront route
  * @param {string} schoolSlug - School slug
@@ -39,8 +41,6 @@ export function getCurrentSchoolSlug() {
  * Maps old createPageUrl usage to new canonical routes where applicable
  */
 export function createPageUrlCompat(pageName, params = {}) {
-  const { createPageUrl } = require('@/utils');
-  
   // If params include slug and target is a storefront page, use canonical
   if (params.slug) {
     const storefrontPages = {
