@@ -1,0 +1,15 @@
+name: Checkout Breslov Academy
+on: [push]
+jobs:
+  checkout:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Main Repo
+        uses: actions/checkout@v4
+
+      - name: Checkout Private Repo
+        uses: actions/checkout@v4
+        with:
+          repository: yeshivabachur/breslov-academy
+          token: ${{ secrets.PAT }}
+          path: breslov-academy   
