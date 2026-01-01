@@ -98,6 +98,12 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
+        {/* Canonical quiz routes (v9.0) */}
+        <Route path="/my-quizzes" element={<Pages.MyQuizzes />} />
+        <Route path="/quiz/:quizId" element={<Pages.QuizTake />} />
+        <Route path="/teach/quizzes" element={<Pages.TeachQuizzes />} />
+        <Route path="/teach/quizzes/new" element={<Pages.TeachQuizEditor />} />
+        <Route path="/teach/quizzes/:quizId" element={<Pages.TeachQuizEditor />} />
       <Route path="/" element={
         <LayoutWrapper currentPageName={mainPageKey}>
           <Suspense fallback={<RouteFallback label="Loading dashboard…" />}>

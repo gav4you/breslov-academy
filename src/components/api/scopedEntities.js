@@ -18,6 +18,7 @@ export const SCHOOL_SCOPED_ENTITIES = [
   'Text', 'CourseReview', 'Discussion', 'ContentReport',
   'ModerationAction', 'SchoolMetricDaily', 'CourseMetricDaily',
   'Assignment', 'Submission', 'Quiz', 'QuizAttempt',
+  'QuizQuestion',
   'Download', 'Bundle', 'SubscriptionPlan', 'PayoutBatch',
   'AnalyticsEvent', 'SubscriptionInvoice', 'Certificate', 'StudySession'
 ];
