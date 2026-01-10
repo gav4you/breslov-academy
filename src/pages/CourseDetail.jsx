@@ -14,7 +14,8 @@ import { getRawEntity } from '@/components/api/tenancyEnforcer';
 import { useSession } from '@/components/hooks/useSession';
 import { isEntitlementActive } from '@/components/utils/entitlements';
 import { toast } from '@/components/ui/use-toast';
-import { tokens } from '@/components/theme/tokens';
+import { tokens, cx } from '@/components/theme/tokens';
+import { CourseDetailSkeleton } from '@/components/ui/SkeletonLoaders';
 
 function uniqStrings(list) {
   const out = [];
@@ -47,7 +48,7 @@ export default function CourseDetail() {
 
   const canTeach = !!isTeacher;
 
-  // Resolve course across schools the user belongs to (handles deep links even when active school differs).
+  // Resolve course across schools
   const { data: resolvedCourse, isLoading: isLoadingCourse } = useQuery({
     queryKey: ['course-resolve', courseId, user?.email, activeSchoolId, (memberships || []).length],
     queryFn: async () => {
@@ -80,14 +81,12 @@ export default function CourseDetail() {
   const course = resolvedCourse?.course || null;
   const courseSchoolId = resolvedCourse?.schoolId || course?.school_id || null;
 
-  // If this course belongs to a different school, switch the active school so the rest
-  // of the app (tenancy enforcer, scoped queries) behaves consistently.
+  // Auto-switch school logic
   useEffect(() => {
     if (!courseSchoolId) return;
     if (!activeSchoolId) return;
     if (String(courseSchoolId) === String(activeSchoolId)) return;
 
-    // Only switch if the user is actually a member of the course's school.
     const ok = (memberships || []).some((m) => String(m.school_id) === String(courseSchoolId));
     if (!ok) return;
 
@@ -102,7 +101,7 @@ export default function CourseDetail() {
         // ignore
       });
      
-  }, [courseSchoolId]);
+  }, [courseSchoolId, activeSchoolId, memberships, changeActiveSchool]);
 
   const effectiveRole = useMemo(() => {
     if (!courseSchoolId) return role;
@@ -110,7 +109,6 @@ export default function CourseDetail() {
     return m?.role || role;
   }, [memberships, courseSchoolId, role]);
 
-  // Legacy subscription tier (kept for backward compatibility)
   const { data: subscription } = useQuery({
     queryKey: ['subscription-legacy', user?.email],
     queryFn: async () => {
@@ -127,7 +125,6 @@ export default function CourseDetail() {
 
   const userTier = String(subscription?.tier || 'free').toLowerCase();
 
-  // Entitlements for the course school (modern access path)
   const { data: entitlements = [] } = useQuery({
     queryKey: ['entitlements', courseSchoolId, user?.email],
     queryFn: () => scopedFilter('Entitlement', courseSchoolId, { user_email: user.email }, '-created_date', 500),
@@ -140,7 +137,6 @@ export default function CourseDetail() {
     if (!course) return false;
     if (['OWNER', 'ADMIN', 'INSTRUCTOR', 'TA'].includes(String(effectiveRole || '').toUpperCase())) return true;
 
-    // Modern access_level model
     if (String(course.access_level || '').toUpperCase() === 'FREE') return true;
     if (['PAID', 'PRIVATE'].includes(String(course.access_level || '').toUpperCase())) {
       const cid = String(course.id);
@@ -224,12 +220,7 @@ export default function CourseDetail() {
   };
 
   if (isLoading || isLoadingCourse) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh]">
-        <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-4" />
-        <p className="text-muted-foreground animate-pulse">Loading course data...</p>
-      </div>
-    );
+    return <CourseDetailSkeleton />;
   }
 
   if (!course) {
@@ -238,8 +229,8 @@ export default function CourseDetail() {
         <div className="bg-muted rounded-full p-6 mb-6">
           <AlertCircle className="w-12 h-12 text-muted-foreground" />
         </div>
-        <h2 className="text-2xl font-bold mb-2">Course Not Found</h2>
-        <p className="text-muted-foreground mb-8 max-w-md">
+        <h2 className={tokens.text.h2}>Course Not Found</h2>
+        <p className={cx(tokens.text.body, "text-muted-foreground mt-2 mb-8 max-w-md")}>
           This course may have been removed or you may not have permission to view it.
         </p>
         <Link to={createPageUrl('Courses')}>
@@ -253,14 +244,14 @@ export default function CourseDetail() {
     <div className={tokens.layout.sectionGap}>
       {/* Back Button */}
       <Link to={createPageUrl('Courses')}>
-        <Button variant="ghost" className="group pl-0 hover:pl-2 transition-all">
+        <Button variant="ghost" className="group pl-0 hover:pl-2 transition-all -ml-2 text-muted-foreground hover:text-foreground">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Courses
         </Button>
       </Link>
 
       {/* Hero Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-slate-900 text-white shadow-2xl">
+      <div className="relative overflow-hidden rounded-3xl bg-slate-900 text-slate-50 shadow-2xl">
         {/* Background Gradient/Pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
@@ -286,7 +277,7 @@ export default function CourseDetail() {
               </div>
 
               <div>
-                <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-300">
+                <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-300 font-serif">
                   {course.title}
                 </h1>
                 {course.title_hebrew && (
@@ -296,7 +287,7 @@ export default function CourseDetail() {
                 )}
               </div>
 
-              <p className="text-lg text-slate-300 leading-relaxed max-w-2xl">
+              <p className="text-lg text-slate-300 leading-relaxed max-w-2xl font-sans">
                 {course.description}
               </p>
 
@@ -326,8 +317,8 @@ export default function CourseDetail() {
 
             {/* Right Column: Progress / CTA */}
             <div className="w-full md:w-80 shrink-0">
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm text-white">
-                <CardContent className="p-6">
+              <div className="bg-white/5 border border-white/10 backdrop-blur-sm text-white rounded-2xl overflow-hidden">
+                <div className="p-6">
                   {hasCourseAccess ? (
                     <div className="space-y-6">
                       <div className="text-center">
@@ -375,8 +366,8 @@ export default function CourseDetail() {
                       </Button>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -391,7 +382,7 @@ export default function CourseDetail() {
           {/* Lessons List */}
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold tracking-tight">Curriculum</h2>
+              <h2 className={tokens.text.h2}>Curriculum</h2>
               <span className="text-sm text-muted-foreground">{lessons.length} lessons</span>
             </div>
 
@@ -405,19 +396,21 @@ export default function CourseDetail() {
                     key={lesson.id}
                     to={canAccess ? createPageUrl(`LessonViewerPremium?id=${lesson.id}`) : '#'}
                     onClick={(e) => !canAccess && e.preventDefault()}
-                    className={`block group relative overflow-hidden rounded-xl border transition-all duration-300 ${
+                    className={cx(
+                      "block group relative overflow-hidden rounded-xl border transition-all duration-300",
                       canAccess 
-                        ? 'bg-card hover:border-primary/50 hover:shadow-md' 
-                        : 'bg-muted/30 border-transparent opacity-70 cursor-not-allowed'
-                    }`}
+                        ? "bg-card hover:border-primary/50 hover:shadow-md" 
+                        : "bg-muted/30 border-transparent opacity-70 cursor-not-allowed"
+                    )}
                   >
                     <div className="p-5 flex items-start gap-4">
                       {/* Status Icon */}
-                      <div className={`mt-1 shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                      <div className={cx(
+                        "mt-1 shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors",
                         status === 'completed' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
                         canAccess ? 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground' :
                         'bg-slate-100 text-slate-400 dark:bg-slate-800'
-                      }`}>
+                      )}>
                         {status === 'completed' ? <CheckCircle className="w-5 h-5" /> : 
                          canAccess ? <Play className="w-4 h-4 ml-0.5" /> : 
                          <Lock className="w-4 h-4" />}
@@ -425,7 +418,7 @@ export default function CourseDetail() {
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-1">
-                          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                          <span className={tokens.text.meta}>
                             Lesson {index + 1}
                           </span>
                           {lesson.is_preview && !hasCourseAccess && (
@@ -435,7 +428,7 @@ export default function CourseDetail() {
                           )}
                         </div>
                         
-                        <h3 className={`text-lg font-semibold mb-1 truncate ${canAccess ? 'group-hover:text-primary' : ''}`}>
+                        <h3 className={cx(tokens.text.h3, "mb-1 truncate", canAccess && "group-hover:text-primary")}>
                           {lesson.title}
                         </h3>
                         
@@ -477,7 +470,7 @@ export default function CourseDetail() {
           
           {/* Quizzes */}
           <div>
-            <h3 className="text-lg font-bold mb-4 flex items-center">
+            <h3 className={cx(tokens.text.h3, "mb-4 flex items-center")}>
               <ClipboardCheck className="w-5 h-5 mr-2 text-primary" />
               Assessments
             </h3>
@@ -489,11 +482,11 @@ export default function CourseDetail() {
                 const score = last ? Number(last.score || 0) : null;
 
                 return (
-                  <Card key={quiz.id} className={`border-none shadow-sm ${access === 'LOCKED' ? 'bg-muted/50' : 'bg-card'}`}>
+                  <Card key={quiz.id} className={cx("border-none shadow-sm", access === 'LOCKED' ? 'bg-muted/50' : tokens.glass.card)}>
                     <CardContent className="p-4">
                       <div className="mb-3">
                         <div className="flex justify-between items-start mb-1">
-                          <h4 className="font-semibold text-sm line-clamp-1">{quiz.title}</h4>
+                          <h4 className="font-semibold text-sm line-clamp-1 text-foreground">{quiz.title}</h4>
                           {access === 'LOCKED' && <Lock className="w-3 h-3 text-muted-foreground" />}
                         </div>
                         {score !== null && (
@@ -530,10 +523,10 @@ export default function CourseDetail() {
                 <CardTitle className="text-base text-indigo-900 dark:text-indigo-300">Instructor Tools</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button size="sm" className="w-full bg-indigo-600 hover:bg-indigo-700" asChild>
+                <Button size="sm" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" asChild>
                   <Link to={`/teach/quizzes?courseId=${courseId}`}>Manage Quizzes</Link>
                 </Button>
-                <Button size="sm" variant="outline" className="w-full border-indigo-200 text-indigo-700 hover:bg-indigo-100" asChild>
+                <Button size="sm" variant="outline" className="w-full border-indigo-200 text-indigo-700 hover:bg-indigo-100 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-900/50" asChild>
                   <Link to={`/teach/analytics?courseId=${courseId}`}>View Analytics</Link>
                 </Button>
               </CardContent>

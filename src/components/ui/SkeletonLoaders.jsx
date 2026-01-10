@@ -74,3 +74,41 @@ export function DashboardSkeleton() {
     </div>
   );
 }
+
+export function CourseDetailSkeleton() {
+  return (
+    <div className={tokens.layout.sectionGap}>
+      {/* Hero Skeleton */}
+      <div className="relative overflow-hidden rounded-3xl bg-muted/20 border border-border/50 h-[400px]">
+        <div className="p-8 md:p-12 h-full flex flex-col justify-center">
+          <Skeleton className="h-6 w-32 mb-4" />
+          <Skeleton className="h-12 w-3/4 mb-4" />
+          <Skeleton className="h-6 w-1/2 mb-8" />
+          <div className="flex gap-4">
+            <Skeleton className="h-10 w-32 rounded-full" />
+            <Skeleton className="h-10 w-32 rounded-full" />
+          </div>
+        </div>
+      </div>
+
+      {/* Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-6">
+          <Skeleton className="h-8 w-48 mb-4" />
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-24 rounded-xl border border-border/50 bg-card/50 flex items-center p-4 gap-4">
+              <Skeleton className="w-12 h-12 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-5 w-1/3" />
+                <Skeleton className="h-4 w-1/4" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="space-y-6">
+          <Skeleton className="h-64 rounded-2xl" />
+        </div>
+      </div>
+    </div>
+  );
+}
