@@ -116,12 +116,7 @@ export default function CourseDetail() {
     queryFn: async () => {
       if (!user?.email) return null;
       try {
-import { scopedFilter } from '@/components/api/scoped';
-
-// ...
-
-// In query
-const subs = await scopedFilter('Subscription', activeSchoolId, { user_email: user.email }, '-created_date', 1);
+        const subs = await scopedFilter('Subscription', activeSchoolId, { user_email: user.email }, '-created_date', 1);
         return subs?.[0] || null;
       } catch {
         return null;

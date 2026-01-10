@@ -7,9 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Clock, CheckCircle, Crown, BookOpen, ArrowRight } from 'lucide-react';
+import { scopedFilter } from '@/components/api/scoped';
 
 export default function LearningPaths() {
-  const [user, setUser] = useState(null);
+  const { user, activeSchoolId } = useSession();
   const [userTier, setUserTier] = useState('free');
 
   useEffect(() => {
@@ -28,11 +29,7 @@ export default function LearningPaths() {
     queryKey: ['subscription', user?.email],
     queryFn: async () => {
       if (!user?.email) return null;
-      import { scopedFilter } from '@/components/api/scoped';
-
-// ...
-
-const subs = await scopedFilter('Subscription', activeSchoolId, { user_email: user.email });
+      const subs = await scopedFilter('Subscription', activeSchoolId, { user_email: user.email });
       return subs[0] || null;
     },
     enabled: !!user?.email
