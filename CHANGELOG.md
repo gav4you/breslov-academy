@@ -2,6 +2,12 @@
 
 All notable changes to the Breslov Academy LMS project.
 
+## [v10.0] - 2026-01-11
+### Major Upgrades
+- **Feature Flags Framework:** Implemented per-school/user feature toggling with Admin UI (`/schoolfeatures`) and `useFeatureFlag` hook.
+- **Integrations Marketplace:** Added a centralized App Store (`/integrations`) for managing third-party connections (Zoom, Discord, Stripe).
+- **Multi-Language Support:** Enabled course authoring in 5+ languages and added student-facing language filters in the catalog.
+
 ## [v9.5] - 2026-01-11
 ### Storefront & Trust
 - **School Landing:** Redesigned public landing pages with modern Hero, Benefits, Testimonials, and FAQ sections.

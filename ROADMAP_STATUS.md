@@ -1,9 +1,16 @@
 # Roadmap Status
 
-**Current Version:** v9.5 (Storefront & Trust)
+**Current Version:** v10.0 (Major Release)
 **Last Updated:** 2026-01-11
 
-## v9.x Milestones (ALL COMPLETE)
+## v10.x Milestones (COMPLETE)
+
+- [x] **v10.0 Major Upgrades**
+    - [x] Feature Flags Framework
+    - [x] Multi-Language Content Authoring
+    - [x] Integrations Marketplace
+
+## v9.x Milestones (COMPLETE)
 
 - [x] **v9.1 Stable Foundation**
     - [x] Portalization (Student/Teacher/Admin split)
@@ -32,7 +39,7 @@
     - [x] Pricing Page (Bundles/Add-ons)
     - [x] Trust Signals & FAQ
 
-## Future Horizons (v10.0+)
+## Future Horizons (v11.0+)
 - **Mobile Native:** Capacitor/React Native wrapper.
 - **AI Tutors:** Real-time conversational agents for Torah study.
 - **VR/AR:** Virtual Beit Midrash experiences.

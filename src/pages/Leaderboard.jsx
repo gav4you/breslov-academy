@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Trophy, Medal, Award, Flame, Target, ChevronUp, ChevronDown } from 'lucide-react';
+import { Trophy, Medal, Flame, Target, ChevronUp } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { tokens, cx } from '@/components/theme/tokens';
 import GamificationLayout from '@/components/gamification/GamificationLayout';

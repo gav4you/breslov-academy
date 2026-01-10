@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Check, ExternalLink, ShieldCheck } from 'lucide-react';
 import { createPageUrl } from '@/utils';
-import { tokens, cx } from '@/components/theme/tokens';
+import { cx } from '@/components/theme/tokens';
 import PageShell from '@/components/ui/PageShell';
 import GlassCard from '@/components/ui/GlassCard';
 import { toast } from 'sonner';

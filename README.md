@@ -1,6 +1,6 @@
 # Breslov Academy LMS
 
-**Version:** 9.5 Storefront & Trust
+**Version:** 10.0 Major Release
 **Architecture:** Multi-Tenant, Portalized, Registry-Driven, Lazy-Loaded
 **Status:** Production Ready (2026-01-11)
 
@@ -10,7 +10,12 @@
 - **[Architecture Map](./docs/REALITY_MAP.md):** Current codebase structure.
 - **[Audit Report](./docs/AUDIT_REPORT_V9_1.md):** Zero-Trust security audit results.
 
-## Key Features (v9.5 Complete)
+## Key Features (v10.0 Complete)
+
+### 🚀 Enterprise Capabilities
+- **Feature Flags:** Decoupled deployment from release. Admins can toggle optional features (AI Tutor, Gamification) via `/schoolfeatures`.
+- **Integrations Marketplace:** Dedicated App Store for connecting Zoom, Discord, Stripe, and more.
+- **Multi-Language Support:** Courses can be authored and filtered by language (English, Hebrew, Spanish, etc.).
 
 ### 🎨 University-Grade Design System
 - **Calm UI:** "Calm" gradients, glassmorphism cards (`GlassCard`), and serif typography for a premium academic feel.
@@ -32,16 +37,12 @@
 - **Tenancy Guard:** Runtime enforcement of `school_id` scoping via `tenancyEnforcer.js`.
 - **Content Protection:** Strict gating of `LOCKED` and `DRIP_LOCKED` materials.
 
-### ⚡ Performance
-- **Lazy Loading:** Route-level code splitting (`React.lazy`) for Admin, Teacher, and Labs portals.
-- **Bundle Optimization:** Critical path (Student Dashboard, Learning) prioritized for fast Time-to-Interactive (TTI).
-
 ## Portal Structure
 - **Public Site:** `/` (Marketing, generic landing)
 - **Storefront:** `/s/:schoolSlug` (Tenant-branded sales pages)
 - **Student Portal:** `/student` (Dashboard, Learning, Quizzes, Social)
 - **Teacher Portal:** `/teacher` (Course Builder, Analytics, Grading)
-- **Admin Portal:** `/admin` (Monetization, Staff, Integrity)
+- **Admin Portal:** `/admin` (Monetization, Staff, Integrity, Settings)
 
 ## Getting Started
 1. **Install:** `npm install`

@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Plus, FileText, CheckCircle, Clock, Users } from 'lucide-react';
+import { BookOpen, Plus, FileText, CheckCircle, Users } from 'lucide-react';
 import { useSession } from '@/components/hooks/useSession';
 import { tokens, cx } from '@/components/theme/tokens';
 import StatCard from '@/components/dashboard/StatCard';

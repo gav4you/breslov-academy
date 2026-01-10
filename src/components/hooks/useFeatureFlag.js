@@ -23,13 +23,11 @@ export function useFeatureFlag(flagKey) {
   }
 
   // 1. Check User Override (e.g. for beta testers)
-  // Assumes user.feature_flags is a JSON object or map
   if (user?.feature_flags && typeof user.feature_flags[flagKey] !== 'undefined') {
     return !!user.feature_flags[flagKey];
   }
 
   // 2. Check School Setting
-  // Assumes activeSchool.feature_flags is a JSON object or map
   if (activeSchool?.feature_flags && typeof activeSchool.feature_flags[flagKey] !== 'undefined') {
     return !!activeSchool.feature_flags[flagKey];
   }
@@ -40,12 +38,30 @@ export function useFeatureFlag(flagKey) {
 
 /**
  * Helper to check multiple flags
+ * Re-implementation to avoid Hook Rules violation.
+ * We must extract the session ONCE and then compute the flags.
  */
 export function useFeatureFlags(flagKeys) {
   const { user, activeSchool } = useSession();
   
   return flagKeys.reduce((acc, key) => {
-    acc[key] = useFeatureFlag(key);
+    const flagDef = FEATURE_FLAGS[key];
+    if (!flagDef) {
+      acc[key] = false;
+      return acc;
+    }
+
+    let val = flagDef.defaultValue;
+
+    if (activeSchool?.feature_flags && typeof activeSchool.feature_flags[key] !== 'undefined') {
+      val = !!activeSchool.feature_flags[key];
+    }
+
+    if (user?.feature_flags && typeof user.feature_flags[key] !== 'undefined') {
+      val = !!user.feature_flags[key];
+    }
+
+    acc[key] = val;
     return acc;
   }, {});
 }

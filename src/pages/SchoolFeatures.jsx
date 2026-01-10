@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from '@/components/hooks/useSession';
 import { FEATURE_FLAGS } from '@/components/config/featureFlags';
 import { scopedUpdate } from '@/components/api/scoped';
