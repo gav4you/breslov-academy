@@ -17,6 +17,9 @@ import { useLessonAccess } from '@/components/hooks/useLessonAccess';
 import { scopedFilter, scopedCreate, scopedUpdate } from '@/components/api/scoped';
 import ProtectedContent from '@/components/protection/ProtectedContent';
 import AccessGate from '@/components/security/AccessGate';
+import { tokens, cx } from '@/components/theme/tokens';
+import { DashboardSkeleton } from '@/components/ui/SkeletonLoaders';
+
 export default function LessonViewer() {
   const { user, activeSchool, activeSchoolId, isLoading } = useSession();
   const [notes, setNotes] = useState('');
@@ -31,7 +34,7 @@ export default function LessonViewer() {
   }, [isLoading, user]);
 
   // Lesson metadata (safe fields only)
-  const { data: lessonMeta } = useQuery({
+  const { data: lessonMeta, isLoading: isLoadingMeta } = useQuery({
     queryKey: ['lesson-meta', lessonId, activeSchoolId],
     queryFn: async () => {
       if (!lessonId || !activeSchoolId) return null;
@@ -65,7 +68,7 @@ export default function LessonViewer() {
   const shouldLoadLesson = access.accessLevel === 'FULL' || access.accessLevel === 'PREVIEW';
 
   // Full lesson payload (only when FULL or PREVIEW)
-  const { data: lesson } = useQuery({
+  const { data: lesson, isLoading: isLoadingLesson } = useQuery({
     queryKey: ['lesson-full', lessonId, activeSchoolId],
     queryFn: async () => {
       const lessons = await scopedFilter('Lesson', activeSchoolId, { id: lessonId });
@@ -77,19 +80,19 @@ export default function LessonViewer() {
 
   const effectiveCourseId = lessonMeta?.course_id || lesson?.course_id;
 
-const { data: course } = useQuery({
-    queryKey: ['course', lesson?.course_id, activeSchoolId],
+  const { data: course, isLoading: isLoadingCourse } = useQuery({
+    queryKey: ['course', effectiveCourseId, activeSchoolId],
     queryFn: async () => {
-      const courses = await scopedFilter('Course', activeSchoolId, { id: lesson.course_id });
+      const courses = await scopedFilter('Course', activeSchoolId, { id: effectiveCourseId });
       return courses[0];
     },
-    enabled: !!lesson?.course_id && !!activeSchoolId
+    enabled: !!effectiveCourseId && !!activeSchoolId
   });
 
   const { data: allLessons = [] } = useQuery({
-    queryKey: ['lessons', lesson?.course_id, activeSchoolId],
-    queryFn: () => scopedFilter('Lesson', activeSchoolId, { course_id: lesson.course_id }, 'order'),
-    enabled: !!lesson?.course_id && !!activeSchoolId
+    queryKey: ['lessons', effectiveCourseId, activeSchoolId],
+    queryFn: () => scopedFilter('Lesson', activeSchoolId, { course_id: effectiveCourseId }, 'order'),
+    enabled: !!effectiveCourseId && !!activeSchoolId
   });
 
   const { data: progress } = useQuery({
@@ -105,23 +108,23 @@ const { data: course } = useQuery({
   });
 
   const { data: discussions = [] } = useQuery({
-    queryKey: ['discussions', lesson?.course_id, lessonId, activeSchoolId],
+    queryKey: ['discussions', effectiveCourseId, lessonId, activeSchoolId],
     queryFn: () => scopedFilter('Discussion', activeSchoolId, { 
-      course_id: lesson.course_id,
+      course_id: effectiveCourseId,
       lesson_id: lessonId 
     }, '-created_date'),
-    enabled: !!lesson?.course_id && !!activeSchoolId
+    enabled: !!effectiveCourseId && !!activeSchoolId
   });
 
   // Access control (computed above)
-const canFetchMaterials = shouldFetchMaterials(access.accessLevel);
-const rawContent = String(lesson?.content || lesson?.content_json || lesson?.text || '');
-const maxChars = access.maxPreviewChars || 1500;
-const contentToShow = (access.accessLevel === 'FULL')
-  ? rawContent
-  : (access.accessLevel === 'PREVIEW')
-    ? (rawContent.slice(0, maxChars) + (rawContent.length > maxChars ? '…' : ''))
-    : '';
+  const canFetchMaterials = shouldFetchMaterials(access.accessLevel);
+  const rawContent = String(lesson?.content || lesson?.content_json || lesson?.text || '');
+  const maxChars = access.maxPreviewChars || 1500;
+  const contentToShow = (access.accessLevel === 'FULL')
+    ? rawContent
+    : (access.accessLevel === 'PREVIEW')
+      ? (rawContent.slice(0, maxChars) + (rawContent.length > maxChars ? '…' : ''))
+      : '';
 
   useEffect(() => {
     if (progress?.notes) {
@@ -140,7 +143,7 @@ const contentToShow = (access.accessLevel === 'FULL')
         return await scopedCreate('UserProgress', activeSchoolId, {
           user_email: user.email,
           lesson_id: lessonId,
-          course_id: lesson.course_id,
+          course_id: effectiveCourseId,
           completed: true,
           progress_percentage: 100
         });
@@ -160,7 +163,7 @@ const contentToShow = (access.accessLevel === 'FULL')
         return await scopedCreate('UserProgress', activeSchoolId, {
           user_email: user.email,
           lesson_id: lessonId,
-          course_id: lesson.course_id,
+          course_id: effectiveCourseId,
           notes: noteContent,
           completed: false,
           progress_percentage: 0
@@ -173,22 +176,27 @@ const contentToShow = (access.accessLevel === 'FULL')
     }
   });
 
-if (access.accessLevel === 'LOCKED' || access.accessLevel === 'DRIP_LOCKED') {
-  return (
-    <AccessGate
-      mode={access.accessLevel}
-      courseId={effectiveCourseId}
-      schoolSlug={activeSchool?.slug}
-      message={access.accessLevel === 'DRIP_LOCKED' ? (access.dripInfo?.countdownLabel || 'This lesson will unlock soon.') : undefined}
-    />
-  );
-}
+  // Render loading state if critical data is missing
+  if (isLoading || isLoadingMeta || isLoadingCourse || (shouldLoadLesson && isLoadingLesson)) {
+    return <DashboardSkeleton />;
+  }
+
+  if (access.accessLevel === 'LOCKED' || access.accessLevel === 'DRIP_LOCKED') {
+    return (
+      <AccessGate
+        mode={access.accessLevel}
+        courseId={effectiveCourseId}
+        schoolSlug={activeSchool?.slug}
+        message={access.accessLevel === 'DRIP_LOCKED' ? (access.dripInfo?.countdownLabel || 'This lesson will unlock soon.') : undefined}
+      />
+    );
+  }
 
   if (!lesson || !course) {
     return (
       <div className="text-center py-20">
-        <BookOpen className="w-16 h-16 text-slate-400 mx-auto mb-4 animate-pulse" />
-        <p className="text-slate-600">Loading lesson...</p>
+        <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4 animate-pulse" />
+        <p className="text-muted-foreground">Loading lesson...</p>
       </div>
     );
   }
@@ -198,52 +206,58 @@ if (access.accessLevel === 'LOCKED' || access.accessLevel === 'DRIP_LOCKED') {
   const nextLesson = currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className={tokens.page.content}>
       {/* Header */}
-      <div>
+      <div className="mb-8">
         <Link to={createPageUrl(`CourseDetail?id=${course.id}`)}>
-          <Button variant="ghost" className="group mb-4">
+          <Button variant="ghost" className="group mb-6 pl-0 hover:pl-2 transition-all text-muted-foreground hover:text-foreground">
             <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
             Back to {course.title}
           </Button>
         </Link>
 
-        <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl p-6 shadow-lg">
-          <p className="text-amber-400 text-sm mb-2">{course.title}</p>
-          <h1 className="text-3xl font-bold text-white mb-2">{lesson.title}</h1>
-          {lesson.title_hebrew && (
-            <h2 className="text-xl text-amber-300" dir="rtl">{lesson.title_hebrew}</h2>
-          )}
-          {access.accessLevel === 'PREVIEW' && (
-            <Badge className="mt-2 bg-amber-500">Preview Mode</Badge>
-          )}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 text-white p-8 shadow-xl">
+          <div className="relative z-10">
+            <p className="text-amber-400 font-medium mb-2 uppercase tracking-wide text-xs">{course.title}</p>
+            <h1 className={cx(tokens.text.h1, "text-white mb-2")}>{lesson.title}</h1>
+            {lesson.title_hebrew && (
+              <h2 className="text-2xl text-amber-300 font-serif mt-2" dir="rtl">{lesson.title_hebrew}</h2>
+            )}
+            {access.accessLevel === 'PREVIEW' && (
+              <Badge className="mt-4 bg-amber-500 hover:bg-amber-600 text-black border-none">Preview Mode</Badge>
+            )}
+          </div>
+          {/* Decorative background element */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
         </div>
       </div>
 
       {/* Video/Audio Player */}
       {lesson.video_url && access.accessLevel !== 'LOCKED' && (
-        <AdvancedVideoPlayer
-          src={lesson.video_url}
-          onTimeUpdate={(time) => {
-            // Auto-save progress
-            if (progress) {
-              scopedUpdate('UserProgress', progress.id, {
-                last_position_seconds: Math.floor(time)
-              }, activeSchoolId, true);
-            }
-          }}
-          onEnded={() => {
-            // Auto-complete lesson when video ends
-            if (!progress?.completed) {
-              markCompleteMutation.mutate();
-            }
-          }}
-          initialTime={progress?.last_position_seconds || 0}
-        />
+        <div className="mb-10 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-border/50">
+          <AdvancedVideoPlayer
+            src={lesson.video_url}
+            onTimeUpdate={(time) => {
+              // Auto-save progress
+              if (progress) {
+                scopedUpdate('UserProgress', progress.id, {
+                  last_position_seconds: Math.floor(time)
+                }, activeSchoolId, true);
+              }
+            }}
+            onEnded={() => {
+              // Auto-complete lesson when video ends
+              if (!progress?.completed) {
+                markCompleteMutation.mutate();
+              }
+            }}
+            initialTime={progress?.last_position_seconds || 0}
+          />
+        </div>
       )}
 
       {lesson.audio_url && !lesson.video_url && (
-        <div className="bg-slate-100 rounded-xl p-6">
+        <div className="mb-10 bg-muted/30 rounded-2xl p-6 border border-border/50">
           <audio controls className="w-full" src={lesson.audio_url}>
             Your browser does not support audio playback.
           </audio>
@@ -259,15 +273,15 @@ if (access.accessLevel === 'LOCKED' || access.accessLevel === 'DRIP_LOCKED') {
           canCopy={access.canCopy}
           canDownload={access.canDownload}
         >
-          <div className="bg-white rounded-xl shadow-md p-8">
-            <ReactMarkdown className="prose prose-slate max-w-none prose-headings:font-serif">
+          <div className={cx(tokens.glass.card, "p-8 md:p-12 mb-10")}>
+            <ReactMarkdown className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-serif prose-p:leading-relaxed prose-lg">
               {contentToShow}
             </ReactMarkdown>
             {access.accessLevel === 'PREVIEW' && (
-              <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-center">
-                <p className="text-amber-800 mb-3">Preview limit reached</p>
+              <div className="mt-8 p-6 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/50 rounded-xl text-center backdrop-blur-sm">
+                <p className="text-amber-800 dark:text-amber-200 font-medium mb-4">Preview limit reached</p>
                 <Link to={createPageUrl(`CourseSales?slug=${activeSchool?.slug}&courseId=${course.id}`)}>
-                  <Button className="bg-amber-500 hover:bg-amber-600">
+                  <Button className="bg-amber-500 hover:bg-amber-600 text-white font-bold shadow-lg">
                     Purchase Full Access
                   </Button>
                 </Link>
@@ -277,83 +291,96 @@ if (access.accessLevel === 'LOCKED' || access.accessLevel === 'DRIP_LOCKED') {
         </ProtectedContent>
       )}
 
+      {/* Action Bar: Complete & Nav */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12 py-8 border-t border-b border-border/40">
+        <div className="w-full md:w-auto">
+          {!progress?.completed ? (
+            <Button
+              onClick={() => markCompleteMutation.mutate()}
+              disabled={markCompleteMutation.isPending}
+              className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold h-12 px-8 text-base shadow-md hover:shadow-lg transition-all"
+            >
+              <CheckCircle className="w-5 h-5 mr-2" />
+              Mark as Complete
+            </Button>
+          ) : (
+            <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-6 py-3 rounded-full border border-green-200 dark:border-green-900">
+              <CheckCircle className="w-5 h-5" />
+              <span className="font-semibold">Lesson Completed</span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3 w-full md:w-auto justify-center">
+          {previousLesson ? (
+            <Link to={createPageUrl(`LessonViewer?id=${previousLesson.id}`)}>
+              <Button variant="outline" className="group">
+                <ChevronLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+                Previous
+              </Button>
+            </Link>
+          ) : (
+            <Button variant="outline" disabled className="opacity-50">
+              <ChevronLeft className="w-4 h-4 mr-2" />
+              Previous
+            </Button>
+          )}
+
+          {nextLesson ? (
+            <Link to={createPageUrl(`LessonViewer?id=${nextLesson.id}`)}>
+              <Button className="group bg-primary text-primary-foreground hover:bg-primary/90">
+                Next Lesson
+                <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+          ) : (
+            <Link to={createPageUrl(`CourseDetail?id=${course.id}`)}>
+              <Button className="bg-green-600 hover:bg-green-700 text-white">
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Finish Course
+              </Button>
+            </Link>
+          )}
+        </div>
+      </div>
+
       {/* Discussion Section */}
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <DiscussionThread
-          discussions={discussions || []}
-          courseId={lesson.course_id}
-          lessonId={lessonId}
-          user={user}
-        />
+      <div className="mb-10">
+        <h3 className={cx(tokens.text.h3, "mb-6")}>Discussion</h3>
+        <div className={tokens.glass.card}>
+          <div className="p-6">
+            <DiscussionThread
+              discussions={discussions || []}
+              courseId={effectiveCourseId}
+              lessonId={lessonId}
+              user={user}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Notes Section */}
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <h3 className="font-bold text-lg text-slate-900 mb-3">Personal Study Notes</h3>
-        <Textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Write your thoughts, questions, and insights here..."
-          className="min-h-32 mb-3"
-        />
-        <Button 
-          onClick={() => saveNotesMutation.mutate(notes)}
-          variant="outline"
-          disabled={saveNotesMutation.isPending}
-        >
-          Save Notes
-        </Button>
-      </div>
-
-      {/* Complete Button */}
-      {!progress?.completed && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
-          <Button
-            onClick={() => markCompleteMutation.mutate()}
-            disabled={markCompleteMutation.isPending}
-            className="bg-green-600 hover:bg-green-700 text-white font-semibold px-8"
-          >
-            <CheckCircle className="w-5 h-5 mr-2" />
-            Mark as Complete
-          </Button>
+      <div className="mb-20">
+        <h3 className={cx(tokens.text.h3, "mb-6")}>Personal Notes</h3>
+        <div className={tokens.glass.card}>
+          <div className="p-6">
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Capture your insights..."
+              className="min-h-[150px] mb-4 bg-background/50 border-border/50 focus:bg-background transition-colors resize-y"
+            />
+            <div className="flex justify-end">
+              <Button 
+                onClick={() => saveNotesMutation.mutate(notes)}
+                variant="outline"
+                disabled={saveNotesMutation.isPending}
+              >
+                Save Notes
+              </Button>
+            </div>
+          </div>
         </div>
-      )}
-
-      {progress?.completed && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
-          <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
-          <p className="text-green-900 font-semibold">Lesson Completed!</p>
-        </div>
-      )}
-
-      {/* Navigation */}
-      <div className="flex justify-between items-center pt-6 border-t">
-        {previousLesson ? (
-          <Link to={createPageUrl(`LessonViewer?id=${previousLesson.id}`)}>
-            <Button variant="outline" className="group">
-              <ChevronLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-              Previous Lesson
-            </Button>
-          </Link>
-        ) : (
-          <div />
-        )}
-
-        {nextLesson ? (
-          <Link to={createPageUrl(`LessonViewer?id=${nextLesson.id}`)}>
-            <Button className="bg-blue-600 hover:bg-blue-700 group">
-              Next Lesson
-              <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </Link>
-        ) : (
-          <Link to={createPageUrl(`CourseDetail?id=${course.id}`)}>
-            <Button className="bg-green-600 hover:bg-green-700">
-              <CheckCircle className="w-4 h-4 mr-2" />
-              Course Complete
-            </Button>
-          </Link>
-        )}
       </div>
     </div>
   );
