@@ -7,7 +7,9 @@ import useStorefrontContext from '@/components/hooks/useStorefrontContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Star, Crown } from 'lucide-react';
+import { CheckCircle, Star, Crown, ShieldCheck, Zap } from 'lucide-react';
+import { tokens, cx } from '@/components/theme/tokens';
+import { DashboardSkeleton } from '@/components/ui/SkeletonLoaders';
 
 export default function SchoolPricing() {
   const [user, setUser] = useState(null);
@@ -38,7 +40,7 @@ export default function SchoolPricing() {
     }
   }, [school, user]);
 
-  const { data: school } = useQuery({
+  const { data: school, isLoading: isLoadingSchool } = useQuery({
     queryKey: ['school-by-slug', slug],
     queryFn: async () => {
       const schools = await base44.entities.School.filter({ slug });
@@ -61,72 +63,86 @@ export default function SchoolPricing() {
   const subscriptions = offers.filter(o => o.offer_type === 'SUBSCRIPTION');
   const addOns = offers.filter(o => o.offer_type === 'ADDON');
 
+  if (isLoadingSchool) {
+    return <DashboardSkeleton />;
+  }
+
   if (!school) {
     return (
       <div className="min-h-screen bg-slate-50 py-20 px-4 text-center">
-        <p className="text-slate-600">Loading pricing...</p>
+        <p className="text-slate-600">School not found</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 py-20 px-4">
+      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 py-20 px-4 text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold text-white mb-4">Choose Your Plan</h1>
-          <p className="text-xl text-slate-300">
-            Invest in your learning journey with {school.name}
+          <h1 className={cx(tokens.text.h1, "text-white mb-4")}>Choose Your Plan</h1>
+          <p className={cx(tokens.text.lead, "text-slate-300 max-w-2xl mx-auto")}>
+            Invest in your spiritual growth with {school.name}. Simple pricing, lifetime value.
           </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-12 space-y-16">
+      <div className={cx(tokens.page.inner, "py-12 space-y-20")}>
+        
         {/* Subscriptions (Best Value) */}
         {subscriptions.length > 0 && (
-          <div>
-            <div className="text-center mb-8">
-              <Badge className="bg-amber-500 text-white mb-3">
-                <Crown className="w-3 h-3 mr-1" />
-                Best Value
+          <section>
+            <div className="text-center mb-10">
+              <Badge className="bg-amber-500 hover:bg-amber-600 text-white mb-3 border-none px-3 py-1">
+                <Crown className="w-3 h-3 mr-1.5" />
+                Recommended
               </Badge>
-              <h2 className="text-3xl font-bold mb-2">Unlimited Access</h2>
-              <p className="text-slate-600">All courses, one simple price</p>
+              <h2 className={tokens.text.h2}>Unlimited Access</h2>
+              <p className={cx(tokens.text.body, "text-muted-foreground mt-2")}>
+                Unlock the entire library with a simple monthly plan.
+              </p>
             </div>
-            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            
+            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
               {subscriptions.map((sub) => (
-                <Card key={sub.id} className="border-2 border-amber-300 shadow-xl hover:shadow-2xl transition-all">
+                <Card key={sub.id} className={cx(
+                  tokens.glass.card, 
+                  "border-2 border-amber-500/30 shadow-xl relative overflow-hidden transform hover:-translate-y-1 transition-transform duration-300"
+                )}>
+                  <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-amber-400 to-amber-600" />
                   <CardHeader>
                     <CardTitle className="text-2xl">{sub.name}</CardTitle>
                     <CardDescription>{sub.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="mb-6">
-                      <span className="text-4xl font-bold">${(sub.price_cents / 100).toFixed(0)}</span>
-                      <span className="text-slate-600">/month</span>
+                    <div className="mb-8 flex items-baseline">
+                      <span className="text-4xl font-bold tracking-tight text-foreground">
+                        ${(sub.price_cents / 100).toFixed(0)}
+                      </span>
+                      <span className="text-muted-foreground ml-1 font-medium">/month</span>
                     </div>
-                    <ul className="space-y-3">
+                    <ul className="space-y-4">
                       <li className="flex items-start">
-                        <CheckCircle className="w-5 h-5 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm">Access all courses</span>
+                        <CheckCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">Access to all current courses</span>
                       </li>
                       <li className="flex items-start">
-                        <CheckCircle className="w-5 h-5 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
                         <span className="text-sm">New courses added monthly</span>
                       </li>
                       <li className="flex items-start">
-                        <CheckCircle className="w-5 h-5 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm">Download materials</span>
+                        <CheckCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">Premium community access</span>
                       </li>
                       <li className="flex items-start">
-                        <CheckCircle className="w-5 h-5 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm">Certificate of completion</span>
+                        <CheckCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">Cancel anytime</span>
                       </li>
                     </ul>
                   </CardContent>
                   <CardFooter>
                     <Link to={createPageUrl(`SchoolCheckout?slug=${slug}&offerId=${sub.id}`)} className="w-full">
-                      <Button size="lg" className="w-full bg-amber-600 hover:bg-amber-700">
+                      <Button size="lg" className="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold shadow-lg">
                         Start Subscription
                       </Button>
                     </Link>
@@ -134,128 +150,137 @@ export default function SchoolPricing() {
                 </Card>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
         {/* Bundles */}
         {bundleOffers.length > 0 && (
-          <div>
-            <div className="text-center mb-8">
-              <Badge className="bg-blue-500 text-white mb-3">
-                Popular Choice
+          <section>
+            <div className="text-center mb-10">
+              <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 mb-3 border-none">
+                <Zap className="w-3 h-3 mr-1.5" />
+                Best Savings
               </Badge>
-              <h2 className="text-3xl font-bold mb-2">Course Bundles</h2>
-              <p className="text-slate-600">Save when you bundle multiple courses</p>
+              <h2 className={tokens.text.h2}>Course Bundles</h2>
+              <p className={cx(tokens.text.body, "text-muted-foreground mt-2")}>
+                Master a topic deeply and save by bundling.
+              </p>
             </div>
-            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            
+            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {bundleOffers.map((bundle) => (
-                <Card key={bundle.id} className="border-blue-200 hover:shadow-xl transition-all">
+                <div key={bundle.id} className={cx(tokens.glass.card, tokens.glass.cardHover, "flex flex-col h-full")}>
                   <CardHeader>
-                    <CardTitle>{bundle.name}</CardTitle>
-                    <CardDescription>{bundle.description}</CardDescription>
+                    <CardTitle className="text-xl">{bundle.name}</CardTitle>
+                    <CardDescription className="line-clamp-2">{bundle.description}</CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="flex-1">
                     <div className="mb-4">
-                      <span className="text-3xl font-bold">${(bundle.price_cents / 100).toFixed(2)}</span>
+                      <span className="text-3xl font-bold text-foreground">
+                        ${(bundle.price_cents / 100).toFixed(2)}
+                      </span>
                     </div>
-                    <p className="text-sm text-slate-600 mb-4">
-                      Multiple courses included
+                    <p className="text-sm text-muted-foreground">
+                      Includes multiple courses for a complete learning path.
                     </p>
                   </CardContent>
-                  <CardFooter>
+                  <CardFooter className="mt-auto">
                     <Link to={createPageUrl(`SchoolCheckout?slug=${slug}&offerId=${bundle.id}`)} className="w-full">
-                      <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700">
+                      <Button className="w-full" variant="outline">
                         Get Bundle
                       </Button>
                     </Link>
                   </CardFooter>
-                </Card>
+                </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
         {/* Individual Courses */}
         {courseOffers.length > 0 && (
-          <div>
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-2">Individual Courses</h2>
-              <p className="text-slate-600">Lifetime access, one-time payment</p>
+          <section>
+            <div className="text-center mb-10">
+              <h2 className={tokens.text.h2}>Individual Courses</h2>
+              <p className={cx(tokens.text.body, "text-muted-foreground mt-2")}>
+                Lifetime access with a one-time payment.
+              </p>
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               {courseOffers.map((course) => (
-                <Card key={course.id} className="hover:shadow-lg transition-all">
+                <div key={course.id} className={cx(tokens.glass.card, tokens.glass.cardHover, "flex flex-col h-full")}>
                   <CardHeader>
-                    <CardTitle className="text-lg">{course.name}</CardTitle>
-                    <CardDescription className="line-clamp-2">{course.description}</CardDescription>
+                    <CardTitle className="text-lg leading-tight">{course.name}</CardTitle>
+                    <CardDescription className="line-clamp-2 mt-1">{course.description}</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <div className="mb-4">
-                      <span className="text-2xl font-bold">${(course.price_cents / 100).toFixed(2)}</span>
-                    </div>
+                  <CardContent className="flex-1">
+                    <span className="text-2xl font-bold text-foreground">
+                      ${(course.price_cents / 100).toFixed(2)}
+                    </span>
                   </CardContent>
-                  <CardFooter>
+                  <CardFooter className="mt-auto">
                     <Link to={createPageUrl(`SchoolCheckout?slug=${slug}&offerId=${course.id}`)} className="w-full">
-                      <Button size="lg" variant="outline" className="w-full">
+                      <Button className="w-full bg-primary/90 hover:bg-primary">
                         Enroll Now
                       </Button>
                     </Link>
                   </CardFooter>
-                </Card>
+                </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
         {/* Add-ons */}
         {addOns.length > 0 && (
-          <div>
+          <section className="bg-muted/30 rounded-2xl p-8 border border-border/50">
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold mb-2">Add-On Licenses</h2>
-              <p className="text-slate-600 text-sm">Enhance your purchased courses</p>
+              <h2 className={tokens.text.h3}>Additional Resources</h2>
+              <p className="text-sm text-muted-foreground mt-1">Enhance your learning with these add-ons</p>
             </div>
             <div className="grid md:grid-cols-2 gap-4 max-w-3xl mx-auto">
               {addOns.map((addon) => (
-                <Card key={addon.id} className="border-slate-200">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-semibold">{addon.name}</p>
-                        <p className="text-xs text-slate-600">{addon.description}</p>
-                      </div>
-                      <Link to={createPageUrl(`SchoolCheckout?slug=${slug}&offerId=${addon.id}`)}>
-                        <Button size="sm">
-                          ${(addon.price_cents / 100).toFixed(2)}
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div key={addon.id} className="bg-background border border-border/60 rounded-lg p-4 flex items-center justify-between hover:border-primary/30 transition-colors">
+                  <div>
+                    <p className="font-semibold text-foreground">{addon.name}</p>
+                    <p className="text-xs text-muted-foreground">{addon.description}</p>
+                  </div>
+                  <Link to={createPageUrl(`SchoolCheckout?slug=${slug}&offerId=${addon.id}`)}>
+                    <Button size="sm" variant="secondary">
+                      ${(addon.price_cents / 100).toFixed(2)}
+                    </Button>
+                  </Link>
+                </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
         {/* Trust Section */}
-        <div className="bg-white rounded-xl shadow-md p-8 text-center max-w-3xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto pt-8">
           <div className="flex items-center justify-center space-x-1 mb-4">
             {[1, 2, 3, 4, 5].map((i) => (
               <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
             ))}
           </div>
-          <p className="text-slate-700 mb-2">
-            Join thousands of students learning with {school.name}
+          <p className="text-lg font-medium text-foreground mb-2">
+            "This platform transformed my learning experience."
           </p>
-          <p className="text-sm text-slate-500">
-            Money-back guarantee • Secure payment • Instant access
-          </p>
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <ShieldCheck className="w-4 h-4 text-green-500" />
+            <span>Secure Checkout</span>
+            <span>•</span>
+            <span>Instant Access</span>
+            <span>•</span>
+            <span>Satisfaction Guarantee</span>
+          </div>
         </div>
 
-        {/* CTA */}
-        <div className="text-center">
+        {/* Final CTA */}
+        <div className="text-center pb-8">
           <Link to={createPageUrl(`SchoolCourses?slug=${slug}`)}>
-            <Button size="lg" variant="outline">
-              Browse All Courses
+            <Button variant="link" className="text-muted-foreground hover:text-foreground">
+              Continue Browsing Catalog &rarr;
             </Button>
           </Link>
         </div>
