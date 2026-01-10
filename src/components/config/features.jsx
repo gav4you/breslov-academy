@@ -88,7 +88,8 @@ export const FEATURES = {
   
   // SYSTEM
   schoolSelect: { key: 'SchoolSelect', label: 'School Select', route: '/schoolselect', area: 'system', audiences: ['student', 'teacher', 'admin'], icon: 'Building', hidden: true },
-  integrations: { key: 'Integrations', label: 'Integrations', route: '/integrations', area: 'system', audiences: ['student', 'teacher', 'admin'], icon: 'Plug' },
+  integrationsMarketplace: { key: 'IntegrationsMarketplace', label: 'App Store', route: '/integrations', area: 'system', audiences: ['admin'], icon: 'Plug' },
+  integrationDetail: { key: 'IntegrationDetail', label: 'App Details', route: '/integrations/:appId', area: 'system', audiences: ['admin'], hidden: true },
   portfolio: { key: 'Portfolio', label: 'Profile', route: '/portfolio', area: 'system', audiences: ['student', 'teacher', 'admin'], icon: 'User' },
   vault: { key: 'Vault', label: 'Vault', route: '/vault', area: 'system', audiences: ['student', 'teacher', 'admin'], icon: 'Archive' },
   oauth2callback: { key: 'oauth2callback', label: 'OAuth Callback', route: '/oauth2callback', area: 'system', audiences: ['public'], hidden: true },

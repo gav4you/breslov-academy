@@ -84,7 +84,8 @@ const CertificateVerify = React.lazy(() => import('./pages/CertificateVerify'));
 const SchoolNew = React.lazy(() => import('./pages/SchoolNew'));
 const SchoolJoin = React.lazy(() => import('./pages/SchoolJoin'));
 const SchoolSelect = React.lazy(() => import('./pages/SchoolSelect'));
-const Integrations = React.lazy(() => import('./pages/Integrations'));
+const IntegrationsMarketplace = React.lazy(() => import('./pages/IntegrationsMarketplace'));
+const IntegrationDetail = React.lazy(() => import('./pages/IntegrationDetail'));
 const Portfolio = React.lazy(() => import('./pages/Portfolio'));
 const Vault = React.lazy(() => import('./pages/Vault'));
 const Downloads = React.lazy(() => import('./pages/Downloads'));
@@ -114,7 +115,8 @@ export const PAGES = {
     "Feed": Feed,
     "Forums": Forums,
     "HabitTracker": HabitTracker,
-    "Integrations": Integrations,
+    "IntegrationsMarketplace": IntegrationsMarketplace,
+    "IntegrationDetail": IntegrationDetail,
     "Integrity": Integrity,
     "LanguageLearning": LanguageLearning,
     "Languages": Languages,
