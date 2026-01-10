@@ -1,52 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Plus, FileText } from 'lucide-react';
-import { canCreateCourses } from '@/components/utils/permissions';
+import { BookOpen, Plus, FileText, CheckCircle, Clock, Users } from 'lucide-react';
+import { useSession } from '@/components/hooks/useSession';
+import { tokens, cx } from '@/components/theme/tokens';
+import StatCard from '@/components/dashboard/StatCard';
 
 export default function Teach() {
-  const [user, setUser] = useState(null);
-  const [activeSchoolId, setActiveSchoolId] = useState(null);
-  const [membership, setMembership] = useState(null);
+  const { user, activeSchoolId, isTeacher, isLoading } = useSession();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const currentUser = await base44.auth.me();
-        setUser(currentUser);
-        
-        const schoolId = localStorage.getItem('active_school_id');
-        setActiveSchoolId(schoolId);
-
-        if (schoolId) {
-          const memberships = await base44.entities.SchoolMembership.filter({
-            user_email: currentUser.email,
-            school_id: schoolId
-          });
-          
-          if (memberships.length > 0) {
-            setMembership(memberships[0]);
-            
-            // Check permission
-            if (!canCreateCourses(memberships[0].role)) {
-              navigate(createPageUrl('Dashboard'));
-            }
-          } else {
-            navigate(createPageUrl('Dashboard'));
-          }
-        }
-      } catch (error) {
-        base44.auth.redirectToLogin();
-      }
-    };
-    loadUser();
-  }, []);
+  // Redirect if not authorized (handled mostly by router/portal, but extra safety here)
+  if (!isLoading && !isTeacher) {
+    // Optionally redirect or show unauthorized
+  }
 
   const { data: myCourses = [] } = useQuery({
     queryKey: ['my-courses', user?.email, activeSchoolId],
@@ -86,88 +58,84 @@ export default function Teach() {
   const publishedCourses = myCourses.filter(c => c.status === 'published');
 
   return (
-    <div className="space-y-8">
+    <div className={tokens.layout.sectionGap}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-900 to-purple-900 rounded-xl p-8 shadow-xl">
-        <div className="flex items-center justify-between">
-          <div className="text-white">
-            <h1 className="text-4xl font-bold mb-2">Instructor Dashboard</h1>
-            <p className="text-indigo-200 text-lg">
-              Manage your courses and connect with students
+      <div className={cx(tokens.glass.card, "p-8 md:p-12 overflow-hidden bg-gradient-to-r from-indigo-900 to-purple-900 border-none")}>
+        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="text-center md:text-left text-white">
+            <h1 className={cx(tokens.text.h1, "text-white")}>Instructor Dashboard</h1>
+            <p className="text-indigo-100 text-lg mt-2 max-w-xl">
+              Manage your courses, track student progress, and create new learning experiences.
             </p>
           </div>
           <Link to={createPageUrl('TeachCourseNew')}>
-            <Button className="bg-white text-indigo-900 hover:bg-indigo-50" size="lg">
+            <Button className="bg-white text-indigo-900 hover:bg-indigo-50 font-semibold shadow-lg" size="lg">
               <Plus className="w-5 h-5 mr-2" />
               Create Course
             </Button>
           </Link>
         </div>
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none" />
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Total Courses</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{myCourses.length}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Published</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-green-600">{publishedCourses.length}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Drafts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-amber-600">{draftCourses.length}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Total Students</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-blue-600">-</div>
-            <p className="text-xs text-slate-500 mt-1">Coming soon</p>
-          </CardContent>
-        </Card>
+      <div className={cx("grid grid-cols-1 md:grid-cols-4", tokens.layout.gridGap)}>
+        <StatCard
+          icon={BookOpen}
+          label="Total Courses"
+          value={myCourses.length}
+          color="text-indigo-600 dark:text-indigo-400"
+          bg="bg-indigo-100 dark:bg-indigo-900/20"
+        />
+        <StatCard
+          icon={CheckCircle}
+          label="Published"
+          value={publishedCourses.length}
+          color="text-green-600 dark:text-green-400"
+          bg="bg-green-100 dark:bg-green-900/20"
+        />
+        <StatCard
+          icon={FileText}
+          label="Drafts"
+          value={draftCourses.length}
+          color="text-amber-600 dark:text-amber-400"
+          bg="bg-amber-100 dark:bg-amber-900/20"
+        />
+        <StatCard
+          icon={Users}
+          label="Total Students"
+          value="-"
+          color="text-blue-600 dark:text-blue-400"
+          bg="bg-blue-100 dark:bg-blue-900/20"
+        />
       </div>
 
       {/* Draft Courses */}
       {draftCourses.length > 0 && (
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">Drafts Needing Attention</h2>
+          <h2 className={cx(tokens.text.h2, "mb-4")}>Drafts Needing Attention</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {draftCourses.map((course) => (
-              <Card key={course.id}>
-                <CardContent className="p-6">
+              <div key={course.id} className={cx(tokens.glass.card, tokens.glass.cardHover)}>
+                <div className="p-6">
                   <div className="flex items-start justify-between mb-3">
-                    <h3 className="font-bold text-lg">{course.title}</h3>
-                    <Badge variant="secondary">Draft</Badge>
+                    <h3 className="font-bold text-lg text-foreground">{course.title}</h3>
+                    <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                      Draft
+                    </Badge>
                   </div>
-                  <p className="text-slate-600 text-sm mb-4 line-clamp-2">
-                    {course.description}
+                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                    {course.description || 'No description provided.'}
                   </p>
                   <Link to={createPageUrl(`TeachCourse?id=${course.id}`)}>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className="w-full">
                       <FileText className="w-4 h-4 mr-2" />
                       Continue Editing
                     </Button>
                   </Link>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -175,60 +143,70 @@ export default function Teach() {
 
       {/* All Courses */}
       <div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-4">My Courses</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <h2 className={cx(tokens.text.h2, "mb-4")}>My Courses</h2>
+        <div className={cx("grid grid-cols-1 md:grid-cols-3", tokens.layout.gridGap)}>
           {myCourses.map((course) => (
-            <Card key={course.id} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-0">
-                {course.cover_image_url && (
-                  <img 
-                    src={course.cover_image_url} 
-                    alt={course.title}
-                    className="w-full h-40 object-cover rounded-t-lg"
-                  />
-                )}
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-bold text-lg">{course.title}</h3>
-                    <Badge variant={course.status === 'published' ? 'default' : 'secondary'}>
+            <Link key={course.id} to={createPageUrl(`TeachCourse?id=${course.id}`)} className="group block h-full">
+              <div className={cx(tokens.glass.card, tokens.glass.cardHover, "h-full flex flex-col overflow-hidden")}>
+                <div className="relative h-40 bg-muted">
+                  {course.cover_image_url ? (
+                    <img 
+                      src={course.cover_image_url} 
+                      alt={course.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500/10 to-purple-500/10">
+                      <BookOpen className="w-10 h-10 text-indigo-300" />
+                    </div>
+                  )}
+                  <div className="absolute top-3 right-3">
+                    <Badge variant={course.status === 'published' ? 'default' : 'secondary'} className="shadow-sm">
                       {course.status}
                     </Badge>
                   </div>
-                  <p className="text-slate-600 text-sm mb-4 line-clamp-2">
+                </div>
+                
+                <div className="p-6 flex-1 flex flex-col">
+                  <h3 className={cx(tokens.text.h3, "mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1")}>
+                    {course.title}
+                  </h3>
+                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2 flex-1">
                     {course.description}
                   </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-500">
-                      {course.category}
+                  
+                  <div className="flex items-center justify-between pt-4 border-t border-border/50">
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      {course.category || 'General'}
                     </span>
-                    <Link to={createPageUrl(`TeachCourse?id=${course.id}`)}>
-                      <Button size="sm">Manage</Button>
-                    </Link>
+                    <Button size="sm" variant="ghost" className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 -mr-2">
+                      Manage
+                    </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Link>
           ))}
         </div>
 
         {myCourses.length === 0 && (
-          <Card>
-            <CardContent className="text-center py-12">
-              <BookOpen className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">
-                No courses yet
-              </h3>
-              <p className="text-slate-600 mb-6">
-                Create your first course to start teaching
-              </p>
-              <Link to={createPageUrl('TeachCourseNew')}>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Course
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+          <div className={cx(tokens.glass.card, "text-center py-16 border-2 border-dashed border-border/50")}>
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+              <BookOpen className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              No courses yet
+            </h3>
+            <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+              Create your first course to start teaching and sharing your knowledge.
+            </p>
+            <Link to={createPageUrl('TeachCourseNew')}>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Course
+              </Button>
+            </Link>
+          </div>
         )}
       </div>
     </div>
