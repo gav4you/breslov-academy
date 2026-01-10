@@ -12,7 +12,8 @@ import {
   ChevronDown, 
   Archive,
   Bell,
-  Search
+  Search,
+  Settings
 } from 'lucide-react';
 
 import IconButton from '@/components/ui/IconButton';
@@ -178,7 +179,7 @@ export default function PortalLayout({ children, currentPageName, audienceOverri
       <div className="flex-1 flex overflow-hidden">
         
         {/* Sidebar: Desktop */}
-        <aside className="hidden md:block w-72 border-r border-border bg-muted/30 overflow-y-auto">
+        <aside className="hidden md:block w-72 border-r border-border/60 bg-muted/10 overflow-y-auto">
           <div className="p-4">
             <PortalSidebar currentPageName={currentPageName} audience={userAudience} />
           </div>
@@ -186,19 +187,19 @@ export default function PortalLayout({ children, currentPageName, audienceOverri
 
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto relative bg-background scroll-smooth">
-          <div className="mx-auto max-w-6xl p-4 sm:p-6 lg:p-8">
+          <div className={tokens.page.content}>
             {children}
           </div>
           
           {/* Footer inside content area for scroll behavior */}
-          <footer className="mt-auto border-t border-border/40 py-12 px-8">
+          <footer className="mt-auto border-t border-border/40 py-12 px-8 bg-muted/5">
             <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
               <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
                 © {new Date().getFullYear()} Breslov Academy. Spreading the light of Rebbe Nachman.
               </p>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <Link to="/terms" className="hover:underline underline-offset-4">Terms</Link>
-                <Link to="/privacy" className="hover:underline underline-offset-4">Privacy</Link>
+                <Link to="/terms" className="hover:underline underline-offset-4 hover:text-foreground">Terms</Link>
+                <Link to="/privacy" className="hover:underline underline-offset-4 hover:text-foreground">Privacy</Link>
               </div>
             </div>
           </footer>
