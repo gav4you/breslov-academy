@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { useSession } from '@/components/hooks/useSession';
+import { useIsNative } from '@/hooks/use-mobile';
 import { 
   BookOpen, 
   Menu, 
@@ -54,6 +55,8 @@ export default function PortalLayout({ children, currentPageName, audienceOverri
     changeActiveSchool,
   } = useSession();
 
+  const isNative = useIsNative();
+
   const handleSchoolChange = async (schoolId) => {
     await changeActiveSchool(schoolId);
   };
@@ -65,7 +68,10 @@ export default function PortalLayout({ children, currentPageName, audienceOverri
     <div className={cx(tokens.page.outer, "min-h-screen flex flex-col bg-background")}>
       
       {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
+      <header className={cx(
+        "sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md",
+        isNative ? "pt-safe-top" : ""
+      )}>
         <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between gap-4">
             
