@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Trophy, Star, Target, Flame } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Trophy, Star, Target, Flame, Lock } from 'lucide-react';
+import { tokens, cx } from '@/components/theme/tokens';
+import GamificationLayout from '@/components/gamification/GamificationLayout';
 import AchievementBadge from '@/components/gamification/AchievementBadge';
+import { DashboardSkeleton } from '@/components/ui/SkeletonLoaders';
 
 export default function Achievements() {
   const [user, setUser] = useState(null);
@@ -20,11 +22,15 @@ export default function Achievements() {
     loadUser();
   }, []);
 
-  const { data: achievements = [] } = useQuery({
+  const { data: achievements = [], isLoading } = useQuery({
     queryKey: ['achievements', user?.email],
     queryFn: () => base44.entities.Achievement.filter({ user_email: user.email }, '-earned_date'),
     enabled: !!user?.email
   });
+
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
 
   const totalPoints = achievements.reduce((sum, a) => sum + (a.points || 0), 0);
 
@@ -44,111 +50,83 @@ export default function Achievements() {
     { type: 'night_owl', name: 'Night Owl', description: 'Study after 10 PM', points: 20 }
   ];
 
-  const earnedBadges = achievements.map(a => a.badge_type);
-  const locked = allBadges.filter(b => !earnedBadges.includes(b.type));
+  const earnedTypes = achievements.map(a => a.badge_type);
+  const locked = allBadges.filter(b => !earnedTypes.includes(b.type));
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-amber-900 to-orange-900 rounded-2xl p-8 shadow-xl">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Trophy className="w-8 h-8 text-white" />
+    <GamificationLayout
+      title="Achievements"
+      subtitle="Track your milestones and collect badges as you master new topics."
+    >
+      <div className="space-y-12">
+        {/* Stats Grid */}
+        <div className={cx("grid grid-cols-1 md:grid-cols-4", tokens.layout.gridGap)}>
+          {[
+            { label: 'Badges Earned', value: achievements.length, icon: Trophy, color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/20' },
+            { label: 'Total Points', value: totalPoints, icon: Star, color: 'text-blue-600', bg: 'bg-blue-100 dark:bg-blue-900/20' },
+            { label: 'Completion', value: `${Math.round((achievements.length / allBadges.length) * 100)}%`, icon: Target, color: 'text-purple-600', bg: 'bg-purple-100 dark:bg-purple-900/20' },
+            { label: 'Current Streak', value: '7 Days', icon: Flame, color: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-900/20' }
+          ].map((stat, i) => (
+            <div key={i} className={cx(tokens.glass.card, "p-6 flex items-center gap-4")}>
+              <div className={cx("w-12 h-12 rounded-xl flex items-center justify-center", stat.bg)}>
+                <stat.icon className={cx("w-6 h-6", stat.color)} />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{stat.label}</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-4xl font-bold text-white">Achievements</h1>
-              <p className="text-amber-200 text-lg mt-1">
-                Track your learning milestones
-              </p>
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="text-5xl font-bold text-white">{totalPoints}</div>
-            <div className="text-amber-200">Total Points</div>
-          </div>
+          ))}
         </div>
-      </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-          <CardContent className="p-6 text-center">
-            <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Trophy className="w-6 h-6 text-white" />
-            </div>
-            <div className="text-3xl font-bold text-slate-900">{achievements.length}</div>
-            <div className="text-sm text-slate-600">Badges Earned</div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200">
-          <CardContent className="p-6 text-center">
-            <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Star className="w-6 h-6 text-white" />
-            </div>
-            <div className="text-3xl font-bold text-slate-900">{totalPoints}</div>
-            <div className="text-sm text-slate-600">Total Points</div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
-          <CardContent className="p-6 text-center">
-            <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Target className="w-6 h-6 text-white" />
-            </div>
-            <div className="text-3xl font-bold text-slate-900">
-              {Math.round((achievements.length / allBadges.length) * 100)}%
-            </div>
-            <div className="text-sm text-slate-600">Progress</div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-orange-50 to-red-50 border-orange-200">
-          <CardContent className="p-6 text-center">
-            <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Flame className="w-6 h-6 text-white" />
-            </div>
-            <div className="text-3xl font-bold text-slate-900">7</div>
-            <div className="text-sm text-slate-600">Day Streak</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Earned Badges */}
-      {achievements.length > 0 && (
+        {/* Earned Badges */}
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-6">Your Badges</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {achievements.map((achievement) => (
-              <AchievementBadge key={achievement.id} achievement={achievement} size="md" />
+          <h2 className={cx(tokens.text.h2, "mb-6 border-b border-border/50 pb-2")}>Collection</h2>
+          {achievements.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+              {achievements.map((achievement) => (
+                <div key={achievement.id} className="group relative">
+                  <div className={cx(tokens.glass.card, tokens.glass.cardHover, "p-6 flex flex-col items-center text-center h-full")}>
+                    <div className="transform group-hover:scale-110 transition-transform duration-300">
+                      <AchievementBadge achievement={achievement} size="lg" />
+                    </div>
+                    <h3 className="font-bold text-sm mt-4 mb-1">{achievement.badge_name || achievement.badge_type}</h3>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(achievement.earned_date).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-muted/20 rounded-xl border border-dashed border-border">
+              <Trophy className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+              <p className="text-muted-foreground">No badges earned yet. Start learning to unlock your first one!</p>
+            </div>
+          )}
+        </div>
+
+        {/* Locked Badges */}
+        <div>
+          <h2 className={cx(tokens.text.h2, "mb-6 border-b border-border/50 pb-2 opacity-75")}>
+            Available ({locked.length})
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 opacity-75">
+            {locked.map((badge) => (
+              <div key={badge.type} className={cx(tokens.glass.card, "p-6 flex flex-col items-center text-center h-full bg-muted/10")}>
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4 ring-4 ring-background">
+                  <Lock className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <h3 className="font-bold text-sm text-foreground mb-1">{badge.name}</h3>
+                <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{badge.description}</p>
+                <div className="mt-auto pt-2 border-t border-border/50 w-full">
+                  <span className="text-xs font-bold text-primary">+{badge.points} XP</span>
+                </div>
+              </div>
             ))}
           </div>
         </div>
-      )}
-
-      {/* Locked Badges */}
-      <div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-6">
-          Available Achievements ({locked.length} remaining)
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {locked.map((badge) => (
-            <Card key={badge.type} className="opacity-60 hover:opacity-80 transition-opacity">
-              <CardContent className="p-6 text-center">
-                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-slate-300 flex items-center justify-center">
-                  <Trophy className="w-8 h-8 text-slate-500" />
-                </div>
-                <h4 className="font-bold text-slate-900 text-sm mb-1">{badge.name}</h4>
-                <p className="text-slate-600 text-xs line-clamp-2">{badge.description}</p>
-                <div className="mt-2 text-xs text-slate-500">
-                  +{badge.points} points
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
       </div>
-    </div>
+    </GamificationLayout>
   );
 }
