@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { User, CreditCard, Award, Users } from 'lucide-react';
+import { CreditCard, Award, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { scopedFilter, scopedUpdate } from '@/components/api/scoped';
 import { isSubscriptionActive } from '@/components/subscriptions/subscriptionEngine';

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { Accessibility, Type, Moon } from 'lucide-react';
+import { Accessibility, Type } from 'lucide-react';
 
 export default function AccessibilityMenu() {
   const [fontSize, setFontSize] = useState(100);

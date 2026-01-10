@@ -6,7 +6,7 @@ import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Clock, CheckCircle, Crown, BookOpen, ArrowRight } from 'lucide-react';
+import { MapPin, Clock, Crown, BookOpen, ArrowRight } from 'lucide-react';
 import { scopedFilter } from '@/components/api/scoped';
 
 export default function LearningPaths() {

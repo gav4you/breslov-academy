@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Lock, ShoppingCart, Eye, Clock, ShieldAlert } from 'lucide-react';
+import { ShoppingCart, Eye, Clock, ShieldAlert } from 'lucide-react';
 import { tokens, cx } from '@/components/theme/tokens';
 
 export default function AccessGate({ 

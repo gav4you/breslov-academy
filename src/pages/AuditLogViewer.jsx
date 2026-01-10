@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { FileText, Shield } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import { scopedFilter } from '@/components/api/scoped';
 import { isSchoolAdmin } from '@/components/auth/roles';
 

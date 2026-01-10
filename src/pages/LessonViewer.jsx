@@ -4,10 +4,6 @@ import { useSession } from '@/components/hooks/useSession';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, CheckCircle, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react';
 import DiscussionThread from '@/components/learning/DiscussionThread';
-import AITutor from '@/components/ai/AITutor';
-import TranscriptViewer from '@/components/video/TranscriptViewer';
-import Whiteboard from '@/components/collaboration/Whiteboard';
-import OfflineMode from '@/components/mobile/OfflineMode';
 import AdvancedVideoPlayer from '@/components/video/AdvancedVideoPlayer';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -127,18 +123,7 @@ const contentToShow = (access.accessLevel === 'FULL')
     ? (rawContent.slice(0, maxChars) + (rawContent.length > maxChars ? '…' : ''))
     : '';
 
-if (access.accessLevel === 'LOCKED' || access.accessLevel === 'DRIP_LOCKED') {
-  return (
-    <AccessGate
-      mode={access.accessLevel}
-      courseId={effectiveCourseId}
-      schoolSlug={activeSchool?.slug}
-      message={access.accessLevel === 'DRIP_LOCKED' ? (access.dripInfo?.countdownLabel || 'This lesson will unlock soon.') : undefined}
-    />
-  );
-}
-
-useEffect(() => {
+  useEffect(() => {
     if (progress?.notes) {
       setNotes(progress.notes);
     }
@@ -187,6 +172,17 @@ useEffect(() => {
       toast.success('Notes saved!');
     }
   });
+
+if (access.accessLevel === 'LOCKED' || access.accessLevel === 'DRIP_LOCKED') {
+  return (
+    <AccessGate
+      mode={access.accessLevel}
+      courseId={effectiveCourseId}
+      schoolSlug={activeSchool?.slug}
+      message={access.accessLevel === 'DRIP_LOCKED' ? (access.dripInfo?.countdownLabel || 'This lesson will unlock soon.') : undefined}
+    />
+  );
+}
 
   if (!lesson || !course) {
     return (

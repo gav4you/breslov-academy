@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Circle, Flame } from 'lucide-react';
+import { CheckCircle, Flame } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function HabitTracker() {

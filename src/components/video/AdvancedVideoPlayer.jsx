@@ -2,8 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { 
-  Play, Pause, Volume2, VolumeX, Maximize, Settings, 
-  SkipBack, SkipForward, Rewind, FastForward 
+  Play, Pause, Volume2, VolumeX, Maximize, Settings, Rewind, FastForward 
 } from 'lucide-react';
 import {
   DropdownMenu,

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Sparkles, TrendingUp, Star } from 'lucide-react';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import { Sparkles, Star } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import CourseCard from '@/components/courses/CourseCard';
 

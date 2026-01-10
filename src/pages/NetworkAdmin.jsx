@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Building2, Users, DollarSign, Plus } from 'lucide-react';
+import { Building2, Users, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { createPageUrl } from '@/utils';
 import VirtualizedList from '@/components/system/VirtualizedList';
@@ -145,22 +145,6 @@ export default function NetworkAdmin() {
     }
   });
 
-  if (!isGlobalAdmin) {
-    return (
-      <div className="max-w-2xl mx-auto px-4 py-20 text-center">
-        <Card>
-          <CardContent className="p-12">
-            <Building2 className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Global Admin Required</h2>
-            <p className="text-slate-600">
-              This page is only accessible to network administrators
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   const totalRevenue = allTransactions.reduce((sum, t) => sum + (t.amount_cents || 0), 0);
 
   // Precompute per-school aggregates for O(1) lookups during render.
@@ -181,6 +165,22 @@ export default function NetworkAdmin() {
     }
     return map;
   }, [allTransactions]);
+
+  if (!isGlobalAdmin) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-20 text-center">
+        <Card>
+          <CardContent className="p-12">
+            <Building2 className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-2">Global Admin Required</h2>
+            <p className="text-slate-600">
+              This page is only accessible to network administrators
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">

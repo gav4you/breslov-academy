@@ -6,7 +6,7 @@ import { createPageUrl } from '@/utils';
 import useStorefrontContext from '@/components/hooks/useStorefrontContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Star, BookOpen, Users, ArrowRight } from 'lucide-react';
+import { Star, BookOpen, Users } from 'lucide-react';
 import SchoolHero from '@/components/storefront/SchoolHero';
 import CourseCard from '@/components/courses/CourseCard';
 import { tokens, cx } from '@/components/theme/tokens';

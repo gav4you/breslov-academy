@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
-import { BookOpen, GraduationCap, Users, Menu, X, LogOut, User, Plug, Beaker, ChevronDown, Settings, BookMarked, Search, Archive } from 'lucide-react';
+import { BookOpen, Menu, X, LogOut, User, Plug, Beaker, ChevronDown, BookMarked, Archive } from 'lucide-react';
 import { canCreateCourses } from '@/components/utils/permissions';
 import { useSession } from '@/components/hooks/useSession';
 import IconButton from '@/components/ui/IconButton';
@@ -14,7 +14,7 @@ import NotificationCenter from '@/components/notifications/NotificationCenter';
 import SchoolSwitcher from '@/components/school/SchoolSwitcher';
 import CommandPalette from '@/components/navigation/CommandPalette';
 import PortalSidebar from '@/portals/shared/PortalSidebar';
-import { FEATURES, getNavGroupsForAudience } from '@/components/config/features';
+import { getNavGroupsForAudience } from '@/components/config/features';
 
 export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

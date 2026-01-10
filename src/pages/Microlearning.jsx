@@ -3,8 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Clock, CheckCircle } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Microlearning() {

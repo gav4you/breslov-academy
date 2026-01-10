@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
-import { Trash2, Copy, Archive } from 'lucide-react';
+import { Trash2, Archive } from 'lucide-react';
 
 export default function BulkOperations({ items, type, onComplete }) {
   const [selected, setSelected] = useState([]);

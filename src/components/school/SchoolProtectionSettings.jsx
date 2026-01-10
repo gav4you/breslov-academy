@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, Eye, Lock, DollarSign } from 'lucide-react';
+import { Shield, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 
 const PRESETS = {

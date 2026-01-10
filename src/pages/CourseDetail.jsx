@@ -14,7 +14,7 @@ import { getRawEntity } from '@/components/api/tenancyEnforcer';
 import { useSession } from '@/components/hooks/useSession';
 import { isEntitlementActive } from '@/components/utils/entitlements';
 import { toast } from '@/components/ui/use-toast';
-import { tokens, cx } from '@/components/theme/tokens';
+import { tokens } from '@/components/theme/tokens';
 
 function uniqStrings(list) {
   const out = [];
@@ -101,7 +101,7 @@ export default function CourseDetail() {
       .catch(() => {
         // ignore
       });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [courseSchoolId]);
 
   const effectiveRole = useMemo(() => {

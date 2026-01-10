@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Users, Briefcase, LinkedinIcon, Award } from 'lucide-react';
+import { Users, LinkedinIcon } from 'lucide-react';
 
 export default function AlumniNetwork() {
   const [user, setUser] = useState(null);

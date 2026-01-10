@@ -5,7 +5,6 @@
 export * from '../config/features';
 
 // Legacy FEATURES export (adapter)
-import { FEATURES as CANONICAL_FEATURES } from '@/components/config/features';
 export const FEATURES_OLD = {
   // Core Learning (Everyone)
   dashboard: {

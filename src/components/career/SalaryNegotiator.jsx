@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { DollarSign, TrendingUp, Award } from 'lucide-react';
+import { DollarSign, TrendingUp } from 'lucide-react';
 
 export default function SalaryNegotiator() {
   const [offer, setOffer] = useState('');

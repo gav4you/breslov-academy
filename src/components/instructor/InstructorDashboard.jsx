@@ -2,8 +2,6 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, DollarSign, Star, TrendingUp, Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
 
 export default function InstructorDashboard({ instructor, courses, analytics }) {
   const totalStudents = analytics.reduce((sum, a) => sum + (a.total_students || 0), 0);

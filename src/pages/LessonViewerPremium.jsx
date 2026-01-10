@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, ChevronLeft, ChevronRight, CheckCircle, BookOpen } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -20,7 +20,7 @@ import { useLessonAccess } from '@/components/hooks/useLessonAccess';
 import { shouldFetchMaterials } from '@/components/materials/materialsEngine';
 import ProtectedContent from '@/components/protection/ProtectedContent';
 import AccessGate from '@/components/security/AccessGate';
-import { tokens, cx } from '@/components/theme/tokens';
+import { tokens } from '@/components/theme/tokens';
 
 export default function LessonViewerPremium() {
   const { user, activeSchool, activeSchoolId, isLoading } = useSession();

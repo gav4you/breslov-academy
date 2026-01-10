@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Heart, MessageCircle, Share2, Send } from 'lucide-react';
+import { Heart, MessageCircle, Send } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Feed() {

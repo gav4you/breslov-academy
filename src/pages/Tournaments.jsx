@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, Medal, Users } from 'lucide-react';
+import { Trophy, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Tournaments() {

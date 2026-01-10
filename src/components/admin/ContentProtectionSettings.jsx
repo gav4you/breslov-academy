@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Shield, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function ContentProtectionSettings({ schoolId, user }) {

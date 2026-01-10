@@ -6,7 +6,7 @@ import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Plus, Users, TrendingUp, FileText } from 'lucide-react';
+import { BookOpen, Plus, FileText } from 'lucide-react';
 import { canCreateCourses } from '@/components/utils/permissions';
 
 export default function Teach() {

@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Users, Video, CheckCircle } from 'lucide-react';
+import { Calendar, Clock, Users, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Events() {

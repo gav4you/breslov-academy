@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RotateCcw, Volume2, CheckCircle, XCircle } from 'lucide-react';
+import { Volume2, CheckCircle, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function FlashcardPractice({ vocabulary, onComplete }) {

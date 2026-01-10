@@ -4,9 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Shield, Eye, EyeOff, Trash2 } from 'lucide-react';
+import { Shield, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function SchoolModeration({ school, user, membership }) {

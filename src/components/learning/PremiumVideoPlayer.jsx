@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { Badge } from '@/components/ui/badge';
-import { Play, Pause, Volume2, VolumeX, SkipForward, SkipBack, Bookmark as BookmarkIcon, Settings } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, SkipForward, SkipBack, Settings } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function PremiumVideoPlayer({ lesson, progress, user, accessLevel = 'FULL', maxPreviewSeconds = 90, onProgressUpdate }) {

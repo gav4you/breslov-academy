@@ -52,7 +52,7 @@ export default function VirtualizedList({
     const schedule = () => {
       if (cancelled) return;
       if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-        // eslint-disable-next-line no-undef
+         
         window.requestIdleCallback(
           () => {
             if (cancelled) return;
@@ -75,7 +75,7 @@ export default function VirtualizedList({
       cancelled = true;
       if (rafRef.current) window.cancelAnimationFrame(rafRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [canGrow, chunkSize, minIntervalMs]);
 
   const visibleItems = useMemo(() => safeItems.slice(0, visibleCount), [safeItems, visibleCount]);

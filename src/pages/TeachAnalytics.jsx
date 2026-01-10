@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { scopedFilter } from '@/components/api/scoped';
 import { useSession } from '@/components/hooks/useSession';
 import { useQuery } from '@tanstack/react-query';

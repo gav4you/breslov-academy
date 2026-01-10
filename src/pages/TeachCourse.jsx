@@ -1,13 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { createPageUrl } from '@/utils';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ArrowLeft, Settings as SettingsIcon, Users, DollarSign, BookOpen, Eye } from 'lucide-react';
-import { toast } from 'sonner';
 import TeachCourseCurriculum from '@/components/instructor/TeachCourseCurriculum';
 import TeachCoursePricing from '@/components/instructor/TeachCoursePricing';
 import TeachCourseStudents from '@/components/instructor/TeachCourseStudents';

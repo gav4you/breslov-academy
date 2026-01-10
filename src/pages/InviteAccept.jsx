@@ -7,7 +7,7 @@ import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, Mail, Building2 } from 'lucide-react';
+import { XCircle, Mail, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function InviteAccept() {

@@ -10,7 +10,6 @@ import { createPageUrl } from '@/utils';
 import StatCard from '@/components/dashboard/StatCard';
 import CourseCard from '@/components/courses/CourseCard';
 import CourseRecommendations from '@/components/ai/CourseRecommendations';
-import LearningInsights from '@/components/insights/LearningInsights';
 import AnnouncementsPanel from '@/components/announcements/AnnouncementsPanel';
 
 export default function Dashboard() {

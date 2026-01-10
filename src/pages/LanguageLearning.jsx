@@ -6,7 +6,7 @@ import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Plus, TrendingUp } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 export default function LanguageLearning() {
   const [user, setUser] = useState(null);
