@@ -133,6 +133,7 @@ export default function OAuth2Callback() {
         setMessage('OAuth token exchange requires backend function or app connector. Please use Base44 app connectors for Google services instead of manual OAuth.');
         return;
         
+        /* 
         // Token exchange code removed for security - use app connectors instead
         
         // Step 4: Calculate token expiration
@@ -172,6 +173,7 @@ export default function OAuth2Callback() {
         setTimeout(() => {
           window.location.href = '/';
         }, 2000);
+        */
 
       } catch (error) {
         console.error('OAuth error:', error);
