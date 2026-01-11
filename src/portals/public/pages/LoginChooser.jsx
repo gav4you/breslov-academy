@@ -30,6 +30,16 @@ export default function LoginChooser() {
             <Link to="/login/teacher">Continue as teacher</Link>
           </Button>
         </div>
+
+        <div className="rounded-xl border border-slate-200 p-6">
+          <h2 className="text-xl font-medium">Admin</h2>
+          <p className="mt-2 text-sm text-slate-600">
+            Configure your school, staff, settings, and storefront.
+          </p>
+          <Button asChild variant="outline" className="mt-4 w-full">
+            <Link to="/login/admin">Continue as admin</Link>
+          </Button>
+        </div>
       </div>
     </div>
   );

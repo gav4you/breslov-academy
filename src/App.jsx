@@ -20,6 +20,7 @@ import PublicFAQ from '@/portals/public/pages/PublicFAQ';
 import LoginChooser from '@/portals/public/pages/LoginChooser';
 import LoginStudent from '@/portals/public/pages/LoginStudent';
 import LoginTeacher from '@/portals/public/pages/LoginTeacher';
+import LoginAdmin from '@/portals/public/pages/LoginAdmin';
 import SignupChooser from '@/portals/public/pages/SignupChooser';
 import SignupStudent from '@/portals/public/pages/SignupStudent';
 import SignupTeacher from '@/portals/public/pages/SignupTeacher';
@@ -58,6 +59,7 @@ function App() {
                 <Route path="login" element={<LoginChooser />} />
                 <Route path="login/student" element={<LoginStudent />} />
                 <Route path="login/teacher" element={<LoginTeacher />} />
+                <Route path="login/admin" element={<LoginAdmin />} />
 
                 {/* Dedicated signups (v9.1 spec) */}
                 <Route path="signup" element={<SignupChooser />} />

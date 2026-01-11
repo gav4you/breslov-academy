@@ -62,6 +62,7 @@ export const FEATURES = {
   loginChooserPublic: { key: 'LoginChooserPublic', label: 'Login', route: '/login', area: 'marketing', audiences: ['public'], hidden: true },
   loginStudentPublic: { key: 'LoginStudentPublic', label: 'Student Login', route: '/login/student', area: 'marketing', audiences: ['public'], hidden: true },
   loginTeacherPublic: { key: 'LoginTeacherPublic', label: 'Teacher Login', route: '/login/teacher', area: 'marketing', audiences: ['public'], hidden: true },
+  loginAdminPublic: { key: 'LoginAdminPublic', label: 'Admin Login', route: '/login/admin', area: 'marketing', audiences: ['public'], hidden: true },
 
   legalPrivacy: { key: 'LegalPrivacy', label: 'Privacy Policy', route: '/privacy', aliases: ['/legal/privacy'], area: 'marketing', audiences: ['public'], hidden: true },
   legalTerms: { key: 'LegalTerms', label: 'Terms of Service', route: '/terms', aliases: ['/legal/terms'], area: 'marketing', audiences: ['public'], hidden: true },
