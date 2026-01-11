@@ -11,6 +11,7 @@ export const SessionProvider = ({ children }) => {
   const [memberships, setMemberships] = useState([]);
   const [activeSchool, setActiveSchool] = useState(null);
   const [activeSchoolId, setActiveSchoolId] = useState(null);
+  const [activeSchoolSlug, setActiveSchoolSlug] = useState(null);
   const [activeSchoolSource, setActiveSchoolSource] = useState(null); // localStorage | preference | firstMembership | manual
   const [role, setRole] = useState(null);
   const [audience, setAudience] = useState('student');
@@ -30,6 +31,7 @@ export const SessionProvider = ({ children }) => {
         setMemberships([]);
         setActiveSchool(null);
         setActiveSchoolId(null);
+        setActiveSchoolSlug(null);
         setActiveSchoolSource(null);
         setRole(null);
         setAudience('student');
@@ -49,8 +51,16 @@ export const SessionProvider = ({ children }) => {
       setMemberships(userMemberships);
 
       // Load active school (localStorage -> persisted preference -> first membership)
-      let preferredSchoolId = localStorage.getItem('active_school_id');
-      let preferredSource = preferredSchoolId ? 'localStorage' : null;
+      let preferredSchoolId = null;
+      let preferredSource = null;
+      try {
+        preferredSchoolId = localStorage.getItem('active_school_id');
+        preferredSource = preferredSchoolId ? 'localStorage' : null;
+      } catch (e) {
+        preferredSchoolId = null;
+        preferredSource = null;
+      }
+
       if (!preferredSchoolId) {
         try {
           const prefs = await base44.entities.UserSchoolPreference.filter({
@@ -58,17 +68,36 @@ export const SessionProvider = ({ children }) => {
           });
           if (prefs?.[0]?.active_school_id) {
             preferredSchoolId = prefs[0].active_school_id;
+            preferredSource = 'preference';
           }
         } catch (e) {
           // optional entity in some workspaces
         }
       }
+
+      const membershipIds = new Set(
+        (userMemberships || []).map((m) => m?.school_id).filter(Boolean)
+      );
+
+      if (preferredSchoolId && membershipIds.size > 0 && !membershipIds.has(preferredSchoolId)) {
+        preferredSchoolId = null;
+        preferredSource = null;
+      }
+
       if (!preferredSchoolId && userMemberships.length > 0) {
         preferredSchoolId = userMemberships[0].school_id;
+        preferredSource = 'firstMembership';
       }
+
+      setActiveSchoolSource(preferredSource);
+
       if (preferredSchoolId) {
-        localStorage.setItem('active_school_id', preferredSchoolId);
-        await loadActiveSchool(preferredSchoolId, userMemberships);
+        try {
+          localStorage.setItem('active_school_id', preferredSchoolId);
+        } catch (e) {
+          // ignore storage failures
+        }
+        await loadActiveSchool(preferredSchoolId, userMemberships, preferredSource);
 
         // Reconcile subscriptions (best effort, background)
         try {
@@ -80,6 +109,10 @@ export const SessionProvider = ({ children }) => {
         } catch (e) {
           console.warn('Subscription reconciliation failed:', e);
         }
+      } else {
+        setActiveSchool(null);
+        setActiveSchoolId(null);
+        setActiveSchoolSlug(null);
       }
     } catch (error) {
       console.error('Session load error:', error);
@@ -87,6 +120,7 @@ export const SessionProvider = ({ children }) => {
       setMemberships([]);
       setActiveSchool(null);
       setActiveSchoolId(null);
+      setActiveSchoolSlug(null);
       setActiveSchoolSource(null);
       setRole(null);
       setAudience('student');
@@ -96,12 +130,16 @@ export const SessionProvider = ({ children }) => {
     }
   };
 
-  const loadActiveSchool = async (schoolId, userMemberships = memberships) => {
+  const loadActiveSchool = async (schoolId, userMemberships = memberships, source = activeSchoolSource) => {
     try {
       const schools = await base44.entities.School.filter({ id: schoolId });
       if (schools[0]) {
         setActiveSchool(schools[0]);
         setActiveSchoolId(schoolId);
+        setActiveSchoolSlug(schools[0].slug || null);
+        if (source) {
+          setActiveSchoolSource(source);
+        }
         
         // Determine role and audience
         const membership = userMemberships.find(m => m.school_id === schoolId);
@@ -135,6 +173,10 @@ export const SessionProvider = ({ children }) => {
           
           setAudience(finalAudience);
         }
+      } else {
+        setActiveSchool(null);
+        setActiveSchoolId(null);
+        setActiveSchoolSlug(null);
       }
     } catch (error) {
       console.error('Load active school error:', error);
@@ -142,9 +184,12 @@ export const SessionProvider = ({ children }) => {
   };
 
   const changeActiveSchool = async (schoolId) => {
-    localStorage.setItem('active_school_id', schoolId);
-    setActiveSchoolSource('manual');
-    await loadActiveSchool(schoolId);
+    try {
+      localStorage.setItem('active_school_id', schoolId);
+    } catch (e) {
+      // ignore storage failures
+    }
+    await loadActiveSchool(schoolId, memberships, 'manual');
     
     // Update preference
     try {
@@ -173,11 +218,13 @@ export const SessionProvider = ({ children }) => {
     memberships,
     activeSchool,
     activeSchoolId,
+    activeSchoolSlug,
     activeSchoolSource,
-    needsSchoolSelection: memberships.length > 1 && activeSchoolSource === 'firstMembership',
+    needsSchoolSelection: memberships.length > 1 && (!activeSchoolId || activeSchoolSource === 'firstMembership'),
     role,
     audience,
     isLoading,
+    isAuthenticated: !!user,
     isAdmin: audience === 'admin' || isGlobalAdmin,
     isTeacher: audience === 'teacher' || audience === 'admin' || isGlobalAdmin,
     isStudent: audience === 'student',
