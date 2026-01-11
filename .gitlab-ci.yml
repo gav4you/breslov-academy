@@ -1,63 +1,6 @@
-# GitLab CI/CD for Breslov Academy v10.0
-# Reference: _specpack/CI_CD_PIPELINE.md
-
-stages:
-  - install
-  - test
-  - build
-  - release
-
-variables:
-  NODE_VERSION: '20'
-
-cache:
-  paths:
-    - node_modules/
-
-install_dependencies:
-  stage: install
-  image: node:$NODE_VERSION
-  script:
-    - npm install --no-audit --no-fund
-  artifacts:
-    paths:
-      - node_modules/
-    expire_in: 1h
-
-lint_and_typecheck:
-  stage: test
-  image: node:$NODE_VERSION
-  dependencies:
-    - install_dependencies
-  script:
-    - npm run lint
-    - npm run typecheck
-
-build_app:
-  stage: build
-  image: node:$NODE_VERSION
-  dependencies:
-    - install_dependencies
-  script:
-    - npm run build
-  artifacts:
-    paths:
-      - dist/
-    expire_in: 1 week
-
-# Manual release job
-release_zip:
-  stage: release
-  image: node:$NODE_VERSION
-  dependencies:
-    - build_app
-  script:
-    - echo "Generating release artifact..."
-    - apt-get update && apt-get install -y zip
-    - zip -r breslov-academy-v10.0-build.zip dist/ package.json README.md
-  artifacts:
-    paths:
-      - breslov-academy-v10.0-build.zip
-  when: manual
-  only:
-    - main
+include:
+  - local: .gitlab/ci/kit.rules.yml
+  - local: .gitlab/ci/kit.ci-node-windows.yml
+  - local: .gitlab/ci/kit.security-basics.yml
+  # Optional (requires Linux runner):
+  # - local: .gitlab/ci/kit.releases.yml
