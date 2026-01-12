@@ -69,11 +69,11 @@ export function isDomainAllowed(policy, email, verifiedDomains = []) {
     }
   }
 
-  if (policy.require_domain_match === true) {
+  if (policy.require_domain_match === true && allowedDomains.length === 0) {
     return false;
   }
 
-  if (policy.allow_personal_emails === false) {
+  if (policy.allow_personal_emails === false && allowedDomains.length === 0) {
     return false;
   }
 

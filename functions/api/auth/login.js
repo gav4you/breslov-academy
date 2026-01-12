@@ -1,8 +1,17 @@
-import { handleOptions, withHeaders } from '../_utils.js';
+import { errorResponse, handleOptions, withHeaders } from '../_utils.js';
+import { buildRateLimitKey, checkRateLimit } from '../_rateLimit.js';
 
 export async function onRequest({ request, env }) {
   const options = handleOptions(request, env);
   if (options) return options;
+
+  const authLimit = Number(env?.RATE_LIMIT_AUTH || 30);
+  const authWindow = Number(env?.RATE_LIMIT_AUTH_WINDOW_SECONDS || 60);
+  const authKey = buildRateLimitKey({ prefix: 'auth_login', request });
+  const authCheck = await checkRateLimit(env, { key: authKey, limit: authLimit, windowSeconds: authWindow });
+  if (!authCheck.allowed) {
+    return errorResponse('rate_limited', 429, 'Too many login attempts', env);
+  }
 
   const url = new URL(request.url);
   const next = url.searchParams.get('next') || '/';

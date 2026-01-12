@@ -19,7 +19,7 @@ export const FEATURES = {
   lessonViewer: { key: 'LessonViewer', label: 'Lesson Viewer', route: '/lessonviewer', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'Play', hidden: true },
   lessonViewerPremium: { key: 'LessonViewerPremium', label: 'Lesson Viewer Premium', route: '/lessonviewerpremium', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'Play', hidden: true },
   reader: { key: 'Reader', label: 'Smart Reader', route: '/reader', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'BookMarked', order: 3 },
-  aiTutor: { key: 'AITutor', label: 'AI Tutor', route: '/ai-tutor', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'Bot', order: 3.5 },
+  aiTutor: { key: 'AITutor', label: 'AI Tutor', route: '/ai-tutor', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'Bot', order: 3.5, flagKey: 'ENABLE_AI_TUTOR' },
   feed: { key: 'Feed', label: 'Community', route: '/feed', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'Users', order: 4 },
   schoolSearch: { key: 'SchoolSearch', label: 'Search', route: '/schoolsearch', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'Search', order: 5 },
   myProgress: { key: 'MyProgress', label: 'My Progress', route: '/myprogress', area: 'core', audiences: ['student'], icon: 'TrendingUp', vaultOnly: true },
@@ -93,14 +93,14 @@ export const FEATURES = {
   cohorts: { key: 'Cohorts', label: 'Cohorts', route: '/cohorts', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Users' },
   cohortDetail: { key: 'CohortDetail', label: 'Cohort Detail', route: '/cohortdetail', area: 'labs', audiences: ['student', 'teacher', 'admin'], hidden: true },
   offline: { key: 'Offline', label: 'Offline', route: '/offline', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Download' },
-  achievements: { key: 'Achievements', label: 'Achievements', route: '/achievements', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Award' },
-  challenges: { key: 'Challenges', label: 'Challenges', route: '/challenges', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Trophy' },
+  achievements: { key: 'Achievements', label: 'Achievements', route: '/achievements', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Award', flagKey: 'ENABLE_GAMIFICATION' },
+  challenges: { key: 'Challenges', label: 'Challenges', route: '/challenges', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Trophy', flagKey: 'ENABLE_GAMIFICATION' },
   affiliate: { key: 'Affiliate', label: 'Affiliate Program', route: '/affiliate', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Users', vaultOnly: true },
   
   // SYSTEM
   schoolSelect: { key: 'SchoolSelect', label: 'School Select', route: '/schoolselect', area: 'system', audiences: ['student', 'teacher', 'admin'], icon: 'Building', hidden: true },
-  integrationsMarketplace: { key: 'IntegrationsMarketplace', label: 'App Store', route: '/integrations', area: 'system', audiences: ['admin'], icon: 'Plug' },
-  integrationDetail: { key: 'IntegrationDetail', label: 'App Details', route: '/integrations/:appId', area: 'system', audiences: ['admin'], hidden: true },
+  integrationsMarketplace: { key: 'IntegrationsMarketplace', label: 'App Store', route: '/integrations', area: 'system', audiences: ['admin'], icon: 'Plug', flagKey: 'ENABLE_INTEGRATIONS' },
+  integrationDetail: { key: 'IntegrationDetail', label: 'App Details', route: '/integrations/:appId', area: 'system', audiences: ['admin'], hidden: true, flagKey: 'ENABLE_INTEGRATIONS' },
   portfolio: { key: 'Portfolio', label: 'Profile', route: '/portfolio', area: 'system', audiences: ['student', 'teacher', 'admin'], icon: 'User' },
   vault: { key: 'Vault', label: 'Vault', route: '/vault', area: 'system', audiences: ['student', 'teacher', 'admin'], icon: 'Archive' },
   oauth2callback: { key: 'oauth2callback', label: 'OAuth Callback', route: '/oauth2callback', area: 'system', audiences: ['public'], hidden: true },
@@ -114,7 +114,7 @@ export const FEATURES = {
   events: { key: 'Events', label: 'Events', route: '/events', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Calendar', vaultOnly: true },
   forums: { key: 'Forums', label: 'Forums', route: '/forums', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'MessageSquare', vaultOnly: true },
   habitTracker: { key: 'HabitTracker', label: 'Habit Tracker', route: '/habittracker', area: 'labs', audiences: ['student'], icon: 'CheckSquare', vaultOnly: true },
-  leaderboard: { key: 'Leaderboard', label: 'Leaderboard', route: '/leaderboard', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Trophy', vaultOnly: true },
+  leaderboard: { key: 'Leaderboard', label: 'Leaderboard', route: '/leaderboard', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Trophy', vaultOnly: true, flagKey: 'ENABLE_GAMIFICATION' },
   learningPaths: { key: 'LearningPaths', label: 'Learning Paths', route: '/learningpaths', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'Map', vaultOnly: true },
   liveStreams: { key: 'LiveStreams', label: 'Live Streams', route: '/livestreams', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Video', vaultOnly: true },
   virtualBeitMidrash: { key: 'VirtualBeitMidrash', label: 'Virtual Beit Midrash', route: '/virtual-beit-midrash', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Box', order: 5 },
@@ -122,12 +122,12 @@ export const FEATURES = {
   mentorship: { key: 'Mentorship', label: 'Mentorship', route: '/mentorship', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Users', vaultOnly: true },
   messages: { key: 'Messages', label: 'Messages', route: '/messages', area: 'core', audiences: ['student', 'teacher', 'admin'], icon: 'Mail', vaultOnly: true },
   microlearning: { key: 'Microlearning', label: 'Microlearning', route: '/microlearning', area: 'labs', audiences: ['student'], icon: 'Zap', vaultOnly: true },
-  rewardsShop: { key: 'RewardsShop', label: 'Rewards Shop', route: '/rewardsshop', area: 'labs', audiences: ['student'], icon: 'Gift', vaultOnly: true },
+  rewardsShop: { key: 'RewardsShop', label: 'Rewards Shop', route: '/rewardsshop', area: 'labs', audiences: ['student'], icon: 'Gift', vaultOnly: true, flagKey: 'ENABLE_GAMIFICATION' },
   scholarships: { key: 'Scholarships', label: 'Scholarships', route: '/scholarships', area: 'labs', audiences: ['student'], icon: 'Award', vaultOnly: true },
   skills: { key: 'Skills', label: 'Skills', route: '/skills', area: 'labs', audiences: ['student', 'teacher', 'admin'], icon: 'Target', vaultOnly: true },
   studyBuddies: { key: 'StudyBuddies', label: 'Study Buddies', route: '/studybuddies', area: 'labs', audiences: ['student'], icon: 'Users', vaultOnly: true },
   studySet: { key: 'StudySet', label: 'Study Set', route: '/studyset', area: 'labs', audiences: ['student', 'teacher', 'admin'], hidden: true },
-  tournaments: { key: 'Tournaments', label: 'Tournaments', route: '/tournaments', area: 'labs', audiences: ['student'], icon: 'Swords', vaultOnly: true },
+  tournaments: { key: 'Tournaments', label: 'Tournaments', route: '/tournaments', area: 'labs', audiences: ['student'], icon: 'Swords', vaultOnly: true, flagKey: 'ENABLE_GAMIFICATION' },
   affiliateProgram: { key: 'AffiliateProgram', label: 'Affiliate Program Info', route: '/affiliateprogram', area: 'marketing', audiences: ['public', 'student', 'teacher', 'admin'], icon: 'Share', vaultOnly: true },
   
   // v8.3 additions
@@ -180,10 +180,15 @@ export const getAllRoutes = () => {
   return Array.from(new Set(routes));
 };
 
-export const getNavGroupsForAudience = (audience) => {
+export const getNavGroupsForAudience = (audience, flags = null) => {
   const groups = {};
   Object.values(FEATURES)
-    .filter(f => !f.hidden && !f.vaultOnly && (f.showInMainNav !== false) && f.audiences.includes(audience))
+    .filter((feature) => {
+      if (feature.hidden || feature.vaultOnly || feature.showInMainNav === false) return false;
+      if (!feature.audiences.includes(audience)) return false;
+      if (!feature.flagKey || !flags) return true;
+      return Boolean(flags[feature.flagKey]);
+    })
     .forEach(feature => {
       if (!groups[feature.area]) {
         groups[feature.area] = {

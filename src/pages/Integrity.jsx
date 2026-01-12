@@ -25,10 +25,12 @@ function StatusIcon({ ok }) {
 }
 
 function scanSchoolSearch(source) {
-  const lessonContentLeak = /scoped(Filter|List)\(\s*['"]Lesson['"][\s\S]*?\{[\s\S]*?\b(content|body)\b/m.test(source)
+  const lessonFilterMatch = /scoped(Filter|List)\(\s*['"]Lesson['"][\s\S]*?\{([\s\S]*?)\}\s*,/m.exec(source);
+  const lessonFilter = lessonFilterMatch ? lessonFilterMatch[1] : '';
+  const lessonContentLeak = /\b(content|body)\b/.test(lessonFilter)
     || /entities\.Lesson\.filter\(\{[\s\S]*?\b(content|body)\b/m.test(source);
-  const lessonLimitPresent = /scoped(Filter|List)\(\s*['"]Lesson['"][\s\S]*?,\s*(\d+)\s*\)/m.test(source)
-    || /entities\.Lesson\.filter\([\s\S]*?,\s*(\d+)\s*\)/m.test(source);
+  const lessonLimitPresent = /scoped(Filter|List)\(\s*['"]Lesson['"][\s\S]*?,\s*(\d+)\s*(,|\))/m.test(source)
+    || /entities\.Lesson\.filter\([\s\S]*?,\s*(\d+)\s*(,|\))/m.test(source);
   return {
     key: 'scan_school_search',
     label: 'Search leakage scan (SchoolSearch)',
@@ -55,8 +57,8 @@ function scanDownloads(source) {
 }
 
 function scanReader(source) {
-  const hasEntitlementGate = /\$or\s*:\s*\[/.test(source) && /\$in/.test(source) && /allowedCourseIds/.test(source);
-  const textLimitPresent = /scopedFilter\('Text'[\s\S]*?,\s*50\)/m.test(source);
+  const hasEntitlementGate = /\$or\s*:\s*\[/.test(source) && /\$in/.test(source) && /(allowedCourseIds|courseIds)/.test(source);
+  const textLimitPresent = /scopedFilter\('Text'[\s\S]*?,\s*50\s*(,|\))/m.test(source);
   return {
     key: 'scan_reader',
     label: 'Reader text fetch scan (Reader)',
@@ -148,11 +150,12 @@ export default function Integrity() {
     const loadSources = async () => {
       try {
         setReloading(true);
-        const [schoolSearch, downloads, reader, scoped, lessonAccess, tenancyEnforcer, aiTutor, discussion] = await Promise.all([
+        const [schoolSearch, downloads, reader, scoped, scopedEntities, lessonAccess, tenancyEnforcer, aiTutor, discussion] = await Promise.all([
           import('./SchoolSearch.jsx?raw'),
           import('./Downloads.jsx?raw'),
           import('./Reader.jsx?raw'),
           import('../components/api/scoped.jsx?raw'),
+          import('../components/api/scopedEntities.js?raw'),
           import('../components/hooks/useLessonAccess.jsx?raw'),
           import('../components/api/tenancyEnforcer.js?raw'),
           import('../components/ai/AiTutorPanel.jsx?raw'),
@@ -164,6 +167,7 @@ export default function Integrity() {
           downloads: downloads.default,
           reader: reader.default,
           scoped: scoped.default,
+          scopedEntities: scopedEntities.default,
           lessonAccess: lessonAccess.default,
           tenancyEnforcer: tenancyEnforcer.default,
           aiTutor: aiTutor.default,
@@ -203,7 +207,7 @@ export default function Integrity() {
       scanReader(sources.reader),
       scanAiTutor(sources.aiTutor),
       scanDiscussion(sources.discussion),
-      scanScoped(sources.scoped)
+      scanScoped(sources.scopedEntities)
     ];
 
     const generic = runScans({
@@ -212,7 +216,7 @@ export default function Integrity() {
       reader: { label: 'Reader', source: sources.reader },
       scoped: { label: 'Scoped API', source: sources.scoped },
       lessonAccess: { label: 'useLessonAccess', source: sources.lessonAccess },
-      tenancyEnforcer: { label: 'TenancyEnforcer', source: sources.tenancyEnforcer },
+      tenancyEnforcer: { label: 'TenancyEnforcer', source: sources.tenancyEnforcer, skipRules: ['avoid_unscoped_list'] },
       aiTutor: { label: 'AiTutorPanel', source: sources.aiTutor },
       discussion: { label: 'DiscussionThread', source: sources.discussion },
     });

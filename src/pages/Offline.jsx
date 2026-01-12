@@ -9,6 +9,12 @@ import { useSession } from '@/components/hooks/useSession';
 import { scopedCreate, scopedFilter } from '@/components/api/scoped';
 import { canDownload, checkCourseAccess, isEntitlementActive } from '@/components/utils/entitlements';
 import { DashboardSkeleton } from '@/components/ui/SkeletonLoaders';
+import {
+  addOfflineCacheItem,
+  estimateOfflineStorage,
+  loadOfflineCache,
+  removeOfflineCacheItem
+} from '@/components/mobile/offlineStorage';
 
 const DEFAULT_POLICY = {
   protect_content: true,
@@ -27,6 +33,7 @@ const DEFAULT_POLICY = {
 export default function Offline() {
   const [cachedItems, setCachedItems] = useState([]);
   const [storageUsed, setStorageUsed] = useState(0);
+  const [storageQuota, setStorageQuota] = useState(5000);
   const [, setIsDownloading] = useState(false);
   const { user, activeSchoolId, role, isLoading } = useSession();
 
@@ -44,23 +51,17 @@ export default function Offline() {
     } else {
       setCachedItems([]);
       setStorageUsed(0);
+      setStorageQuota(5000);
     }
   }, [activeSchoolId]);
 
-  const loadCachedData = (schoolId) => {
+  const loadCachedData = async (schoolId) => {
     try {
-      const cached = JSON.parse(localStorage.getItem('offline_cache') || '[]');
-      const scopedCache = cached.filter((item) => item.school_id === schoolId);
+      const scopedCache = await loadOfflineCache(schoolId);
       setCachedItems(scopedCache);
-      
-      // Estimate storage (rough)
-      let total = 0;
-      for (let key in localStorage) {
-        if (localStorage.hasOwnProperty(key)) {
-          total += localStorage[key].length;
-        }
-      }
-      setStorageUsed(Math.round(total / 1024)); // KB
+      const { usedKb, quotaKb } = await estimateOfflineStorage(schoolId, scopedCache);
+      setStorageUsed(usedKb);
+      setStorageQuota(quotaKb);
     } catch (error) {
       console.error('Error loading cache:', error);
     }
@@ -149,9 +150,7 @@ export default function Offline() {
         cachedAt: new Date().toISOString()
       };
       
-      const existing = JSON.parse(localStorage.getItem('offline_cache') || '[]');
-      existing.push(cacheData);
-      localStorage.setItem('offline_cache', JSON.stringify(existing));
+      await addOfflineCacheItem(activeSchoolId, cacheData);
 
       try {
         await scopedCreate('EventLog', activeSchoolId, {
@@ -167,7 +166,7 @@ export default function Offline() {
       }
       
       toast.success('Course downloaded for offline access!');
-      loadCachedData(activeSchoolId);
+      await loadCachedData(activeSchoolId);
     } catch (error) {
       toast.error('Failed to download course');
     } finally {
@@ -175,15 +174,16 @@ export default function Offline() {
     }
   };
 
-  const handleRemoveCache = (id) => {
-    const existing = JSON.parse(localStorage.getItem('offline_cache') || '[]');
-    const filtered = existing.filter(item => item.id !== id || item.school_id !== activeSchoolId);
-    localStorage.setItem('offline_cache', JSON.stringify(filtered));
+  const handleRemoveCache = async (id) => {
+    await removeOfflineCacheItem(activeSchoolId, id);
     toast.success('Removed from offline storage');
-    loadCachedData(activeSchoolId);
+    await loadCachedData(activeSchoolId);
   };
 
-  const storagePercent = useMemo(() => Math.min((storageUsed / 5000) * 100, 100), [storageUsed]); // Assume 5MB limit
+  const storagePercent = useMemo(() => {
+    if (!storageQuota) return 0;
+    return Math.min((storageUsed / storageQuota) * 100, 100);
+  }, [storageUsed, storageQuota]);
 
   if (isLoading) {
     return <DashboardSkeleton />;
@@ -208,7 +208,7 @@ export default function Offline() {
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-slate-600">
               <span>{storageUsed} KB used</span>
-              <span>~5 MB available</span>
+              <span>~{storageQuota} KB available</span>
             </div>
             <Progress value={storagePercent} />
           </div>

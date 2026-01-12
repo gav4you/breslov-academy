@@ -3,6 +3,7 @@ import { createEntity, listEntities, updateEntity } from '../_store.js';
 import { stripeRequest } from './_stripe.js';
 import { createEntitlementsForOffer, recordCouponRedemption } from '../_billing.js';
 import { isSchoolPublic } from '../_tenancy.js';
+import { buildRateLimitKey, checkRateLimit } from '../_rateLimit.js';
 
 function nowIso() {
   return new Date().toISOString();
@@ -139,6 +140,23 @@ export async function onRequest({ request, env }) {
 
   if (!schoolId || !offerId || !email) {
     return errorResponse('missing_params', 400, 'school_id, offer_id, and email are required', env);
+  }
+
+  const checkoutLimit = Number(env?.RATE_LIMIT_CHECKOUT || 10);
+  const checkoutWindow = Number(env?.RATE_LIMIT_CHECKOUT_WINDOW_SECONDS || 60);
+  const checkoutKey = buildRateLimitKey({
+    prefix: 'stripe_checkout',
+    request,
+    userEmail: email,
+    schoolId,
+  });
+  const checkoutCheck = await checkRateLimit(env, {
+    key: checkoutKey,
+    limit: checkoutLimit,
+    windowSeconds: checkoutWindow,
+  });
+  if (!checkoutCheck.allowed) {
+    return errorResponse('rate_limited', 429, 'Too many checkout attempts', env);
   }
 
   const school = await resolveSchool(env, schoolId);

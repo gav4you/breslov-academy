@@ -56,7 +56,12 @@ Transition from a legacy single-tenant LMS into a premier, multi-tenant white-la
 1. **Install:** `npm install`
 2. **Run:** `npm run dev`
 3. **Verify:** Visit `/integrity` (as admin) to check system health.
-4. **Build:** `npm run build` (generates `dist/`)
+4. **Export Integrity:** `npm run integrity:scan` (updates `docs/integrity-samples/v9.0.sample.json`)
+5. **Build:** `npm run build` (generates `dist/`)
+6. **QA:** `npm run test:unit` and `npm run perf:check`
+7. **Portal QA (optional):** seed + auth state for Playwright portal smoke tests.
+   - `npm run seed:dev` (requires a running API server)
+   - `npm run playwright:state`
 
 ## Cloudflare Deployment (Pages + Functions)
 This repo includes Cloudflare Pages Functions under `functions/api` to replace the Base44 SDK.
@@ -74,6 +79,7 @@ It provides minimal `/api` endpoints for auth, entity CRUD, and integrations.
 - `AUTH_LOGIN_URL`: External auth login URL (if using a real IdP).
 - `AUTH_LOGOUT_URL`: External auth logout URL.
 - `AUTH_SESSION_TTL_HOURS`: Session lifetime in hours (default: 12).
+- `AUTH_CLEANUP_TOKEN`: Optional token to authorize `/api/auth/cleanup` for expired AuthState/AuthSession removal.
 - `CORS_ORIGIN`: Allowed origin for API responses.
 - `REQUIRE_AUTH`: Set to `true` to enforce auth in public settings responses.
 - `OIDC_ALLOW_ALL`: Allow SSO without a per-school policy (default: false).
@@ -112,12 +118,38 @@ It provides minimal `/api` endpoints for auth, entity CRUD, and integrations.
 - `CLOUDFLARE_ACCOUNT_ID`: Cloudflare account ID for Stream.
 - `CLOUDFLARE_STREAM_TOKEN`: API token with Stream permissions.
 
+### Optional environment variables (Cloudflare R2)
+- `R2_ACCESS_KEY_ID`: R2 access key ID for presigned uploads.
+- `R2_SECRET_ACCESS_KEY`: R2 secret access key.
+- `R2_BUCKET`: R2 bucket name.
+- `R2_ENDPOINT`: R2 endpoint URL (e.g. `https://<account>.r2.cloudflarestorage.com`).
+- `R2_REGION`: Region identifier (defaults to `auto`).
+
+### Optional environment variables (Rate limiting)
+- `RATE_LIMIT_DISABLED`: Set to `true` to bypass rate limiting.
+- `RATE_LIMIT_AUTH`: Max auth attempts per window (defaults to 30).
+- `RATE_LIMIT_AUTH_WINDOW_SECONDS`: Auth rate limit window (defaults to 60 seconds).
+- `RATE_LIMIT_DOWNLOADS`: Max download token attempts per window (defaults to 20).
+- `RATE_LIMIT_DOWNLOADS_WINDOW_SECONDS`: Download rate limit window (defaults to 60 seconds).
+- `RATE_LIMIT_CHECKOUT`: Max checkout attempts per window (defaults to 10).
+- `RATE_LIMIT_CHECKOUT_WINDOW_SECONDS`: Checkout rate limit window (defaults to 60 seconds).
+
+### Optional environment variables (AI tutor)
+- `OPENAI_API_KEY`: Enable OpenAI-backed responses for `/api/ai/chat`.
+- `OPENAI_MODEL`: Override OpenAI model (default: `gpt-4o-mini`).
+- `LLM_FALLBACK`: Fallback response when no provider is configured.
+
+### Optional environment variables (Performance budgets)
+- `MAX_IMAGE_KB`: Max image size for `npm run perf:check` (default: 500).
+
 ### D1 schema
 The API uses a simple generic entity table. Apply `cloudflare/schema.sql` to your D1 database.
 
 ### Notes
 - For production auth, wire `/api/auth/*` to your IdP and replace the dev-token logic.
 - For local API testing, run Pages Functions with Wrangler and set `VITE_API_BASE_URL` to the dev URL.
+- AI tutor indexing: run `npm run ai:index` (requires `AI_INDEX_BASE_URL`, `AI_INDEX_TOKEN`, `AI_INDEX_SCHOOL_ID`).
+- Portal smoke tests: set `PLAYWRIGHT_STORAGE_STATE` to the generated state file and `PLAYWRIGHT_ROLE=superadmin` to run all portal checks.
 
 ## Technical Invariants
 *   **Registry First:** All routes must be defined in `src/components/config/features.jsx`.

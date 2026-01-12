@@ -1,9 +1,10 @@
 // src/pages/SubmissionForm.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PageShell from '@/components/ui/PageShell';
 import { useSession } from '@/components/hooks/useSession';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { scopedFilter, scopedCreate, scopedUpdate } from '@/components/api/scoped';
+import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Save, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Save, ArrowLeft, AlertCircle, Paperclip, Download, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { DashboardSkeleton } from '@/components/ui/SkeletonLoaders';
 
@@ -26,7 +27,44 @@ export default function SubmissionForm() {
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [attachments, setAttachments] = useState(''); // Simple string for now, could be JSON or file uploads
+  const [attachments, setAttachments] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const [downloadingKey, setDownloadingKey] = useState('');
+  const uploadBucketRef = useRef(
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`
+  );
+  const fileInputRef = useRef(null);
+
+  const normalizeEmailForKey = (email) => {
+    return String(email || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  const sanitizeFileName = (name) => {
+    return String(name || 'attachment')
+      .trim()
+      .replace(/[^a-zA-Z0-9._-]/g, '_');
+  };
+
+  const formatFileSize = (size) => {
+    if (!Number.isFinite(size)) return 'Unknown size';
+    if (size < 1024) return `${size} B`;
+    if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const buildAttachmentKey = (fileName) => {
+    const safeEmail = normalizeEmailForKey(user?.email);
+    const bucketId = existingSubmissionId || uploadBucketRef.current;
+    const safeName = sanitizeFileName(fileName);
+    return `schools/${activeSchoolId}/submissions/${safeEmail}/${bucketId}/${Date.now()}-${safeName}`;
+  };
 
   const { data: existingSubmission, isLoading: isLoadingExistingSubmission } = useQuery({
     queryKey: ['submission', existingSubmissionId, activeSchoolId, user?.email],
@@ -45,7 +83,18 @@ export default function SubmissionForm() {
     if (existingSubmission) {
       setTitle(existingSubmission.title || '');
       setContent(existingSubmission.content || '');
-      setAttachments(existingSubmission.attachments ? JSON.stringify(existingSubmission.attachments) : '');
+      if (Array.isArray(existingSubmission.attachments)) {
+        setAttachments(existingSubmission.attachments);
+      } else if (typeof existingSubmission.attachments === 'string') {
+        try {
+          const parsed = JSON.parse(existingSubmission.attachments);
+          setAttachments(Array.isArray(parsed) ? parsed : []);
+        } catch {
+          setAttachments([]);
+        }
+      } else {
+        setAttachments([]);
+      }
     } else if (assignmentId) {
       // Potentially fetch assignment details here to pre-fill title or instructions
       setTitle(`Submission for Assignment ${assignmentId}`); // Placeholder
@@ -82,12 +131,92 @@ export default function SubmissionForm() {
     }
   });
 
+  const uploadAttachment = async (file) => {
+    if (!file || !activeSchoolId || !user?.email) return;
+    setIsUploading(true);
+    setUploadError('');
+    try {
+      const key = buildAttachmentKey(file.name);
+      const presign = await base44.request('/media/r2/presign', {
+        method: 'POST',
+        body: {
+          school_id: activeSchoolId,
+          key,
+          method: 'PUT',
+        },
+      });
+
+      const response = await fetch(presign.url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': file.type || 'application/octet-stream',
+        },
+        body: file,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      setAttachments((prev) => [
+        ...prev,
+        {
+          name: file.name,
+          size: file.size,
+          content_type: file.type || 'application/octet-stream',
+          key,
+          uploaded_at: new Date().toISOString(),
+        },
+      ]);
+
+      toast.success('Attachment uploaded');
+    } catch (error) {
+      setUploadError('Upload failed. Please try again.');
+      toast.error('Attachment upload failed');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleFileSelect = async (event) => {
+    const files = Array.from(event.target.files || []);
+    event.target.value = '';
+    if (files.length === 0) return;
+    for (const file of files) {
+      await uploadAttachment(file);
+    }
+  };
+
+  const handleDownload = async (attachment) => {
+    if (!attachment?.key || !activeSchoolId) return;
+    setDownloadingKey(attachment.key);
+    try {
+      const presign = await base44.request('/media/r2/presign', {
+        method: 'POST',
+        body: {
+          school_id: activeSchoolId,
+          key: attachment.key,
+          method: 'GET',
+        },
+      });
+      window.open(presign.url, '_blank', 'noopener');
+    } catch (error) {
+      toast.error('Unable to download attachment');
+    } finally {
+      setDownloadingKey('');
+    }
+  };
+
+  const handleRemoveAttachment = (index) => {
+    setAttachments((prev) => prev.filter((_, idx) => idx !== index));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const submissionData = {
       title,
       content,
-      attachments: attachments ? JSON.parse(attachments) : [],
+      attachments,
       // course_id and lesson_id would typically come from the assignment itself
       // For now, these might need to be added or derived if creating new for an assignmentId
     };
@@ -160,19 +289,71 @@ export default function SubmissionForm() {
                   rows={10}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="attachments">Attachments (JSON string for now)</Label>
-                <Input
-                  id="attachments"
-                  value={attachments}
-                  onChange={(e) => setAttachments(e.target.value)}
-                  placeholder='e.g., [{"name": "file1.pdf", "url": "..."}]'
-                />
-                <p className="text-xs text-muted-foreground">
-                  (Note: Currently supports JSON string of attachments. Full file upload coming soon.)
-                </p>
+              <div className="space-y-3">
+                <Label htmlFor="attachments">Attachments</Label>
+                <div className="rounded-lg border border-dashed border-border/60 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Paperclip className="w-4 h-4" />
+                      Upload files to include with your submission.
+                    </div>
+                    <input
+                      ref={fileInputRef}
+                      id="attachments"
+                      type="file"
+                      multiple
+                      className="hidden"
+                      onChange={handleFileSelect}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploading}
+                    >
+                      {isUploading ? 'Uploading...' : 'Add files'}
+                    </Button>
+                  </div>
+                  {uploadError ? (
+                    <p className="mt-2 text-xs text-destructive">{uploadError}</p>
+                  ) : null}
+                </div>
+
+                {attachments.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">No attachments uploaded yet.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {attachments.map((file, idx) => (
+                      <div key={file.key || idx} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 px-3 py-2">
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{file.name || 'Attachment'}</p>
+                          <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDownload(file)}
+                            disabled={downloadingKey === file.key}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveAttachment(idx)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              <Button type="submit" className="w-full" disabled={createSubmissionMutation.isPending || updateSubmissionMutation.isPending}>
+              <Button type="submit" className="w-full" disabled={createSubmissionMutation.isPending || updateSubmissionMutation.isPending || isUploading}>
                 <Save className="w-4 h-4 mr-2" />
                 {existingSubmissionId ? 'Update Submission' : 'Submit Assignment'}
               </Button>

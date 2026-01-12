@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { getAllIntegrations } from '@/components/config/integrations';
+import { useIntegrationConnections } from '@/components/hooks/useIntegration';
 import { tokens, cx } from '@/components/theme/tokens';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,9 @@ export default function IntegrationsMarketplace() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   
   const integrations = getAllIntegrations();
+  const { map: connectionMap } = useIntegrationConnections({
+    providers: integrations.map((integration) => integration.providerKey || integration.id),
+  });
   const categories = ['All', ...new Set(integrations.map(i => i.category))];
 
   const filteredIntegrations = integrations.filter(app => {
@@ -67,7 +71,7 @@ export default function IntegrationsMarketplace() {
                     <div className={cx("w-12 h-12 rounded-xl flex items-center justify-center", app.bg)}>
                       <app.icon className={cx("w-6 h-6", app.color)} />
                     </div>
-                    {app.status === 'connected' && (
+                    {((connectionMap?.[app.providerKey || app.id]?.status === 'connected') || app.status === 'connected') && (
                       <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
                         Connected
                       </Badge>

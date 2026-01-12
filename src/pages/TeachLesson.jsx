@@ -9,11 +9,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Save, Eye } from 'lucide-react';
 import { toast } from 'sonner';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+
+const LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'he', label: 'Hebrew' },
+  { code: 'es', label: 'Spanish' },
+  { code: 'fr', label: 'French' },
+  { code: 'ru', label: 'Russian' }
+];
 
 export default function TeachLesson() {
   const { user, activeSchoolId } = useSession();
@@ -22,6 +30,7 @@ export default function TeachLesson() {
   const [videoUrl, setVideoUrl] = useState('');
   const [videoStreamId, setVideoStreamId] = useState('');
   const [audioUrl, setAudioUrl] = useState('');
+  const [lessonLanguage, setLessonLanguage] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const navigate = useNavigate();
@@ -43,6 +52,7 @@ export default function TeachLesson() {
         setVideoUrl(l.video_url || '');
         setVideoStreamId(l.video_stream_id || '');
         setAudioUrl(l.audio_url || '');
+        setLessonLanguage(l.language || '');
       }
       return l;
     },
@@ -57,6 +67,12 @@ export default function TeachLesson() {
     },
     enabled: !!lesson && !!activeSchoolId
   });
+
+  useEffect(() => {
+    if (!lessonLanguage && course?.language) {
+      setLessonLanguage(course.language);
+    }
+  }, [lessonLanguage, course?.language]);
 
   const updateLessonMutation = useMutation({
     mutationFn: ({ data }) => scopedUpdate('Lesson', lessonId, data, activeSchoolId, true),
@@ -79,6 +95,7 @@ export default function TeachLesson() {
   const handleSave = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
+    const effectiveLanguage = lessonLanguage || course?.language || 'en';
     
     updateLessonMutation.mutate({
       data: {
@@ -87,6 +104,7 @@ export default function TeachLesson() {
         video_url: videoUrl || formData.get('video_url'),
         video_stream_id: videoStreamId || null,
         audio_url: audioUrl || formData.get('audio_url'),
+        language: effectiveLanguage,
         duration_minutes: parseInt(formData.get('duration_minutes')) || 0,
         drip_days_after_enroll: parseInt(formData.get('drip_days_after_enroll')) || null
       }
@@ -203,15 +221,29 @@ export default function TeachLesson() {
             </div>
 
             <div className="space-y-2">
+              <Label>Lesson Language</Label>
+              <Select value={lessonLanguage || course?.language || 'en'} onValueChange={setLessonLanguage}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LANGUAGES.map((lang) => (
+                    <SelectItem key={lang.code} value={lang.code}>
+                      {lang.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label>Content</Label>
-              <div className="border rounded-lg">
-                <ReactQuill 
-                  theme="snow"
-                  value={content}
-                  onChange={setContent}
-                  style={{ minHeight: '300px' }}
-                />
-              </div>
+              <Textarea
+                value={content}
+                onChange={(event) => setContent(event.target.value)}
+                className="min-h-[300px] resize-y"
+                placeholder="Write lesson content (Markdown supported)."
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">

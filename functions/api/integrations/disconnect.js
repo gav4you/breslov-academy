@@ -1,5 +1,5 @@
 import { errorResponse, getBearerToken, handleOptions, json, readJson } from '../_utils.js';
-import { deleteEntity, listEntities, updateEntity } from '../_store.js';
+import { createEntity, deleteEntity, listEntities, updateEntity } from '../_store.js';
 import { getUserFromToken } from '../_auth.js';
 import { hasMembership, isGlobalAdmin } from '../_tenancy.js';
 
@@ -74,6 +74,15 @@ export async function onRequest({ request, env }) {
   if (secrets?.[0]) {
     await deleteEntity(env, 'IntegrationSecret', secrets[0].id);
   }
+
+  await createEntity(env, 'AuditLog', {
+    school_id: String(schoolId),
+    user_email: user.email,
+    action: 'INTEGRATION_DISCONNECTED',
+    entity_type: 'IntegrationConnection',
+    entity_id: id,
+    metadata: { provider: String(provider) },
+  });
 
   return json({ disconnected: true }, { env });
 }

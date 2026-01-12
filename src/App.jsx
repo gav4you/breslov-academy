@@ -8,6 +8,7 @@ import { queryClientInstance } from '@/lib/query-client';
 import { AuthProvider } from '@/lib/AuthContext';
 import { SessionProvider } from '@/components/hooks/useSession';
 import TenancyBridge from '@/components/api/TenancyBridge';
+import MobileBridge from '@/components/mobile/MobileBridge';
 
 // v9.1 portalization
 import PublicLayout from '@/portals/public/PublicLayout';
@@ -45,6 +46,7 @@ function App() {
         <TenancyBridge />
         <QueryClientProvider client={queryClientInstance}>
           <Router>
+            <MobileBridge />
             <NavigationTracker />
             <Routes>
               {/* Public marketing site */}

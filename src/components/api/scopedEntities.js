@@ -14,6 +14,8 @@ export const SCHOOL_SCOPED_ENTITIES = [
   'Testimonial', 'InstructorPayout', 'AuditLog', 'EventLog',
   'Announcement', 'UserAnnouncementRead', 'Affiliate', 'Referral',
   'AiTutorSession', 'AiTutorPolicyLog', 'RateLimitLog',
+  'AiRagIndex',
+  'NotificationToken',
   'Bookmark', 'LessonNote', 'Highlight', 'Transcript',
   'Text', 'CourseReview', 'Discussion', 'ContentReport',
   'ModerationAction', 'SchoolMetricDaily', 'CourseMetricDaily',

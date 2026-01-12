@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 const publicRoutes = [
-  ['/', 'Torah learning, built like a modern platform.'],
+  ['/', 'Find your school. Learn with certainty.'],
   ['/about', 'A platform for Torah learning at scale.'],
   ['/how-it-works', 'Publish. Protect. Teach.'],
   ['/pricing', 'Pricing that scales with schools.'],

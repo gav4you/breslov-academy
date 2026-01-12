@@ -51,6 +51,13 @@ export const FEATURE_FLAGS = {
     description: 'Link courses to Discord channels.',
     defaultValue: false,
     scope: 'school'
+  },
+  ENABLE_INTEGRATIONS: {
+    key: 'ENABLE_INTEGRATIONS',
+    label: 'Integrations Marketplace',
+    description: 'Show the integrations marketplace and connection flows.',
+    defaultValue: true,
+    scope: 'school'
   }
 };
 

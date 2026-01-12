@@ -1,4 +1,5 @@
 import { errorResponse, handleOptions, withHeaders } from '../../_utils.js';
+import { buildRateLimitKey, checkRateLimit } from '../../_rateLimit.js';
 import { createEntity, listEntities } from '../../_store.js';
 import { getProviderConfig } from './_providers.js';
 import { getSchoolAuthPolicy, policyAllowsProvider, resolveSchool } from './_policy.js';
@@ -37,6 +38,12 @@ async function createPkcePair() {
   const digest = await subtle.digest('SHA-256', new TextEncoder().encode(verifier));
   const challenge = toBase64Url(new Uint8Array(digest));
   return { codeVerifier: verifier, codeChallenge: challenge };
+}
+
+function createNonce() {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return toBase64Url(bytes);
 }
 
 function normalizeNext(next, origin) {
@@ -78,6 +85,14 @@ export async function onRequest({ request, env }) {
   const options = handleOptions(request, env);
   if (options) return options;
 
+  const authLimit = Number(env?.RATE_LIMIT_AUTH || 30);
+  const authWindow = Number(env?.RATE_LIMIT_AUTH_WINDOW_SECONDS || 60);
+  const authKey = buildRateLimitKey({ prefix: 'oidc_start', request });
+  const authCheck = await checkRateLimit(env, { key: authKey, limit: authLimit, windowSeconds: authWindow });
+  if (!authCheck.allowed) {
+    return errorResponse('rate_limited', 429, 'Too many login attempts', env);
+  }
+
   if (request.method !== 'GET') {
     return errorResponse('method_not_allowed', 405, 'Method not allowed', env);
   }
@@ -115,6 +130,7 @@ export async function onRequest({ request, env }) {
   }
 
   const { codeVerifier, codeChallenge } = await createPkcePair();
+  const nonce = createNonce();
   const state = crypto.randomUUID();
   const expiresAt = new Date(Date.now() + STATE_TTL_MINUTES * 60 * 1000).toISOString();
 
@@ -126,6 +142,7 @@ export async function onRequest({ request, env }) {
     intended_audience: audience || null,
     next_url: nextUrl,
     code_verifier: codeVerifier,
+    nonce,
     issued_at: nowIso(),
     expires_at: expiresAt,
   });
@@ -138,6 +155,7 @@ export async function onRequest({ request, env }) {
   authorize.searchParams.set('state', state);
   authorize.searchParams.set('code_challenge', codeChallenge);
   authorize.searchParams.set('code_challenge_method', 'S256');
+  authorize.searchParams.set('nonce', nonce);
   if (config.prompt) {
     authorize.searchParams.set('prompt', config.prompt);
   }

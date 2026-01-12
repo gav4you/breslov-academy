@@ -7,11 +7,36 @@ import { Badge } from '@/components/ui/badge';
 import { Sparkles, Send, BookOpen, HelpCircle, List } from 'lucide-react';
 import { toast } from 'sonner';
 import { buildCacheKey, scopedCreate, scopedFilter, scopedUpdate } from '@/components/api/scoped';
+import { requestAiTutorResponse } from '@/components/ai/aiClient';
 
-export default function AiTutorPanel({ contextType, contextId, contextTitle, contextContent, user, schoolId }) {
+export default function AiTutorPanel({
+  contextType,
+  contextId,
+  contextTitle,
+  contextContent,
+  contextCourseId,
+  user,
+  schoolId,
+}) {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
   const queryClient = useQueryClient();
+  const isLocked = !contextContent;
+
+  const logPolicy = async (action, reason) => {
+    if (!schoolId || !user?.email) return;
+    try {
+      await scopedCreate('AiTutorPolicyLog', schoolId, {
+        user_email: user.email,
+        action,
+        reason,
+        context_type: contextType,
+        context_id: contextId
+      });
+    } catch {
+      // best effort
+    }
+  };
 
   const { data: session } = useQuery({
     queryKey: buildCacheKey('ai-session', schoolId, contextId),
@@ -28,19 +53,37 @@ export default function AiTutorPanel({ contextType, contextId, contextTitle, con
     enabled: !!contextId && !!user && !!schoolId
   });
 
+  const formatSources = (sources) => {
+    if (!Array.isArray(sources) || sources.length === 0) return '';
+    const lines = sources.map((source) => {
+      const title = source.title || 'Source';
+      return `- ${title}`;
+    });
+    return `\n\nSources:\n${lines.join('\n')}`;
+  };
+
   const askMutation = useMutation({
     mutationFn: async ({ prompt, action }) => {
-      // Mock AI response for now - wire to real API later
-      const mockResponse = action === 'explain' 
-        ? `Here's an explanation: ${contextContent?.substring(0, 100)}... (This is a placeholder response. Real AI integration coming soon!)`
-        : action === 'quiz'
-        ? `Quiz time! Question 1: What is the main topic discussed? (Mock question - real AI coming soon!)`
-        : `Summary: ${contextTitle} covers important concepts. (Mock summary - real AI coming soon!)`;
+      const result = await requestAiTutorResponse({
+        prompt,
+        action,
+        school_id: schoolId,
+        context_type: contextType,
+        context_id: contextId,
+        context_title: contextTitle,
+        context_content: contextContent,
+        course_id: contextCourseId,
+        context_locked: isLocked,
+        lesson_id: contextType === 'LESSON' ? contextId : null,
+        messages: messages.map((msg) => ({ role: msg.role, content: msg.content })),
+      });
+      const sourcesNote = formatSources(result?.sources);
+      const reply = `${result?.response || 'No response available.'}${sourcesNote}`;
 
       const newMessages = [
         ...messages,
         { role: 'user', content: prompt },
-        { role: 'assistant', content: mockResponse }
+        { role: 'assistant', content: reply }
       ];
 
       // Save session
@@ -61,7 +104,9 @@ export default function AiTutorPanel({ contextType, contextId, contextTitle, con
       await scopedCreate('AiTutorPolicyLog', schoolId, {
         user_email: user.email,
         action: 'ALLOWED',
-        reason: `AI ${action} request`
+        reason: `AI ${action} request`,
+        context_type: contextType,
+        context_id: contextId
       });
 
       return newMessages;
@@ -71,13 +116,18 @@ export default function AiTutorPanel({ contextType, contextId, contextTitle, con
       setInput('');
       queryClient.invalidateQueries(buildCacheKey('ai-session', schoolId, contextId));
     },
-    onError: () => {
+    onError: (error) => {
+      if (error?.status === 403) {
+        toast.error('This content is locked. Enroll to unlock AI assistance.');
+        return;
+      }
       toast.error('Request limit reached. Please try again later.');
     }
   });
 
   const handleQuickAction = (action) => {
     if (!contextContent) {
+      logPolicy('BLOCKED', 'content_locked');
       toast.error('This content is locked. Enroll to unlock AI assistance.');
       return;
     }
@@ -88,8 +138,6 @@ export default function AiTutorPanel({ contextType, contextId, contextTitle, con
     };
     askMutation.mutate({ prompt: prompts[action], action });
   };
-
-  const isLocked = !contextContent;
 
   return (
     <Card className={isLocked ? 'opacity-70' : ''}>

@@ -5,15 +5,7 @@
 
 import { base44 } from '@/api/base44Client';
 import { scopedFilter } from '@/components/api/scoped';
-
-/**
- * Determine if materials should be fetched based on access level
- * @param {string} accessLevel - FULL | PREVIEW | LOCKED | DRIP_LOCKED
- * @returns {boolean}
- */
-export function shouldFetchMaterials(accessLevel) {
-  return accessLevel === 'FULL' || accessLevel === 'PREVIEW';
-}
+import { getPreviewMaterial, sanitizeMaterialForAccess, shouldFetchMaterials } from '@/components/materials/materialsAccess';
 
 /**
  * Get lesson material (scoped)
@@ -54,47 +46,7 @@ export async function getLessonMaterial({ school_id, lesson_id, course_id }) {
  * @param {object} policy - ContentProtectionPolicy
  * @returns {object} - Truncated material
  */
-export function getPreviewMaterial(material, policy) {
-  if (!material) return null;
-  
-  const maxChars = policy?.max_preview_chars || 1500;
-  const maxSeconds = policy?.max_preview_seconds || 90;
-  
-  return {
-    content_text: material.content_text 
-      ? material.content_text.substring(0, maxChars) + (material.content_text.length > maxChars ? '...' : '')
-      : '',
-    video_url: material.video_url, // Player will enforce time limit
-    audio_url: material.audio_url,
-    duration_seconds: Math.min(material.duration_seconds || 0, maxSeconds),
-    is_preview: true,
-    preview_limit_chars: maxChars,
-    preview_limit_seconds: maxSeconds
-  };
-}
-
-/**
- * Sanitize material based on access level (CRITICAL SECURITY)
- * @param {object} material - Full material object
- * @param {string} accessLevel - FULL | PREVIEW | LOCKED | DRIP_LOCKED
- * @param {object} policy - ContentProtectionPolicy
- * @returns {object|null}
- */
-export function sanitizeMaterialForAccess(material, accessLevel, policy) {
-  // LOCKED and DRIP_LOCKED return nothing
-  if (accessLevel === 'LOCKED' || accessLevel === 'DRIP_LOCKED') {
-    return null;
-  }
-  
-  // PREVIEW returns truncated
-  if (accessLevel === 'PREVIEW') {
-    return getPreviewMaterial(material, policy);
-  }
-  
-  // FULL returns complete material (still wrapped in ProtectedContent)
-  return material;
-}
-
+export { getPreviewMaterial, sanitizeMaterialForAccess, shouldFetchMaterials };
 /**
  * Secure download URL retrieval
  * @param {object} params - {school_id, download_id, user_email, entitlements, policy}

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { scopedFilter, scopedUpdate } from '@/components/api/scoped';
 import { useSession } from '@/components/hooks/useSession';
+import { base44 } from '@/api/base44Client';
 import { tokens, cx } from '@/components/theme/tokens';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ import {
   FileText, 
   User, 
   Award,
+  Download,
   AlertCircle,
   BookOpen
 } from 'lucide-react';
@@ -30,6 +32,34 @@ export default function TeachGrading() {
   const [selectedSubmissionId, setSelectedSubmissionId] = useState(null);
   const [gradeValue, setGradeValue] = useState('');
   const [feedback, setFeedback] = useState('');
+  const [downloadingKey, setDownloadingKey] = useState('');
+
+  const formatFileSize = (size) => {
+    if (!Number.isFinite(size)) return 'Unknown size';
+    if (size < 1024) return `${size} B`;
+    if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const handleDownload = async (attachment) => {
+    if (!attachment?.key || !activeSchoolId) return;
+    setDownloadingKey(attachment.key);
+    try {
+      const presign = await base44.request('/media/r2/presign', {
+        method: 'POST',
+        body: {
+          school_id: activeSchoolId,
+          key: attachment.key,
+          method: 'GET',
+        },
+      });
+      window.open(presign.url, '_blank', 'noopener');
+    } catch (error) {
+      toast.error('Unable to download attachment');
+    } finally {
+      setDownloadingKey('');
+    }
+  };
 
   // 1. Fetch courses taught by this instructor
   const { data: myCourses = [] } = useQuery({
@@ -240,17 +270,27 @@ export default function TeachGrading() {
                     </div>
                   </div>
 
-                  {selectedSubmission.attachments?.length > 0 && (
+                  {Array.isArray(selectedSubmission.attachments) && selectedSubmission.attachments.length > 0 && (
                     <div className="space-y-3">
                        <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Attachments</h4>
-                       <div className="grid grid-cols-2 gap-4">
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                          {selectedSubmission.attachments.map((file, idx) => (
-                           <div key={idx} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
-                             <FileText className="w-8 h-8 text-blue-500" />
-                             <div className="min-w-0">
-                               <p className="text-sm font-medium truncate">{file.name || 'Attachment'}</p>
-                               <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</p>
+                           <div key={file.key || idx} className="flex items-center justify-between gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                             <div className="flex items-center gap-3 min-w-0">
+                               <FileText className="w-8 h-8 text-blue-500" />
+                               <div className="min-w-0">
+                                 <p className="text-sm font-medium truncate">{file.name || 'Attachment'}</p>
+                                 <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
+                               </div>
                              </div>
+                             <Button
+                               variant="ghost"
+                               size="icon"
+                               onClick={() => handleDownload(file)}
+                               disabled={!file.key || downloadingKey === file.key}
+                             >
+                               <Download className="w-4 h-4" />
+                             </Button>
                            </div>
                          ))}
                        </div>

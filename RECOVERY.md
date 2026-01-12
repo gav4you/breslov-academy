@@ -1,6 +1,6 @@
 # Recovery Guide
 
-Last updated: 2026-01-11 (Phase 0 audit)
+Last updated: 2026-01-12 (Phase 0 audit + QA artifacts)
 
 ## Quick Recovery Checklist
 1) Registry + Vault: verify `src/components/config/features.jsx` and `src/pages/Vault.jsx`.
@@ -9,6 +9,7 @@ Last updated: 2026-01-11 (Phase 0 audit)
 4) Content protection: ensure `useLessonAccess` gates material queries and `shouldFetchMaterials()` is used before content fetch.
 5) Storefront: confirm `/s/:schoolSlug/*` routes and legacy query params via `useStorefrontContext`.
 6) Integrity: run `/integrity` and resolve any registry/scoping warnings.
+7) Integrity sample: compare `/integrity` JSON output with `docs/integrity-samples/v9.0.sample.json`.
 
 ## Critical Files (never delete)
 - `src/components/config/features.jsx`

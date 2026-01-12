@@ -14,6 +14,7 @@ export default function AdminPortal() {
       <AdminLayout>
         <Routes>
           <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="features" element={<PortalPageResolver portalHome="dashboard" audience="admin" pageKeyOverride="SchoolFeatures" />} />
           <Route path="integrations" element={<PortalPageResolver portalHome="dashboard" audience="admin" pageKeyOverride="IntegrationsMarketplace" />} />
           <Route path="integrations/:appId" element={<PortalPageResolver portalHome="dashboard" audience="admin" pageKeyOverride="IntegrationDetail" />} />
           <Route path="teach/quizzes" element={<PortalPageResolver portalHome="dashboard" audience="admin" pageKeyOverride="TeachQuizzes" />} />

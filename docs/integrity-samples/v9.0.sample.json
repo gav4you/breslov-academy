@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "generated_at": "2026-01-12T10:18:38.301Z",
+    "user_email": "admin@school.example",
+    "role": "ADMIN",
+    "active_school_id": "school_123"
+  },
+  "registry": {
+    "featureCount": 104,
+    "routeCount": 106,
+    "duplicates": []
+  },
+  "checks": {
+    "registry_present": true,
+    "vault_registered": true,
+    "integrity_registered": true,
+    "tenancy_enforcer": true,
+    "tenancy_runtime_warnings": true,
+    "active_school": true,
+    "routes_deduped": true
+  },
+  "scans": {
+    "scan_school_search": true,
+    "scan_downloads": true,
+    "scan_reader": true,
+    "scan_ai_tutor": true,
+    "scan_discussions": true,
+    "scan_scoped": true,
+    "schoolSearch:no_direct_file_url": true,
+    "schoolSearch:no_search_paid_text": true,
+    "schoolSearch:avoid_unscoped_list": true,
+    "downloads:no_direct_file_url": true,
+    "downloads:no_search_paid_text": true,
+    "downloads:avoid_unscoped_list": true,
+    "reader:no_direct_file_url": true,
+    "reader:no_search_paid_text": true,
+    "reader:avoid_unscoped_list": true,
+    "scoped:no_direct_file_url": true,
+    "scoped:no_search_paid_text": true,
+    "scoped:avoid_unscoped_list": true,
+    "lessonAccess:no_direct_file_url": true,
+    "lessonAccess:no_search_paid_text": true,
+    "lessonAccess:avoid_unscoped_list": true,
+    "tenancyEnforcer:no_direct_file_url": true,
+    "tenancyEnforcer:no_search_paid_text": true,
+    "aiTutor:no_direct_file_url": true,
+    "aiTutor:no_search_paid_text": true,
+    "aiTutor:avoid_unscoped_list": true,
+    "discussion:no_direct_file_url": true,
+    "discussion:no_search_paid_text": true,
+    "discussion:avoid_unscoped_list": true,
+    "reader:entitlement_gate": true
+  },
+  "tenancy_warnings": {
+    "total": 0,
+    "by_type": {}
+  },
+  "tenancy_warnings_recent": []
+}

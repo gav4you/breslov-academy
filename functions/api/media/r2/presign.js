@@ -48,6 +48,20 @@ function normalizeKey(key) {
   return String(key || '').replace(/^\/+/, '').trim();
 }
 
+function normalizeEmailForKey(email) {
+  return String(email || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function buildStudentPrefix(schoolId, email) {
+  const safeEmail = normalizeEmailForKey(email);
+  if (!safeEmail) return null;
+  return `schools/${schoolId}/submissions/${safeEmail}/`;
+}
+
 function getR2Config(env) {
   const accessKeyId = env?.R2_ACCESS_KEY_ID || '';
   const secretAccessKey = env?.R2_SECRET_ACCESS_KEY || '';
@@ -103,18 +117,6 @@ export async function onRequest({ request, env }) {
     return errorResponse('invalid_method', 400, 'method must be GET or PUT', env);
   }
 
-  const globalAdmin = isGlobalAdmin(user, env);
-  if (!globalAdmin) {
-    const member = await hasMembership(env, schoolId, user.email);
-    if (!member) {
-      return errorResponse('forbidden', 403, 'Not authorized for this school', env);
-    }
-    const role = await getMembershipRole(env, schoolId, user.email);
-    if (!isTeacherRole(role)) {
-      return errorResponse('forbidden', 403, 'Teacher role required', env);
-    }
-  }
-
   const config = getR2Config(env);
   if (!config) {
     return errorResponse('not_configured', 500, 'R2 credentials not configured', env);
@@ -123,6 +125,21 @@ export async function onRequest({ request, env }) {
   const key = normalizeKey(rawKey);
   if (!key.startsWith(`schools/${schoolId}/`)) {
     return errorResponse('invalid_key', 400, 'Key must be prefixed with schools/{schoolId}/', env);
+  }
+
+  const globalAdmin = isGlobalAdmin(user, env);
+  if (!globalAdmin) {
+    const member = await hasMembership(env, schoolId, user.email);
+    if (!member) {
+      return errorResponse('forbidden', 403, 'Not authorized for this school', env);
+    }
+    const role = await getMembershipRole(env, schoolId, user.email);
+    if (!isTeacherRole(role)) {
+      const studentPrefix = buildStudentPrefix(schoolId, user.email);
+      if (!studentPrefix || !key.startsWith(studentPrefix)) {
+        return errorResponse('forbidden', 403, 'Student uploads limited to your submission folder', env);
+      }
+    }
   }
 
   const now = new Date();

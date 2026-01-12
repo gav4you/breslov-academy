@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
+import MetaTags from '@/components/seo/MetaTags';
 
 import content from '@/portals/public/publicContent.json';
 
@@ -32,13 +32,7 @@ export function PublicContentPage({ routeKey }) {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-14">
-      <Helmet>
-        <title>{title}</title>
-        {description ? <meta name="description" content={description} /> : null}
-        {description ? <meta property="og:description" content={description} /> : null}
-        <meta property="og:title" content={title} />
-        <meta property="og:type" content="website" />
-      </Helmet>
+      <MetaTags title={title} description={description} />
 
       <section className="grid gap-10 md:grid-cols-2 md:items-center">
         <div>

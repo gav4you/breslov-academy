@@ -11,19 +11,19 @@ test.describe('portal smoke (requires auth)', () => {
 
   test('student dashboard loads', async ({ page }) => {
     await page.goto('/student/dashboard');
-    await expect(page.getByText('Navigation')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Welcome back');
   });
 
   test('teacher dashboard loads', async ({ page }) => {
     test.skip(!hasTeacher, 'Set PLAYWRIGHT_ROLE=teacher|admin|superadmin to run teacher portal tests.');
     await page.goto('/teacher/dashboard');
-    await expect(page.getByText('Navigation')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Shalom');
   });
 
   test('admin dashboard loads', async ({ page }) => {
     test.skip(!hasAdmin, 'Set PLAYWRIGHT_ROLE=admin|superadmin to run admin portal tests.');
     await page.goto('/admin/dashboard');
-    await expect(page.getByText('Navigation')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Shalom');
   });
 
   test('superadmin network admin loads', async ({ page }) => {

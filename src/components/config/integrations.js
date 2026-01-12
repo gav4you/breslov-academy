@@ -67,6 +67,7 @@ export const INTEGRATIONS = {
     color: 'text-yellow-500',
     bg: 'bg-yellow-100 dark:bg-yellow-900/20',
     status: 'available',
+    connectMode: 'api_key',
     features: [
       'Sync new students to audience',
       'Tag students by course',
@@ -127,6 +128,7 @@ export const INTEGRATIONS = {
     color: 'text-orange-500',
     bg: 'bg-orange-100 dark:bg-orange-900/20',
     status: 'available',
+    connectMode: 'api_key',
     features: [
       'Trigger actions on enrollment',
       'Sync data to CRMs',

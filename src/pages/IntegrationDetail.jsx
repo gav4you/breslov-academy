@@ -1,11 +1,10 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { getIntegrationById } from '@/components/config/integrations';
-import { scopedFilter } from '@/components/api/scoped';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
 import { ArrowLeft, Check, ExternalLink, ShieldCheck } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { cx } from '@/components/theme/tokens';
@@ -13,6 +12,7 @@ import PageShell from '@/components/ui/PageShell';
 import GlassCard from '@/components/ui/GlassCard';
 import { toast } from 'sonner';
 import { useSession } from '@/components/hooks/useSession';
+import { useIntegration } from '@/components/hooks/useIntegration';
 import { base44 } from '@/api/base44Client';
 import { buildApiUrl } from '@/api/appClient';
 
@@ -23,25 +23,14 @@ export default function IntegrationDetail() {
   const app = getIntegrationById(appId);
   const { activeSchoolId } = useSession();
   const [isConnecting, setIsConnecting] = useState(false);
-  const [isConnected, setIsConnected] = useState(app?.status === 'connected');
+  const [apiKey, setApiKey] = useState('');
 
-  const isOAuth = app?.connectMode === 'oauth';
+  const connectMode = app?.connectMode || (app?.oauthStartPath ? 'oauth' : 'manual');
+  const isOAuth = connectMode === 'oauth';
+  const isApiKey = connectMode === 'api_key';
   const providerKey = app?.providerKey || app?.id;
 
-  const { data: connectionRows = [], refetch: refetchConnection } = useQuery({
-    queryKey: ['integration-connection', activeSchoolId, providerKey],
-    queryFn: () => scopedFilter(
-      'IntegrationConnection',
-      activeSchoolId,
-      { provider: providerKey },
-      '-updated_at',
-      1,
-      { fields: ['id', 'provider', 'status', 'connected_at', 'updated_at'] }
-    ),
-    enabled: !!activeSchoolId && !!providerKey && isOAuth,
-  });
-
-  const connection = useMemo(() => connectionRows?.[0] || null, [connectionRows]);
+  const { connection, isConnected: hookConnected, refetch: refetchConnection } = useIntegration(providerKey);
 
   useEffect(() => {
     if (!app) {
@@ -49,14 +38,9 @@ export default function IntegrationDetail() {
     }
   }, [app, navigate]);
 
-  useEffect(() => {
-    if (isOAuth) return;
-    setIsConnected(app?.status === 'connected');
-  }, [app, isOAuth]);
-
   if (!app) return null;
 
-  const connected = isOAuth ? connection?.status === 'connected' : isConnected;
+  const connected = hookConnected || (!connection && app?.status === 'connected');
 
   const handleConnect = () => {
     if (isOAuth) {
@@ -73,18 +57,38 @@ export default function IntegrationDetail() {
       return;
     }
 
+    if (!activeSchoolId) {
+      toast.error('Select a school first');
+      return;
+    }
+    if (isApiKey && !apiKey.trim()) {
+      toast.error('API key required');
+      return;
+    }
     setIsConnecting(true);
-    setTimeout(() => {
-      setIsConnecting(false);
-      setIsConnected(true);
+    base44.request('/integrations/connect', {
+      method: 'POST',
+      body: {
+        school_id: activeSchoolId,
+        provider: providerKey,
+        api_key: isApiKey ? apiKey.trim() : null,
+        connect_mode: connectMode,
+      },
+    }).then(async () => {
+      await refetchConnection();
+      setApiKey('');
       toast.success(`Successfully connected to ${app.name}`);
-    }, 1500);
+    }).catch(() => {
+      toast.error('Unable to connect integration');
+    }).finally(() => {
+      setIsConnecting(false);
+    });
   };
 
   const handleDisconnect = async () => {
     if (!confirm(`Are you sure you want to disconnect ${app.name}?`)) return;
 
-    if (isOAuth) {
+    if (isOAuth || isApiKey || connectMode === 'manual') {
       try {
         await base44.request('/integrations/disconnect', {
           method: 'POST',
@@ -98,7 +102,6 @@ export default function IntegrationDetail() {
       return;
     }
 
-    setIsConnected(false);
     toast.info(`Disconnected from ${app.name}`);
   };
 
@@ -229,6 +232,23 @@ export default function IntegrationDetail() {
               </Button>
             </div>
           </GlassCard>
+
+          {isApiKey && !connected && (
+            <GlassCard className="p-6">
+              <h3 className="font-semibold mb-4">API Key</h3>
+              <div className="space-y-3">
+                <Input
+                  type="password"
+                  placeholder="Paste API key"
+                  value={apiKey}
+                  onChange={(event) => setApiKey(event.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Keys are stored securely and only used for this school's integrations.
+                </p>
+              </div>
+            </GlassCard>
+          )}
 
           <div className="bg-blue-50 dark:bg-blue-900/10 rounded-xl p-4 border border-blue-100 dark:border-blue-800">
             <div className="flex gap-3">

@@ -37,3 +37,5 @@ Release gates are ship/no-ship checks. All P0 gates must be green.
 - Turnstile protection on auth forms
 - error logging with correlation ids
 - CI runs lint + spec validation + parity sweep
+- unit tests for tenancy/access/idempotency (`npm run test:unit`)
+- image size budget check (`npm run perf:check`)

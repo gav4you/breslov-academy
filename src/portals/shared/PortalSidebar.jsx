@@ -2,7 +2,9 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { getNavGroupsForAudience } from '@/components/config/features';
+import { FEATURE_FLAGS } from '@/components/config/featureFlags';
 import { useSession } from '@/components/hooks/useSession';
+import { useFeatureFlags } from '@/components/hooks/useFeatureFlag';
 import { Home, BookOpen, GraduationCap, Shield, Archive } from 'lucide-react';
 import { cx } from '@/components/theme/tokens';
 
@@ -17,8 +19,10 @@ function IconForArea({ area }) {
 export default function PortalSidebar({ currentPageName, audience: propAudience, onNavigate }) {
   const { audience, role } = useSession();
   const a = (propAudience || audience || (role === 'ADMIN' ? 'admin' : 'student')).toLowerCase();
+  const flagKeys = useMemo(() => Object.keys(FEATURE_FLAGS), []);
+  const flags = useFeatureFlags(flagKeys);
 
-  const navGroups = useMemo(() => getNavGroupsForAudience(a), [a]);
+  const navGroups = useMemo(() => getNavGroupsForAudience(a, flags), [a, flags]);
 
   return (
     <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-auto p-2">

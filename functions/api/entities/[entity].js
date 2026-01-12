@@ -20,14 +20,94 @@ import {
   sanitizePublicPreviewChars,
 } from '../_tenancy.js';
 
-async function hasAdminRole(env, schoolId, email) {
-  if (!schoolId || !email) return false;
+const ADMIN_ROLES = new Set(['OWNER', 'ADMIN', 'SUPERADMIN']);
+const STAFF_ROLES = new Set(['OWNER', 'ADMIN', 'INSTRUCTOR', 'TEACHER', 'TA', 'RAV', 'RABBI', 'SUPERADMIN']);
+
+const ADMIN_READ_ENTITIES = new Set([
+  'AuditLog',
+  'InstructorPayout',
+  'PayoutBatch',
+  'StripeAccount',
+  'StripeWebhookEvent',
+  'PricingChangeRequest',
+  'IntegrationConnection',
+  'DomainVerification',
+  'SchoolAuthPolicy',
+  'ContentProtectionPolicy',
+  'SchoolSetting',
+  'SchoolInvite',
+  'StaffInvite',
+  'SchoolMembership',
+  'SubscriptionPlan',
+  'SubscriptionInvoice',
+  'FeatureFlag',
+  'NotificationToken',
+  'AiRagIndex',
+]);
+
+const ADMIN_WRITE_ENTITIES = new Set([
+  'AuditLog',
+  'InstructorPayout',
+  'PayoutBatch',
+  'StripeAccount',
+  'StripeWebhookEvent',
+  'PricingChangeRequest',
+  'IntegrationConnection',
+  'DomainVerification',
+  'SchoolAuthPolicy',
+  'ContentProtectionPolicy',
+  'SchoolSetting',
+  'SchoolInvite',
+  'StaffInvite',
+  'SchoolMembership',
+  'SubscriptionPlan',
+  'SubscriptionInvoice',
+  'FeatureFlag',
+  'NotificationToken',
+  'AiRagIndex',
+  'Offer',
+  'Coupon',
+  'Subscription',
+  'Bundle',
+  'Affiliate',
+  'Referral',
+  'CourseStaff',
+  'StreamUpload',
+]);
+
+const STAFF_WRITE_ENTITIES = new Set([
+  'Course',
+  'Lesson',
+  'Quiz',
+  'QuizQuestion',
+  'Assignment',
+  'Announcement',
+  'LiveClass',
+  'LiveStream',
+  'Cohort',
+  'CohortScheduleItem',
+  'CohortMember',
+]);
+
+function normalizeRole(role) {
+  return String(role || '').toUpperCase();
+}
+
+function isAdminRole(role) {
+  return ADMIN_ROLES.has(normalizeRole(role));
+}
+
+function isStaffRole(role) {
+  return STAFF_ROLES.has(normalizeRole(role));
+}
+
+async function getMembership(env, schoolId, email) {
+  if (!schoolId || !email) return null;
   const rows = await listEntities(env, 'SchoolMembership', {
     filters: { school_id: String(schoolId), user_email: String(email) },
     limit: 1,
   });
-  const role = String(rows?.[0]?.role || '').toUpperCase();
-  return ['OWNER', 'ADMIN', 'SUPERADMIN'].includes(role);
+  return rows?.[0] || null;
 }
 
 function normalizePreviewChars(value) {
@@ -71,9 +151,9 @@ export async function onRequest({ request, env, params }) {
     const publicRule = getPublicRule(entity);
     const publicFilters = publicRule ? applyPublicRule(entity, filters) : null;
     const requiresAccessGate = entity === 'Lesson' || entity === 'QuizQuestion';
+    const tokenLookup = isPublicTokenLookup(entity, filters);
 
-    if (!isAuthenticated) {
-      if (isPublicTokenLookup(entity, filters)) {
+    if (tokenLookup) {
       try {
         const rows = await listEntities(env, entity, { filters, sort, limit, fields, previewChars });
         return json(rows, { env });
@@ -81,6 +161,8 @@ export async function onRequest({ request, env, params }) {
         return errorResponse('storage_unavailable', 503, err.message, env);
       }
     }
+
+    if (!isAuthenticated) {
       if (!publicRule || !publicFilters) {
         return errorResponse('auth_required', 401, 'Authentication required', env);
       }
@@ -163,13 +245,16 @@ export async function onRequest({ request, env, params }) {
       }
 
       if (schoolId && !globalAdmin) {
-        const isMember = await hasMembership(env, schoolId, user.email);
-        if (entity === 'DomainVerification') {
-          const isAdmin = await hasAdminRole(env, schoolId, user.email);
-          if (!isAdmin) {
+        const membership = await getMembership(env, schoolId, user.email);
+        const role = membership?.role || null;
+        const isMember = Boolean(membership);
+
+        if (!(entity === 'SchoolMembership' && selfScoped)) {
+          if (ADMIN_READ_ENTITIES.has(entity) && !isAdminRole(role)) {
             return errorResponse('forbidden', 403, 'Admin role required', env);
           }
         }
+
         if (!isMember && publicRule && publicFilters) {
           const schoolOk = await isSchoolPublic(env, schoolId);
           if (!schoolOk) {
@@ -184,7 +269,7 @@ export async function onRequest({ request, env, params }) {
           return errorResponse('storage_unavailable', 503, err.message, env);
         }
       }
-        if (!isMember) {
+        if (!isMember && !(entity === 'SchoolMembership' && selfScoped)) {
           return errorResponse('forbidden', 403, 'Not authorized for this school', env);
         }
       }
@@ -242,23 +327,34 @@ export async function onRequest({ request, env, params }) {
         return errorResponse('missing_school', 400, 'school_id is required', env);
       }
       if (!globalAdmin) {
-        if (entity === 'DomainVerification') {
-          const isAdmin = await hasAdminRole(env, schoolId, user.email);
-          if (!isAdmin) {
-            return errorResponse('forbidden', 403, 'Admin role required', env);
-          }
-        }
         if (entity === 'SchoolMembership') {
           const payloadEmail = payload.user_email || payload.userEmail || '';
           if (payloadEmail && String(payloadEmail).toLowerCase() !== String(user.email).toLowerCase()) {
             return errorResponse('forbidden', 403, 'Cannot create membership for another user', env);
           }
         }
-        const isMember = await hasMembership(env, schoolId, user.email);
-        const invited = entity === 'SchoolMembership'
+        const membership = await getMembership(env, schoolId, user.email);
+        const role = membership?.role || null;
+        const isMember = Boolean(membership);
+
+        const invite = entity === 'SchoolMembership'
           ? await hasInviteForUser(env, schoolId, user.email)
-          : false;
-        if (!isMember && !invited) {
+          : null;
+        const invited = Boolean(invite);
+        if (entity === 'SchoolMembership' && invited && invite?.role && payload.role) {
+          if (normalizeRole(payload.role) !== normalizeRole(invite.role)) {
+            return errorResponse('forbidden', 403, 'Invite role mismatch', env);
+          }
+        }
+
+        if (ADMIN_WRITE_ENTITIES.has(entity) && !isAdminRole(role) && !(entity === 'SchoolMembership' && invited)) {
+          return errorResponse('forbidden', 403, 'Admin role required', env);
+        }
+        if (STAFF_WRITE_ENTITIES.has(entity) && !isStaffRole(role)) {
+          return errorResponse('forbidden', 403, 'Staff role required', env);
+        }
+
+        if (!isMember && !(entity === 'SchoolMembership' && invited)) {
           return errorResponse('forbidden', 403, 'Not authorized for this school', env);
         }
       }

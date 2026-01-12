@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/select';
 import GlassCard from '@/components/ui/GlassCard';
 import SectionHeader from '@/components/ui/SectionHeader';
+import MetaTags from '@/components/seo/MetaTags';
 import {
   ArrowRight,
   BookOpen,
@@ -191,6 +192,10 @@ export default function PublicHome() {
 
   return (
     <div className="flex flex-col bg-background">
+      <MetaTags
+        title="Breslov Academy"
+        description="Discover trusted Torah schools, protected learning, and premium courses across the Breslov Academy network."
+      />
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(205,160,92,0.15),transparent_55%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(15,23,42,0.06),transparent_50%)]" />

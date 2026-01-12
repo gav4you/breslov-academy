@@ -2,6 +2,43 @@
 
 All notable changes to the Breslov Academy LMS project.
 
+## [Unreleased] - 2026-01-12
+### Security & SSO
+- Added OIDC id_token validation (JWKS signature, issuer/audience, nonce) and stored nonce in AuthState.
+- Added authenticated cleanup endpoint for expired AuthState/AuthSession (`/api/auth/cleanup`).
+- Enforced role-based access in the Entities API for admin/staff-only resources while preserving invite acceptance flows.
+- Corrected domain policy evaluation for SSO domain-match requirements.
+- Added configurable rate limiting for auth, checkout, and download token issuance.
+
+### Media & Submissions
+- Added R2 presign flow for submission attachments with student-safe key prefixes.
+- Enabled attachment uploads and secure downloads in student submissions and grading views.
+
+### Integrations & Feature Flags
+- Added integration connect endpoint with API-key support and persistent connection records.
+- Wired marketplace badges to live connection status and gated nav items by feature flags.
+- Extended lesson and quiz authoring to capture language metadata.
+
+### Mobile, AI, and VR
+- Added mobile bridge for deep links and push notification registration, plus notification token endpoints.
+- Implemented offline cache storage with native/IndexedDB fallback and updated Offline UX.
+- Added AI tutor RAG endpoint with optional OpenAI integration and indexing API.
+- Wired AI tutor UIs to server responses with sources and access checks.
+- Upgraded Virtual Beit Midrash with shared media screen, voice toggle, and local avatar movement.
+
+### Frontend & Dependencies
+- Replaced the lesson editor rich text component with a Markdown-friendly textarea.
+- Aligned @react-three dependencies to React 18 compatibility and removed unused react-leaflet.
+- Updated homepage smoke test heading to match current public marketing copy.
+- Added CLI scripts for integrity export and AI indexing, and tightened integrity scan regexes.
+- Added dev seed and Playwright storage-state scripts for authenticated portal QA runs.
+- Fixed API base URL path joining to support absolute URLs with `/api` prefixes.
+
+### QA & Docs
+- Added unit tests for tenancy scoping, access gating, and billing idempotency.
+- Added image size budget check script and integrity report sample.
+- Published Phase 0 reality map docs (codebase, route map, registry dump, invariants).
+
 ## [v11.0] - 2026-01-11
 ### Future Horizons
 - **Mobile Native:** Added Capacitor configuration (`capacitor.config.json`) and updated layout for safe-area insets (iOS/Android notches).

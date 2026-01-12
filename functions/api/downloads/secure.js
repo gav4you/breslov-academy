@@ -1,4 +1,5 @@
 import { errorResponse, getBearerToken, handleOptions, json, readJson } from '../_utils.js';
+import { buildRateLimitKey, checkRateLimit } from '../_rateLimit.js';
 import { createEntity, listEntities, updateEntity } from '../_store.js';
 import { getUserFromToken } from '../_auth.js';
 
@@ -39,6 +40,22 @@ export async function onRequest({ request, env }) {
   const user = await getUserFromToken(token, env);
   if (!user?.email) {
     return errorResponse('unauthorized', 401, 'Authentication required', env);
+  }
+
+  const downloadLimit = Number(env?.RATE_LIMIT_DOWNLOADS || 20);
+  const downloadWindow = Number(env?.RATE_LIMIT_DOWNLOADS_WINDOW_SECONDS || 60);
+  const downloadKey = buildRateLimitKey({
+    prefix: 'downloads_secure',
+    request,
+    userEmail: user.email,
+  });
+  const downloadCheck = await checkRateLimit(env, {
+    key: downloadKey,
+    limit: downloadLimit,
+    windowSeconds: downloadWindow,
+  });
+  if (!downloadCheck.allowed) {
+    return errorResponse('rate_limited', 429, 'Too many download attempts', env);
   }
 
   const payload = await readJson(request);

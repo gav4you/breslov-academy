@@ -13,7 +13,7 @@ import GlassCard from '@/components/ui/GlassCard';
 import { DashboardSkeleton } from '@/components/ui/SkeletonLoaders';
 
 export default function SchoolFeatures() {
-  const { activeSchoolId, user, isLoading: isSessionLoading } = useSession();
+  const { activeSchool, activeSchoolId, user, isLoading: isSessionLoading } = useSession();
   const queryClient = useQueryClient();
   const [pendingChanges, setPendingChanges] = useState({});
   const SETTING_PREFIX = 'feature_';

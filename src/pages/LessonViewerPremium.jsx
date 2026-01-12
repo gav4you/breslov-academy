@@ -301,6 +301,7 @@ export default function LessonViewerPremium() {
             contextId={lesson.id}
             contextTitle={lesson.title}
             contextContent={canFetchMaterials ? contentToShow : ''}
+            contextCourseId={lesson.course_id}
             user={user}
             schoolId={lesson.school_id}
           />

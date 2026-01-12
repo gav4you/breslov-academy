@@ -1,4 +1,5 @@
 import { errorResponse, handleOptions, withHeaders } from '../../_utils.js';
+import { buildRateLimitKey, checkRateLimit } from '../../_rateLimit.js';
 import { createEntity, listEntities, updateEntity } from '../../_store.js';
 import { createSession } from '../../_auth.js';
 import { getProviderConfig } from './_providers.js';
@@ -64,6 +65,175 @@ function extractName(profile, fallbackEmail) {
 
 function extractProviderUserId(profile) {
   return profile?.sub || profile?.id || profile?.oid || null;
+}
+
+const JWKS_CACHE = new Map();
+const JWKS_CACHE_TTL_MS = 5 * 60 * 1000;
+const JWT_CLOCK_SKEW_SEC = 120;
+
+function base64UrlToBytes(value) {
+  const raw = String(value || '').replace(/-/g, '+').replace(/_/g, '/');
+  const padded = raw + '='.repeat((4 - (raw.length % 4)) % 4);
+  if (typeof Buffer !== 'undefined') {
+    return Uint8Array.from(Buffer.from(padded, 'base64'));
+  }
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+function decodeJwtSegment(segment) {
+  const bytes = base64UrlToBytes(segment);
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+
+function parseJwt(token) {
+  const parts = String(token || '').split('.');
+  if (parts.length !== 3) {
+    throw new Error('Invalid token format');
+  }
+  const [headerSegment, payloadSegment, signatureSegment] = parts;
+  return {
+    header: decodeJwtSegment(headerSegment),
+    payload: decodeJwtSegment(payloadSegment),
+    signedData: `${headerSegment}.${payloadSegment}`,
+    signature: base64UrlToBytes(signatureSegment),
+  };
+}
+
+function normalizeIssuer(value) {
+  return String(value || '').trim().replace(/\/+$/, '');
+}
+
+function isIssuerAllowed(payload, config) {
+  const issuer = normalizeIssuer(payload?.iss);
+  const expected = normalizeIssuer(config?.issuer);
+  if (expected && issuer === expected) return true;
+  const aliases = Array.isArray(config?.issuerAliases) ? config.issuerAliases : [];
+  if (aliases.some((alias) => normalizeIssuer(alias) === issuer)) return true;
+  if (config?.issuerAllowTenantWildcard) {
+    return issuer.startsWith('https://login.microsoftonline.com/');
+  }
+  return false;
+}
+
+function hasAudience(payload, clientId) {
+  const aud = payload?.aud;
+  if (!aud || !clientId) return false;
+  if (Array.isArray(aud)) return aud.includes(clientId);
+  return String(aud) === String(clientId);
+}
+
+function assertTokenClaims(payload, config, expectedNonce) {
+  if (!payload || !config) {
+    throw new Error('Invalid token claims');
+  }
+  if (!isIssuerAllowed(payload, config)) {
+    throw new Error('Invalid token issuer');
+  }
+  if (!hasAudience(payload, config.clientId)) {
+    throw new Error('Invalid token audience');
+  }
+  if (Array.isArray(payload.aud) && payload.azp && String(payload.azp) !== String(config.clientId)) {
+    throw new Error('Invalid token authorized party');
+  }
+  const now = Math.floor(Date.now() / 1000);
+  const exp = Number(payload.exp);
+  if (!Number.isFinite(exp)) {
+    throw new Error('Token missing expiration');
+  }
+  if (now - JWT_CLOCK_SKEW_SEC >= exp) {
+    throw new Error('Token expired');
+  }
+  if (payload.nbf) {
+    const nbf = Number(payload.nbf);
+    if (Number.isFinite(nbf) && now + JWT_CLOCK_SKEW_SEC < nbf) {
+      throw new Error('Token not active');
+    }
+  }
+  if (expectedNonce) {
+    if (!payload.nonce || String(payload.nonce) !== String(expectedNonce)) {
+      throw new Error('Invalid token nonce');
+    }
+  } else {
+    throw new Error('Missing login nonce');
+  }
+}
+
+async function fetchJwks(jwksUrl, force = false) {
+  if (!jwksUrl) {
+    throw new Error('Missing JWKS endpoint');
+  }
+  const cached = JWKS_CACHE.get(jwksUrl);
+  if (!force && cached && Date.now() - cached.fetchedAt < JWKS_CACHE_TTL_MS) {
+    return cached.keys;
+  }
+  const response = await fetch(jwksUrl);
+  const data = await response.json().catch(() => null);
+  if (!response.ok || !Array.isArray(data?.keys)) {
+    throw new Error('Failed to fetch JWKS');
+  }
+  JWKS_CACHE.set(jwksUrl, { keys: data.keys, fetchedAt: Date.now() });
+  return data.keys;
+}
+
+async function resolveJwk(config, kid) {
+  const keys = await fetchJwks(config?.jwksUrl, false);
+  let match = keys.find((key) => key.kid === kid);
+  if (!match) {
+    const refreshed = await fetchJwks(config?.jwksUrl, true);
+    match = refreshed.find((key) => key.kid === kid);
+  }
+  if (!match) {
+    throw new Error('Signing key not found');
+  }
+  return match;
+}
+
+async function verifyJwtSignature({ signedData, signature, jwk }) {
+  const subtle = crypto?.subtle || crypto?.webcrypto?.subtle;
+  if (!subtle) {
+    throw new Error('Crypto unavailable');
+  }
+  const key = await subtle.importKey(
+    'jwk',
+    jwk,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['verify']
+  );
+  const verified = await subtle.verify(
+    'RSASSA-PKCS1-v1_5',
+    key,
+    signature,
+    new TextEncoder().encode(signedData)
+  );
+  if (!verified) {
+    throw new Error('Invalid token signature');
+  }
+}
+
+async function verifyIdToken(idToken, config, expectedNonce) {
+  if (!idToken) {
+    throw new Error('Missing id_token');
+  }
+  if (!config?.jwksUrl || !config?.issuer) {
+    throw new Error('Provider missing JWKS or issuer');
+  }
+  const { header, payload, signedData, signature } = parseJwt(idToken);
+  if (header?.alg !== 'RS256') {
+    throw new Error('Unsupported token algorithm');
+  }
+  if (!header?.kid) {
+    throw new Error('Missing token kid');
+  }
+  const jwk = await resolveJwk(config, header.kid);
+  await verifyJwtSignature({ signedData, signature, jwk });
+  assertTokenClaims(payload, config, expectedNonce);
+  return payload;
 }
 
 async function exchangeCode(config, code, codeVerifier) {
@@ -176,13 +346,25 @@ async function findMembership(env, schoolId, email) {
 
 async function acceptInviteIfExists(env, schoolId, email) {
   if (!schoolId || !email) return null;
-  const invites = await listEntities(env, 'SchoolInvite', {
-    filters: { school_id: String(schoolId), email },
-    limit: 25,
-  });
+  const [schoolInvites, staffInvites] = await Promise.all([
+    listEntities(env, 'SchoolInvite', {
+      filters: { school_id: String(schoolId), email },
+      limit: 25,
+    }),
+    listEntities(env, 'StaffInvite', {
+      filters: { school_id: String(schoolId), email },
+      limit: 25,
+    }),
+  ]);
   const now = new Date();
-  const invite = (invites || []).find((row) => {
+  const invites = [
+    ...(schoolInvites || []).map((row) => ({ ...row, _entity: 'SchoolInvite' })),
+    ...(staffInvites || []).map((row) => ({ ...row, _entity: 'StaffInvite' })),
+  ];
+  const invite = invites.find((row) => {
+    const status = String(row.status || '').toUpperCase();
     if (row.accepted_at) return false;
+    if (status && status !== 'PENDING') return false;
     if (row.expires_at && new Date(row.expires_at) <= now) return false;
     return true;
   });
@@ -195,15 +377,22 @@ async function acceptInviteIfExists(env, schoolId, email) {
     joined_at: nowIso(),
   });
 
-  await updateEntity(env, 'SchoolInvite', invite.id, {
-    accepted_at: nowIso(),
-  });
+  if (invite._entity === 'StaffInvite') {
+    await updateEntity(env, 'StaffInvite', invite.id, {
+      accepted_at: nowIso(),
+      status: 'ACCEPTED',
+    });
+  } else {
+    await updateEntity(env, 'SchoolInvite', invite.id, {
+      accepted_at: nowIso(),
+    });
+  }
 
   await createEntity(env, 'AuditLog', {
     school_id: String(schoolId),
     user_email: email,
-    action: 'SCHOOL_INVITE_ACCEPTED',
-    entity_type: 'SchoolInvite',
+    action: invite._entity === 'StaffInvite' ? 'STAFF_INVITE_ACCEPTED' : 'SCHOOL_INVITE_ACCEPTED',
+    entity_type: invite._entity || 'SchoolInvite',
     entity_id: invite.id,
     metadata: { invited_email: invite.email, role: invite.role },
   });
@@ -244,6 +433,14 @@ export async function onRequest({ request, env }) {
   const options = handleOptions(request, env);
   if (options) return options;
 
+  const authLimit = Number(env?.RATE_LIMIT_AUTH || 30);
+  const authWindow = Number(env?.RATE_LIMIT_AUTH_WINDOW_SECONDS || 60);
+  const authKey = buildRateLimitKey({ prefix: 'oidc_callback', request });
+  const authCheck = await checkRateLimit(env, { key: authKey, limit: authLimit, windowSeconds: authWindow });
+  if (!authCheck.allowed) {
+    return errorResponse('rate_limited', 429, 'Too many login attempts', env);
+  }
+
   if (request.method !== 'GET') {
     return errorResponse('method_not_allowed', 405, 'Method not allowed', env);
   }
@@ -279,6 +476,13 @@ export async function onRequest({ request, env }) {
     return redirectWithError('token_exchange_failed', error.message, state.next_url, url.origin, env);
   }
 
+  let idTokenPayload = null;
+  try {
+    idTokenPayload = await verifyIdToken(tokenResponse.id_token, config, state.nonce);
+  } catch (error) {
+    return redirectWithError('invalid_id_token', error.message, state.next_url, url.origin, env);
+  }
+
   let profile;
   try {
     profile = await fetchUserInfo(config, tokenResponse.access_token);
@@ -286,13 +490,18 @@ export async function onRequest({ request, env }) {
     return redirectWithError('userinfo_failed', error.message, state.next_url, url.origin, env);
   }
 
-  const email = extractEmail(profile);
+  const email = extractEmail(profile) || extractEmail(idTokenPayload);
   if (!email) {
     return redirectWithError('email_missing', 'No email returned by provider', state.next_url, url.origin, env);
   }
 
-  const name = extractName(profile, email);
-  const providerUserId = extractProviderUserId(profile);
+  const idTokenEmail = extractEmail(idTokenPayload);
+  if (idTokenEmail && String(idTokenEmail).toLowerCase() !== String(email).toLowerCase()) {
+    return redirectWithError('email_mismatch', 'Email mismatch between ID token and user info', state.next_url, url.origin, env);
+  }
+
+  const name = extractName(profile, email) || extractName(idTokenPayload, email);
+  const providerUserId = extractProviderUserId(profile) || extractProviderUserId(idTokenPayload);
 
   const school = await resolveSchool(env, state.school_id, state.school_slug);
   const policy = await getSchoolAuthPolicy(env, school?.id);
@@ -303,8 +512,10 @@ export async function onRequest({ request, env }) {
     if (!policyAllowsProvider(policy, provider, allowAll)) {
       return redirectWithError('sso_disabled', 'SSO not enabled for this school', state.next_url, url.origin, env);
     }
-    if (!isDomainAllowed(policy, email, verifiedDomains)) {
-      return redirectWithError('domain_blocked', 'Email domain not allowed', state.next_url, url.origin, env);
+    if (!allowAll || policy) {
+      if (!isDomainAllowed(policy, email, verifiedDomains)) {
+        return redirectWithError('domain_blocked', 'Email domain not allowed', state.next_url, url.origin, env);
+      }
     }
   }
 

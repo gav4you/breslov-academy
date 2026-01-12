@@ -65,7 +65,7 @@ export function scanSource({ moduleKey, moduleLabel, source, rules = RULES }) {
  */
 export function scanReaderEntitlementGate(source) {
   const hasEntitlementGate = /\$or\s*:\s*\[/.test(source) && /\$in/.test(source) && /(allowedCourseIds|courseIds)/.test(source);
-  const hasLimit = /scopedFilter\(['"]Text['"][\s\S]*?,\s*\d+\)/m.test(source) || /,\s*\d+\)\s*;\s*$/m.test(source);
+  const hasLimit = /scopedFilter\(['"]Text['"][\s\S]*?,\s*\d+\s*(,|\))/m.test(source);
   return {
     key: 'reader:entitlement_gate',
     label: 'Reader — Text query gated by entitlements',
@@ -85,7 +85,9 @@ export function runScans(sources = {}) {
   const out = [];
   for (const [key, entry] of Object.entries(sources)) {
     if (!entry?.source) continue;
-    out.push(...scanSource({ moduleKey: key, moduleLabel: entry.label || key, source: entry.source }));
+    const skipRules = Array.isArray(entry.skipRules) ? new Set(entry.skipRules) : null;
+    const rules = entry.rules || RULES.filter((rule) => (skipRules ? !skipRules.has(rule.key) : true));
+    out.push(...scanSource({ moduleKey: key, moduleLabel: entry.label || key, source: entry.source, rules }));
   }
   // Optional high-signal scan for Reader
   if (sources.reader?.source) {

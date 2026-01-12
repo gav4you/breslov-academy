@@ -38,6 +38,7 @@ export default function TeachCourseCurriculum({ course, user }) {
         created_by: user.email,
         title,
         content: '',
+        language: course?.language || 'en',
         order: maxOrder + 1,
         status: 'draft'
       });

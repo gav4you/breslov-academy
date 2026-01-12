@@ -9,6 +9,8 @@ export const SCHOOL_SCOPED_ENTITIES = [
   'Testimonial', 'InstructorPayout', 'AuditLog', 'EventLog',
   'Announcement', 'UserAnnouncementRead', 'Affiliate', 'Referral',
   'AiTutorSession', 'AiTutorPolicyLog', 'RateLimitLog',
+  'AiRagIndex',
+  'NotificationToken',
   'Bookmark', 'LessonNote', 'Highlight', 'Transcript',
   'Text', 'CourseReview', 'Discussion', 'ContentReport',
   'ModerationAction', 'SchoolMetricDaily', 'CourseMetricDaily',
@@ -194,15 +196,24 @@ export async function findSchoolByFilter(env, filters) {
 }
 
 export async function hasInviteForUser(env, schoolId, userEmail) {
-  if (!schoolId || !userEmail) return false;
-  const invites = await listEntities(env, 'SchoolInvite', {
-    filters: { school_id: String(schoolId), email: String(userEmail) },
-    limit: 25,
-  });
+  if (!schoolId || !userEmail) return null;
+  const [schoolInvites, staffInvites] = await Promise.all([
+    listEntities(env, 'SchoolInvite', {
+      filters: { school_id: String(schoolId), email: String(userEmail) },
+      limit: 25,
+    }),
+    listEntities(env, 'StaffInvite', {
+      filters: { school_id: String(schoolId), email: String(userEmail) },
+      limit: 25,
+    }),
+  ]);
   const now = new Date();
-  return (invites || []).some((invite) => {
+  const invites = [...(schoolInvites || []), ...(staffInvites || [])];
+  return invites.find((invite) => {
+    const status = String(invite.status || '').toUpperCase();
     if (invite.accepted_at) return false;
+    if (status && status !== 'PENDING') return false;
     if (invite.expires_at && new Date(invite.expires_at) <= now) return false;
     return true;
-  });
+  }) || null;
 }

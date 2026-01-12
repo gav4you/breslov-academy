@@ -7,6 +7,14 @@ function normalizeBaseUrl(baseUrl) {
   return baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
 }
 
+function joinPaths(basePath, nextPath) {
+  const left = String(basePath || '').replace(/\/+$/, '');
+  const right = String(nextPath || '').replace(/^\/+/, '');
+  if (!left) return `/${right}`;
+  if (!right) return left || '/';
+  return `${left}/${right}`;
+}
+
 function resolveOrigin() {
   if (typeof window !== 'undefined' && window.location?.origin) {
     return window.location.origin;
@@ -37,8 +45,9 @@ export function buildApiUrl(path, params, baseUrlOverride) {
 
   const isAbsolute = /^https?:\/\//i.test(baseUrl);
   const url = isAbsolute
-    ? new URL(normalizedPath, baseUrl)
-    : new URL(`${baseUrl}${normalizedPath}`, resolveOrigin());
+    ? new URL(baseUrl)
+    : new URL(baseUrl, resolveOrigin());
+  url.pathname = joinPaths(url.pathname, normalizedPath);
 
   const query = buildQuery(params);
   if (query) {

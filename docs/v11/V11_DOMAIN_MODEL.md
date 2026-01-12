@@ -1,7 +1,7 @@
 # V11 Domain Model (Tenant First)
 
 Status: Draft
-Last updated: 2026-01-11
+Last updated: 2026-01-12
 
 This model defines tenant-first entities for Breslov University v11.
 Every entity marked "school scoped" must include school_id and use scoped helpers.
@@ -54,6 +54,12 @@ Every entity marked "school scoped" must include school_id and use scoped helper
 - Download (school scoped): course_id, file_url, price_cents
 - DownloadToken (school scoped): token, download_id, expires_at, used_at
 - StreamUpload (school scoped): stream_uid, upload_url, lesson_id, status
+
+## AI and Mobile
+- AiTutorSession (school scoped): user_email, context_type, context_id, messages
+- AiTutorPolicyLog (school scoped): action, reason, context_type, context_id
+- AiRagIndex (school scoped): lesson_id, course_id, token_count, tokens, source_updated_at
+- NotificationToken (school scoped): user_email, token, platform, device_id, last_seen_at, revoked_at
 
 ## Integrations
 - Integration (global): marketplace metadata

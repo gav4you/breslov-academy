@@ -22,6 +22,14 @@ import { loadQuizForAccess, saveQuiz } from '@/components/academic/quizEngine';
 import { toast } from 'sonner';
 import { GripVertical, Plus, Save, Trash2, Download, Check } from 'lucide-react';
 
+const LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'he', label: 'Hebrew' },
+  { code: 'es', label: 'Spanish' },
+  { code: 'fr', label: 'French' },
+  { code: 'ru', label: 'Russian' }
+];
+
 function makeBlankQuestion() {
   return {
     prompt: '',
@@ -138,6 +146,7 @@ const quizSchema = z.object({
   description: z.string().optional().or(z.literal('')),
   course_id: z.string().min(1, 'Course is required'),
   lesson_id: z.string().optional().or(z.literal('')),
+  language: z.string().optional().or(z.literal('')),
   passing_score: z.coerce.number().min(0).max(100).default(70),
   preview_limit_questions: z.coerce.number().int().min(0).max(10).default(2),
   shuffle_questions: z.boolean().default(false),
@@ -212,6 +221,7 @@ export default function TeachQuizEditor() {
       description: '',
       course_id: presetCourseId || '',
       lesson_id: '',
+      language: 'en',
       passing_score: 70,
       preview_limit_questions: 2,
       shuffle_questions: false,
@@ -282,6 +292,7 @@ export default function TeachQuizEditor() {
       description: quiz.description || '',
       course_id: quiz.course_id ? String(quiz.course_id) : '',
       lesson_id: quiz.lesson_id ? String(quiz.lesson_id) : '',
+      language: quiz.language || 'en',
       passing_score: quiz.passing_score ?? 70,
       preview_limit_questions: quiz.preview_limit_questions ?? 2,
       shuffle_questions: !!quiz.shuffle_questions,
@@ -315,6 +326,7 @@ export default function TeachQuizEditor() {
           description: values.description,
           course_id: values.course_id,
           lesson_id: values.lesson_id || null,
+          language: values.language || 'en',
           passing_score: values.passing_score,
           preview_limit_questions: values.preview_limit_questions,
           shuffle_questions: values.shuffle_questions,
@@ -440,6 +452,25 @@ export default function TeachQuizEditor() {
                     {(lessons || []).map((l) => (
                       <SelectItem key={l.id} value={String(l.id)}>
                         {l.title || l.name || `Lesson ${l.order ?? ''}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Quiz Language</Label>
+                <Select
+                  value={form.watch('language') || 'en'}
+                  onValueChange={(v) => form.setValue('language', v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LANGUAGES.map((lang) => (
+                      <SelectItem key={lang.code} value={lang.code}>
+                        {lang.label}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -12,9 +12,27 @@ function buildRedirectUri(provider, env, origin) {
   return new URL('/api/auth/oidc/callback', origin).toString();
 }
 
+function getGoogleIssuer() {
+  return 'https://accounts.google.com';
+}
+
+function getGoogleJwksUrl() {
+  return 'https://www.googleapis.com/oauth2/v3/certs';
+}
+
 function getMicrosoftTenant(env) {
   const raw = env?.MICROSOFT_OIDC_TENANT || 'common';
   return String(raw || 'common');
+}
+
+function getMicrosoftIssuer(env) {
+  const tenant = getMicrosoftTenant(env);
+  return `https://login.microsoftonline.com/${encodeURIComponent(tenant)}/v2.0`;
+}
+
+function getMicrosoftJwksUrl(env) {
+  const tenant = getMicrosoftTenant(env);
+  return `https://login.microsoftonline.com/${encodeURIComponent(tenant)}/discovery/v2.0/keys`;
 }
 
 export function getProviderConfig(provider, env, origin) {
@@ -30,6 +48,9 @@ export function getProviderConfig(provider, env, origin) {
       authorizeUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
       tokenUrl: 'https://oauth2.googleapis.com/token',
       userinfoUrl: 'https://openidconnect.googleapis.com/v1/userinfo',
+      jwksUrl: getGoogleJwksUrl(),
+      issuer: getGoogleIssuer(),
+      issuerAliases: ['accounts.google.com'],
       scopes: env?.GOOGLE_OIDC_SCOPES || DEFAULT_GOOGLE_SCOPES,
       redirectUri: buildRedirectUri('google', env, origin),
       prompt: env?.GOOGLE_OIDC_PROMPT || 'select_account',
@@ -42,6 +63,7 @@ export function getProviderConfig(provider, env, origin) {
     if (!clientId || !clientSecret) return null;
     const tenant = getMicrosoftTenant(env);
     const base = `https://login.microsoftonline.com/${encodeURIComponent(tenant)}/oauth2/v2.0`;
+    const issuer = getMicrosoftIssuer(env);
     return {
       id: 'microsoft',
       clientId,
@@ -49,6 +71,9 @@ export function getProviderConfig(provider, env, origin) {
       authorizeUrl: `${base}/authorize`,
       tokenUrl: `${base}/token`,
       userinfoUrl: 'https://graph.microsoft.com/oidc/userinfo',
+      jwksUrl: getMicrosoftJwksUrl(env),
+      issuer,
+      issuerAllowTenantWildcard: ['common', 'organizations', 'consumers'].includes(tenant.toLowerCase()),
       scopes: env?.MICROSOFT_OIDC_SCOPES || DEFAULT_MICROSOFT_SCOPES,
       redirectUri: buildRedirectUri('microsoft', env, origin),
       prompt: env?.MICROSOFT_OIDC_PROMPT || 'select_account',
