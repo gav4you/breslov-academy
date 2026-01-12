@@ -1,6 +1,0 @@
-include:
-  - local: .gitlab/ci/kit.rules.yml
-  - local: .gitlab/ci/kit.ci-node-windows.yml
-  - local: .gitlab/ci/kit.security-basics.yml
-  # Optional (requires Linux runner):
-  # - local: .gitlab/ci/kit.releases.yml
