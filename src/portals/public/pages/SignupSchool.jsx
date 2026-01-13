@@ -7,6 +7,7 @@ import { ArrowLeft, Building2, CheckCircle2, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
+import TurnstileWidget from '@/components/security/TurnstileWidget';
 
 export default function SignupSchool() {
   const [submitted, setSubmitted] = useState(false);
@@ -17,6 +18,9 @@ export default function SignupSchool() {
     email: '',
     description: ''
   });
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileRequired = Boolean(turnstileSiteKey);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +33,8 @@ export default function SignupSchool() {
         slug: formData.slug,
         admin_email: formData.email,
         description: formData.description,
-        status: 'pending'
+        status: 'pending',
+        turnstile_token: turnstileToken
       });
       
       setSubmitted(true);
@@ -75,7 +80,7 @@ export default function SignupSchool() {
             <div className="p-2 bg-amber-100 rounded-lg text-amber-600">
               <Building2 className="h-6 w-6" />
             </div>
-            <CardTitle className="text-3xl font-bold">Start a New School</CardTitle>
+            <h1 className="text-3xl font-bold">Start a New School</h1>
           </div>
           <CardDescription className="text-base">
             Create your own dedicated platform for teaching and community.
@@ -137,7 +142,17 @@ export default function SignupSchool() {
               </p>
             </div>
 
-            <Button type="submit" className="w-full py-6 text-lg font-semibold shadow-lg" disabled={loading}>
+            <TurnstileWidget
+              siteKey={turnstileSiteKey}
+              action="school_signup"
+              onToken={setTurnstileToken}
+            />
+
+            <Button
+              type="submit"
+              className="w-full py-6 text-lg font-semibold shadow-lg"
+              disabled={loading || (turnstileRequired && !turnstileToken)}
+            >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />

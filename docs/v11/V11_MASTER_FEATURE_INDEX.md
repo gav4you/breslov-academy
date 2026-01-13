@@ -73,10 +73,10 @@ Status:
 | V11-MKT-009 | LoginStudentPublic | Student Login | public | P0 | building | Growth | Auth adapter | G/W/T: student login starts auth flow | None | /login/student | Auth:login |
 | V11-MKT-010 | LoginTeacherPublic | Teacher Login | public | P0 | building | Growth | Auth adapter | G/W/T: teacher login starts auth flow | None | /login/teacher | Auth:login |
 | V11-MKT-011 | LoginAdminPublic | Admin Login | public | P0 | building | Growth | Auth adapter | G/W/T: admin login starts auth flow | None | /login/admin | Auth:login |
-| V11-MKT-012 | SignupChooserPublic | Signup | public | P0 | planned | Growth | Auth adapter | G/W/T: signup choice leads to correct onboarding | None | /signup | Auth:signup |
-| V11-MKT-013 | SignupStudentPublic | Student Signup | public | P0 | planned | Growth | Auth adapter | G/W/T: student signup creates user | None | /signup/student | Auth:signup |
-| V11-MKT-014 | SignupTeacherPublic | Teacher Signup | public | P0 | planned | Growth | Auth adapter | G/W/T: teacher signup creates user | None | /signup/teacher | Auth:signup |
-| V11-MKT-015 | SignupSchoolPublic | School Signup | public | P0 | planned | Growth | School onboarding | G/W/T: school signup creates pending tenant | None | /signup/school | TenantApplication:create |
+| V11-MKT-012 | SignupChooserPublic | Signup | public | P0 | building | Growth | Auth adapter | G/W/T: signup choice leads to correct onboarding | None | /signup | Auth:signup |
+| V11-MKT-013 | SignupStudentPublic | Student Signup | public | P0 | building | Growth | Auth adapter | G/W/T: student signup creates user | None | /signup/student | Auth:signup |
+| V11-MKT-014 | SignupTeacherPublic | Teacher Signup | public | P0 | building | Growth | Auth adapter | G/W/T: teacher signup creates user | None | /signup/teacher | Auth:signup |
+| V11-MKT-015 | SignupSchoolPublic | School Signup | public | P0 | building | Growth | School onboarding | G/W/T: school signup creates pending tenant | None | /signup/school | TenantApplication:create |
 | V11-MKT-016 | LegalPrivacy | Privacy Policy | public | P2 | planned | Growth | content | TBD | None | /privacy | AnalyticsEvent:view_privacy |
 | V11-MKT-017 | LegalTerms | Terms of Service | public | P2 | planned | Growth | content | TBD | None | /terms | AnalyticsEvent:view_terms |
 | V11-MKT-018 | SchoolLanding | Landing Page | public, student, teacher, admin | P0 | building | Growth | School, Course | G/W/T: school landing shows published courses only | None | /schoollanding | AnalyticsEvent:view_storefront |
@@ -131,9 +131,9 @@ Status:
 | V11-PLAT-004 | N/A | Content Protection Policy Engine | platform | P0 | building | Platform | ContentProtectionPolicy | G/W/T: policy toggles enforce copy/download rules | None | Admin settings | ContentProtectionPolicy:update |
 | V11-PLAT-005 | N/A | Protected Materials Engine | platform | P0 | building | Platform | materialsEngine, useLessonAccess | G/W/T: LOCKED never fetches premium content | None | Lesson viewers | shouldFetchMaterials |
 | V11-PLAT-006 | N/A | Feature Registry + Vault | platform | P0 | building | Platform | features registry | G/W/T: route added only via registry | None | Registry | FEATURES |
-| V11-PLAT-007 | N/A | Base44 + GitHub Release Discipline | platform | P0 | planned | Platform | branch model | G/W/T: main only via PR and checks | None | GitHub settings | CODEOWNERS |
+| V11-PLAT-007 | N/A | Base44 + GitHub Release Discipline | platform | P0 | building | Platform | branch model | G/W/T: main only via PR and checks | None | GitHub settings | CODEOWNERS |
 | V11-PLAT-008 | N/A | Google OIDC SSO | platform | P0 | building | Platform | OIDC, domain policy | G/W/T: Google login issues session and role mapping | None | Auth | auth/login/google |
-| V11-PLAT-009 | N/A | Microsoft OIDC SSO | platform | P0 | building | Platform | OIDC, domain policy | G/W/T: Microsoft login issues session and role mapping | None | Auth | auth/login/microsoft |
+| V11-PLAT-009 | N/A | Microsoft OIDC SSO | platform | P0 | deferred | Platform | OIDC, domain policy | G/W/T: Microsoft login issues session and role mapping | None | Auth | auth/login/microsoft |
 | V11-PLAT-010 | N/A | Domain Verification + IdP Policies | platform | P0 | building | Platform | DNS verify | G/W/T: unverified domain blocks SSO enable | None | Admin settings | DomainPolicy:update |
 | V11-PLAT-011 | N/A | Google Classroom Sync | platform | P1 | building | Platform | Classroom API | TBD | None | Admin integrations | Classroom:sync |
 | V11-PLAT-012 | N/A | Google Drive Attachments | platform | P1 | building | Platform | Drive API | TBD | None | Authoring | Drive:attach |
@@ -142,13 +142,13 @@ Status:
 | V11-PLAT-015 | N/A | Billing + Metering | platform | P0 | planned | Platform | Stripe, usage metrics | G/W/T: billing invoices reflect usage tiers | Data backfill | Admin billing | Invoice:create |
 | V11-PLAT-016 | N/A | Cloudflare Stream Uploads | platform | P1 | building | Platform | Stream API | TBD | None | Authoring | Stream:upload |
 | V11-PLAT-017 | N/A | R2 Presigned Files | platform | P1 | planned | Platform | R2 | TBD | None | Materials | R2:presign |
-| V11-PLAT-018 | N/A | Cloudflare Pages/Workers Deployment | platform | P0 | planned | Platform | CI/CD | G/W/T: main deploys to Pages + Workers | None | Cloudflare | pages:deploy |
-| V11-PLAT-019 | N/A | Turnstile + Bot Protection | platform | P0 | planned | Platform | Turnstile | G/W/T: signup/login protected by Turnstile | None | Auth | Turnstile:verify |
-| V11-PLAT-020 | N/A | Observability + Release Gates | platform | P0 | planned | Platform | logs, checks | G/W/T: release gates fail on missing P0 specs | None | CI | spec:validate |
+| V11-PLAT-018 | N/A | Cloudflare Pages/Workers Deployment | platform | P0 | building | Platform | CI/CD | G/W/T: main deploys to Pages + Workers | None | Cloudflare | pages:deploy |
+| V11-PLAT-019 | N/A | Turnstile + Bot Protection | platform | P0 | building | Platform | Turnstile | G/W/T: signup/login protected by Turnstile | None | Auth | Turnstile:verify |
+| V11-PLAT-020 | N/A | Observability + Release Gates | platform | P0 | building | Platform | logs, checks | G/W/T: release gates fail on missing P0 specs | None | CI | spec:validate |
 | V11-PLAT-021 | N/A | Parity Sweep Automation | platform | P0 | building | Platform | scripts | G/W/T: parity script flags registry drift | None | CI | parity:report |
 | V11-PLAT-022 | N/A | Download Tokenization | platform | P0 | building | Platform | DownloadToken | G/W/T: file URL never exposed before token validation | None | Downloads | DownloadToken:issue |
 | V11-PLAT-023 | N/A | SSO Admin Wizard | platform | P1 | building | Platform | domain policy | TBD | None | Admin settings | SSOConfig:update |
-| V11-PLAT-024 | N/A | Onboarding Wizard | platform | P0 | planned | Platform | tenant setup | G/W/T: onboarding creates school, admin, first course | None | Public onboarding | TenantApplication:create |
+| V11-PLAT-024 | N/A | Onboarding Wizard | platform | P0 | building | Platform | tenant setup | G/W/T: onboarding creates school, admin, first course | None | Public onboarding | TenantApplication:create |
 | V11-PLAT-025 | N/A | Background Jobs/Queue | platform | P2 | planned | Platform | workers | TBD | None | Background | Job:run |
 | V11-PLAT-026 | N/A | Video Watermarking | platform | P2 | planned | Platform | Stream | TBD | None | Video | Stream:watermark |
 | V11-PLAT-027 | N/A | Data Migration Framework | platform | P1 | planned | Platform | D1/R2 | TBD | Data backfill | Migration | Migration:run |

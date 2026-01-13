@@ -162,7 +162,7 @@ function main() {
   // by vite-plugin-sitemap (dist/sitemap.xml).
   const robotsPath = path.join(publicDir, 'robots.txt');
   if (!fs.existsSync(robotsPath)) {
-    const host = baseUrl ? baseUrl.replace(/\/$/, '') : 'https://example.com';
+    const host = baseUrl ? baseUrl.replace(/\/$/, '') : 'https://yesod.uk';
     fs.writeFileSync(
       robotsPath,
       `User-agent: *\nAllow: /\n\nSitemap: ${host}/sitemap.xml\n`,

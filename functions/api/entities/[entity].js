@@ -2,6 +2,7 @@ import { errorResponse, getBearerToken, handleOptions, json, normalizeLimit, par
 import { createEntity, listEntities } from '../_store.js';
 import { getUserFromToken } from '../_auth.js';
 import { applyFieldProjection, applyLessonAccess, applyQuizQuestionAccess } from '../_access.js';
+import { verifyTurnstileToken } from '../_turnstile.js';
 import {
   applyPublicRule,
   canWriteUnauth,
@@ -314,23 +315,35 @@ export async function onRequest({ request, env, params }) {
   }
 
   if (request.method === 'POST') {
-    const payload = await readJson(request);
-    if (!payload) {
-      return errorResponse('invalid_payload', 400, 'Expected JSON body', env);
+    const rawPayload = await readJson(request);
+    if (!rawPayload) {
+      return errorResponse('invalid_payload', 400, 'Expected JSON body', env, request);
     }
-    if (!isAuthenticated && !canWriteUnauth(entity, request.method)) {
-      return errorResponse('auth_required', 401, 'Authentication required', env);
+    const unauthWriteAllowed = !isAuthenticated && canWriteUnauth(entity, request.method);
+    if (!isAuthenticated && !unauthWriteAllowed) {
+      return errorResponse('auth_required', 401, 'Authentication required', env, request);
+    }
+    let payload = rawPayload;
+    if (!isAuthenticated && entity === 'TenantApplication') {
+      const token = rawPayload.turnstile_token || rawPayload.turnstileToken;
+      const turnstileCheck = await verifyTurnstileToken({ env, request, token });
+      if (!turnstileCheck.allowed) {
+        return errorResponse('turnstile_failed', 403, 'Security check failed', env, request);
+      }
+      payload = { ...rawPayload };
+      delete payload.turnstile_token;
+      delete payload.turnstileToken;
     }
     if (requiresSchoolScope(entity)) {
       const schoolId = payload.school_id ? String(payload.school_id) : null;
       if (!schoolId) {
-        return errorResponse('missing_school', 400, 'school_id is required', env);
+        return errorResponse('missing_school', 400, 'school_id is required', env, request);
       }
       if (!globalAdmin) {
         if (entity === 'SchoolMembership') {
           const payloadEmail = payload.user_email || payload.userEmail || '';
           if (payloadEmail && String(payloadEmail).toLowerCase() !== String(user.email).toLowerCase()) {
-            return errorResponse('forbidden', 403, 'Cannot create membership for another user', env);
+            return errorResponse('forbidden', 403, 'Cannot create membership for another user', env, request);
           }
         }
         const membership = await getMembership(env, schoolId, user.email);
@@ -343,33 +356,33 @@ export async function onRequest({ request, env, params }) {
         const invited = Boolean(invite);
         if (entity === 'SchoolMembership' && invited && invite?.role && payload.role) {
           if (normalizeRole(payload.role) !== normalizeRole(invite.role)) {
-            return errorResponse('forbidden', 403, 'Invite role mismatch', env);
+            return errorResponse('forbidden', 403, 'Invite role mismatch', env, request);
           }
         }
 
         if (ADMIN_WRITE_ENTITIES.has(entity) && !isAdminRole(role) && !(entity === 'SchoolMembership' && invited)) {
-          return errorResponse('forbidden', 403, 'Admin role required', env);
+          return errorResponse('forbidden', 403, 'Admin role required', env, request);
         }
         if (STAFF_WRITE_ENTITIES.has(entity) && !isStaffRole(role)) {
-          return errorResponse('forbidden', 403, 'Staff role required', env);
+          return errorResponse('forbidden', 403, 'Staff role required', env, request);
         }
 
         if (!isMember && !(entity === 'SchoolMembership' && invited)) {
-          return errorResponse('forbidden', 403, 'Not authorized for this school', env);
+          return errorResponse('forbidden', 403, 'Not authorized for this school', env, request);
         }
       }
     } else if (isGlobalEntity(entity) && !canWriteUnauth(entity, request.method)) {
       if (!globalAdmin && !isUserScopedGlobal(entity, payload, user.email)) {
-        return errorResponse('forbidden', 403, 'Not authorized', env);
+        return errorResponse('forbidden', 403, 'Not authorized', env, request);
       }
     }
     try {
       const created = await createEntity(env, entity, payload);
       return json(created, { status: 201, env });
     } catch (err) {
-      return errorResponse('storage_unavailable', 503, err.message, env);
+      return errorResponse('storage_unavailable', 503, err.message, env, request);
     }
   }
 
-  return errorResponse('method_not_allowed', 405, 'Method not allowed', env);
+  return errorResponse('method_not_allowed', 405, 'Method not allowed', env, request);
 }

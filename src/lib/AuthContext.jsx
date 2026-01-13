@@ -127,7 +127,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const navigateToLogin = async (nextUrl = window.location.href) => {
+  const navigateToLogin = async (nextUrl = window.location.href, options = {}) => {
     // Rate limit the redirect attempt (client-side defense)
     const { allowed } = await checkRateLimit('login', 'guest'); 
     if (!allowed) {
@@ -135,7 +135,7 @@ export const AuthProvider = ({ children }) => {
       return;
     }
     // Uses Base44 SDK redirectToLogin(nextUrl)
-    base44.auth.redirectToLogin(nextUrl);
+    base44.auth.redirectToLogin(nextUrl, options);
   };
 
   return (

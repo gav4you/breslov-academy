@@ -3,6 +3,7 @@ import { buildRateLimitKey, checkRateLimit } from '../../_rateLimit.js';
 import { createEntity, listEntities } from '../../_store.js';
 import { getProviderConfig } from './_providers.js';
 import { getSchoolAuthPolicy, policyAllowsProvider, resolveSchool } from './_policy.js';
+import { getTurnstileTokenFromUrl, verifyTurnstileToken } from '../../_turnstile.js';
 
 const STATE_TTL_MINUTES = 10;
 
@@ -90,14 +91,19 @@ export async function onRequest({ request, env }) {
   const authKey = buildRateLimitKey({ prefix: 'oidc_start', request });
   const authCheck = await checkRateLimit(env, { key: authKey, limit: authLimit, windowSeconds: authWindow });
   if (!authCheck.allowed) {
-    return errorResponse('rate_limited', 429, 'Too many login attempts', env);
+    return errorResponse('rate_limited', 429, 'Too many login attempts', env, request);
   }
 
   if (request.method !== 'GET') {
-    return errorResponse('method_not_allowed', 405, 'Method not allowed', env);
+    return errorResponse('method_not_allowed', 405, 'Method not allowed', env, request);
   }
 
   const url = new URL(request.url);
+  const turnstileToken = getTurnstileTokenFromUrl(url);
+  const turnstileCheck = await verifyTurnstileToken({ env, request, token: turnstileToken });
+  if (!turnstileCheck.allowed) {
+    return errorResponse('turnstile_failed', 403, 'Security check failed', env, request);
+  }
   const provider = (url.searchParams.get('provider') || '').toLowerCase();
   const audience = url.searchParams.get('audience') || '';
   const next = url.searchParams.get('next') || '/';

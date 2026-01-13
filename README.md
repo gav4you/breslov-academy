@@ -73,7 +73,7 @@ It provides minimal `/api` endpoints for auth, entity CRUD, and integrations.
 - `VITE_PUBLIC_BASE_URL`: Public site base URL (used for OAuth redirect hints).
 
 ### Optional environment variables (Functions)
-- `DEV_TOKEN`: Dev login token used by `/api/auth/login` (defaults to `dev`).
+- `DEV_TOKEN`: Dev login token used by `/api/auth/login` for local testing only (no default; if unset, dev login is disabled).
 - `DEV_EMAIL`: Email for the dev user (defaults to `dev@breslov.academy`).
 - `DEV_ROLE`: Role for the dev user (defaults to `admin`).
 - `AUTH_LOGIN_URL`: External auth login URL (if using a real IdP).
@@ -104,6 +104,11 @@ It provides minimal `/api` endpoints for auth, entity CRUD, and integrations.
 - `MICROSOFT_OIDC_REDIRECT_URI`: Override callback URL (defaults to `/api/auth/oidc/callback`).
 - `MICROSOFT_OIDC_SCOPES`: Override scopes (defaults to `openid email profile`).
 - `MICROSOFT_OIDC_PROMPT`: Override prompt parameter (defaults to `select_account`).
+
+### Optional environment variables (Turnstile)
+- `VITE_TURNSTILE_SITE_KEY`: Cloudflare Turnstile site key for auth forms.
+- `TURNSTILE_SECRET_KEY`: Cloudflare Turnstile secret key for server-side verification.
+- `TURNSTILE_DISABLED`: Set to `true` to bypass Turnstile checks (non-production only).
 
 ### Optional environment variables (Integrations)
 - `GOOGLE_INTEGRATION_CLIENT_ID`: Google OAuth client ID for Classroom/Drive.

@@ -17,6 +17,9 @@ Each P0 feature must pass at least one Given/When/Then test.
 - Given a public visitor, when they select Student Login, then the login flow starts and returns to the correct portal.
 - Given a public visitor, when they complete school signup, then a pending tenant application is created.
 
+## Bot Protection
+- Given a public visitor, when they attempt login or signup without a valid Turnstile token, then the request is rejected.
+
 ## Storefront Pricing + Checkout
 - Given a public visitor on school pricing, when offers load, then only offers for that school are shown.
 - Given a visitor checkout, when a payment is initiated, then a pending Transaction is created and AuditLog written.

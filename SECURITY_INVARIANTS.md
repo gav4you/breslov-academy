@@ -27,3 +27,6 @@ These are **non-negotiable** rules enforced by architecture.
 
 ## Quizzes
 - If questions are stored in `QuizQuestion`, do **not** fetch them when access is LOCKED.
+
+## Bot protection
+- Public auth and tenant application flows must enforce Turnstile verification when configured.

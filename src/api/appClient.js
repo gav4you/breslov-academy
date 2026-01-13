@@ -39,6 +39,27 @@ function buildQuery(params = {}) {
   return query.toString();
 }
 
+function buildTurnstileLoginUrl(nextUrl) {
+  const origin = resolveOrigin();
+  const target = new URL('/login', origin);
+  if (!nextUrl) return target.toString();
+  try {
+    const returnUrl = new URL(nextUrl, origin);
+    const path = returnUrl.pathname || '/';
+    if (path.startsWith('/teacher')) {
+      target.pathname = '/login/teacher';
+    } else if (path.startsWith('/admin')) {
+      target.pathname = '/login/admin';
+    } else if (path.startsWith('/student')) {
+      target.pathname = '/login/student';
+    }
+    target.searchParams.set('returnTo', `${returnUrl.pathname}${returnUrl.search}`);
+  } catch {
+    // ignore malformed return targets
+  }
+  return target.toString();
+}
+
 export function buildApiUrl(path, params, baseUrlOverride) {
   const baseUrl = normalizeBaseUrl(baseUrlOverride || appParams.apiBaseUrl || DEFAULT_API_BASE_URL);
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
@@ -175,11 +196,22 @@ export function createAppClient() {
     request: requestJson,
     auth: {
       me: () => requestJson('/auth/me'),
-      redirectToLogin: (nextUrl) => {
+      redirectToLogin: (nextUrl, params = {}) => {
         const resolvedNext = nextUrl || (typeof window !== 'undefined' ? window.location.href : '/');
-        const url = getAuthRedirectUrl('login', resolvedNext)
-          || buildApiUrl('/auth/login', { next: resolvedNext });
-        window.location.assign(url);
+        const url = getAuthRedirectUrl('login', resolvedNext);
+        if (url) {
+          window.location.assign(url);
+          return;
+        }
+        const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+        const safeParams = params && typeof params === 'object' ? params : {};
+        const hasTurnstileToken = Boolean(safeParams.turnstileToken || safeParams.turnstile_token);
+        if (turnstileSiteKey && !hasTurnstileToken) {
+          window.location.assign(buildTurnstileLoginUrl(resolvedNext));
+          return;
+        }
+        const target = buildApiUrl('/auth/login', { next: resolvedNext, ...safeParams });
+        window.location.assign(target);
       },
       logout: async (nextUrl) => {
         clearStoredToken();

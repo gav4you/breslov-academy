@@ -29,10 +29,16 @@ export function PublicContentPage({ routeKey }) {
 
   const title = page.title || site?.name || 'Breslov Academy';
   const description = page.description || site?.defaultDescription || '';
+  const baseUrl = import.meta.env.VITE_PUBLIC_BASE_URL
+    || (typeof window !== 'undefined' ? window.location.origin : '');
+  const normalizedBase = baseUrl ? baseUrl.replace(/\/$/, '') : '';
+  const canonicalUrl = normalizedBase
+    ? `${normalizedBase}${routeKey === '/' ? '' : routeKey}`
+    : undefined;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-14">
-      <MetaTags title={title} description={description} />
+      <MetaTags title={title} description={description} url={canonicalUrl} />
 
       <section className="grid gap-10 md:grid-cols-2 md:items-center">
         <div>
@@ -64,9 +70,9 @@ export function PublicContentPage({ routeKey }) {
                 <div key={idx}>
                   {sec.title ? <div className="text-sm font-medium">{sec.title}</div> : null}
                   {Array.isArray(sec.bullets) ? (
-                    <ul className="mt-3 grid gap-2 text-sm text-muted-foreground">
+                    <ul className="mt-3 grid gap-2 text-sm text-muted-foreground list-disc list-inside">
                       {sec.bullets.map((b, i) => (
-                        <li key={i}>• {b}</li>
+                        <li key={i}>{b}</li>
                       ))}
                     </ul>
                   ) : null}
@@ -86,3 +92,4 @@ export function PublicContentPage({ routeKey }) {
     </div>
   );
 }
+

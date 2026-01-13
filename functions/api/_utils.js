@@ -2,6 +2,23 @@ const DEFAULT_HEADERS = {
   'Content-Type': 'application/json',
 };
 
+function fallbackCorrelationId() {
+  return `req_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+export function getCorrelationId(request) {
+  if (request?.headers) {
+    const header = request.headers.get('X-Correlation-Id')
+      || request.headers.get('X-Request-Id')
+      || request.headers.get('CF-Ray');
+    if (header) return header;
+  }
+  if (crypto?.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return fallbackCorrelationId();
+}
+
 export function getCorsHeaders(env) {
   const origin = env?.CORS_ORIGIN || '*';
   return {
@@ -29,11 +46,20 @@ export function json(data, options = {}) {
   });
 }
 
-export function errorResponse(reason, status = 400, message, env) {
+export function errorResponse(reason, status = 400, message, env, request) {
+  const correlationId = getCorrelationId(request);
+  if (status >= 500) {
+    console.error(`[${correlationId}] ${message || reason || 'Request failed'}`);
+  }
   return json({
     reason,
     message: message || reason || 'Request failed',
-  }, { status, env });
+    correlation_id: correlationId,
+  }, {
+    status,
+    env,
+    headers: { 'X-Correlation-Id': correlationId },
+  });
 }
 
 export async function readJson(request) {

@@ -16,7 +16,7 @@ function normalizeNextPath(path) {
   return `/${path}`;
 }
 
-function buildStartUrl(provider, audience, nextPath, schoolSlug, schoolId) {
+function buildStartUrl(provider, audience, nextPath, schoolSlug, schoolId, turnstileToken) {
   const origin = window.location.origin;
   const target = new URL('/api/auth/oidc/start', origin);
   target.searchParams.set('provider', provider);
@@ -24,10 +24,20 @@ function buildStartUrl(provider, audience, nextPath, schoolSlug, schoolId) {
   if (audience) target.searchParams.set('audience', audience);
   if (schoolSlug) target.searchParams.set('schoolSlug', schoolSlug);
   if (schoolId) target.searchParams.set('schoolId', schoolId);
+  if (turnstileToken) target.searchParams.set('turnstileToken', turnstileToken);
   return target.toString();
 }
 
-export default function AuthProviderButtons({ audience, schoolSlug, schoolId, nextPath, onFallback, fallbackLabel }) {
+export default function AuthProviderButtons({
+  audience,
+  schoolSlug,
+  schoolId,
+  nextPath,
+  onFallback,
+  fallbackLabel,
+  turnstileToken,
+  turnstileRequired,
+}) {
   const storedSchoolId = useMemo(() => {
     try {
       return localStorage.getItem('active_school_id') || '';
@@ -49,6 +59,7 @@ export default function AuthProviderButtons({ audience, schoolSlug, schoolId, ne
     const list = data?.providers || [];
     return list.filter((provider) => provider.allowed);
   }, [data]);
+  const turnstileBlocked = Boolean(turnstileRequired && !turnstileToken);
 
   if (isLoading) {
     return (
@@ -66,7 +77,8 @@ export default function AuthProviderButtons({ audience, schoolSlug, schoolId, ne
             <Button
               key={provider.id}
               className="h-12 justify-between"
-              onClick={() => window.location.assign(buildStartUrl(provider.id, audience, nextPath, schoolSlug, resolvedSchoolId))}
+              disabled={turnstileBlocked}
+              onClick={() => window.location.assign(buildStartUrl(provider.id, audience, nextPath, schoolSlug, resolvedSchoolId, turnstileToken))}
             >
               <span>{PROVIDER_LABELS[provider.id] || `Continue with ${provider.id}`}</span>
               <Badge variant="secondary" className="ml-2">SSO</Badge>
@@ -83,9 +95,14 @@ export default function AuthProviderButtons({ audience, schoolSlug, schoolId, ne
       )}
 
       {onFallback && (
-        <Button variant="outline" className="h-11 w-full" onClick={onFallback}>
+        <Button variant="outline" className="h-11 w-full" onClick={onFallback} disabled={turnstileBlocked}>
           {fallbackLabel || 'Continue with secure login'}
         </Button>
+      )}
+      {turnstileBlocked && (
+        <p className="text-xs text-muted-foreground">
+          Complete the security check to enable sign in.
+        </p>
       )}
     </div>
   );

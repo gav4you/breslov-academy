@@ -18,7 +18,7 @@ Release gates are ship/no-ship checks. All P0 gates must be green.
 
 ## Gate C: Identity and SSO
 - Google OIDC login works end-to-end
-- Microsoft OIDC login works end-to-end
+- Microsoft OIDC login deferred for initial launch (waived gate)
 - domain policy enforces allowed domains
 
 ## Gate D: Billing and Monetization
@@ -36,6 +36,6 @@ Release gates are ship/no-ship checks. All P0 gates must be green.
 - audit logs for sensitive actions (pricing, publishing, roles)
 - Turnstile protection on auth forms
 - error logging with correlation ids
-- CI runs lint + spec validation + parity sweep
+- CI runs lint + typecheck + unit tests + perf check + spec validation + parity sweep + build
 - unit tests for tenancy/access/idempotency (`npm run test:unit`)
 - image size budget check (`npm run perf:check`)

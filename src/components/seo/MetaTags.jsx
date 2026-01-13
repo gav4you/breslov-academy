@@ -15,6 +15,20 @@ function setMetaTag({ name, property, content }) {
   document.head.appendChild(meta);
 }
 
+function setLinkTag({ rel, href }) {
+  if (!href) return;
+  const selector = `link[rel="${rel}"]`;
+  const existing = document.head.querySelector(selector);
+  if (existing) {
+    existing.setAttribute('href', href);
+    return;
+  }
+  const link = document.createElement('link');
+  link.setAttribute('rel', rel);
+  link.setAttribute('href', href);
+  document.head.appendChild(link);
+}
+
 export default function MetaTags({
   title,
   description,
@@ -34,6 +48,7 @@ export default function MetaTags({
     setMetaTag({ property: 'og:type', content: type });
     if (url) setMetaTag({ property: 'og:url', content: url });
     if (image) setMetaTag({ property: 'og:image', content: image });
+    if (url) setLinkTag({ rel: 'canonical', href: url });
 
     setMetaTag({ name: 'twitter:card', content: 'summary_large_image' });
     setMetaTag({ name: 'twitter:title', content: fullTitle });

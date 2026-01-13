@@ -9,8 +9,14 @@ const publicRoutes = [
   ['/contact', 'Talk to us'],
   ['/privacy', 'Privacy Policy'],
   ['/terms', 'Terms of Service'],
+  ['/login', 'Log in'],
   ['/login/student', 'Student login'],
   ['/login/teacher', 'Teacher login'],
+  ['/login/admin', 'Admin login'],
+  ['/signup', 'Join Breslov Academy'],
+  ['/signup/student', 'Join as a Student'],
+  ['/signup/teacher', 'Join as a Teacher'],
+  ['/signup/school', 'Start a New School'],
 ];
 
 for (const [path, heading] of publicRoutes) {

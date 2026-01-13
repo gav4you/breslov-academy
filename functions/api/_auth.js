@@ -20,19 +20,13 @@ function isExpired(expiresAt) {
 }
 
 function normalizeDevUser(token, env) {
-  const devToken = env?.DEV_TOKEN || 'dev';
+  const devToken = env?.DEV_TOKEN;
+  if (!devToken) return null;
   const devEmail = env?.DEV_EMAIL || DEFAULT_DEV_EMAIL;
   const devRole = env?.DEV_ROLE || DEFAULT_DEV_ROLE;
 
   if (token === devToken) {
     return { id: 'dev-user', email: devEmail, role: devRole };
-  }
-
-  if (token.startsWith('dev:')) {
-    const parts = token.split(':');
-    const email = parts[1] || devEmail;
-    const role = parts[2] || devRole;
-    return { id: 'dev-user', email, role };
   }
 
   return null;

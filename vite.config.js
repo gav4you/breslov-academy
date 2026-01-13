@@ -21,7 +21,7 @@ export default defineConfig({
   plugins: [
     react(),
     sitemap({
-      hostname: process.env.VITE_PUBLIC_BASE_URL || process.env.PUBLIC_SITE_URL || 'https://example.com',
+      hostname: process.env.VITE_PUBLIC_BASE_URL || process.env.PUBLIC_SITE_URL || 'https://yesod.uk',
       robots: [{ userAgent: '*', allow: '/' }]
     }),
   ]

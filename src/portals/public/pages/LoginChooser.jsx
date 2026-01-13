@@ -5,7 +5,11 @@ import { Button } from '@/components/ui/button';
 export default function LoginChooser() {
   const [params] = useSearchParams();
   const schoolSlug = params.get('schoolSlug') || params.get('school_slug') || '';
-  const suffix = schoolSlug ? `?schoolSlug=${encodeURIComponent(schoolSlug)}` : '';
+  const returnTo = params.get('returnTo') || '';
+  const query = new URLSearchParams();
+  if (schoolSlug) query.set('schoolSlug', schoolSlug);
+  if (returnTo) query.set('returnTo', returnTo);
+  const suffix = query.toString() ? `?${query.toString()}` : '';
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-16">

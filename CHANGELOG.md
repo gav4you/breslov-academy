@@ -9,6 +9,8 @@ All notable changes to the Breslov Academy LMS project.
 - Enforced role-based access in the Entities API for admin/staff-only resources while preserving invite acceptance flows.
 - Corrected domain policy evaluation for SSO domain-match requirements.
 - Added configurable rate limiting for auth, checkout, and download token issuance.
+- Added Turnstile verification for auth and tenant signup flows with correlation ids on API errors.
+- Disabled default dev login token; `/api/auth/login` now requires `DEV_TOKEN` to be explicitly set.
 
 ### Media & Submissions
 - Added R2 presign flow for submission attachments with student-safe key prefixes.
@@ -33,11 +35,21 @@ All notable changes to the Breslov Academy LMS project.
 - Added CLI scripts for integrity export and AI indexing, and tightened integrity scan regexes.
 - Added dev seed and Playwright storage-state scripts for authenticated portal QA runs.
 - Fixed API base URL path joining to support absolute URLs with `/api` prefixes.
+- Switched marketing bullet lists to semantic list styling instead of hardcoded glyphs.
 
 ### QA & Docs
 - Added unit tests for tenancy scoping, access gating, and billing idempotency.
 - Added image size budget check script and integrity report sample.
 - Published Phase 0 reality map docs (codebase, route map, registry dump, invariants).
+- Aligned page registry parity for AI Tutor and Virtual Beit Midrash.
+- Expanded public smoke tests for login/signup routes and standardized signup page headings.
+- Updated spec pack statuses for onboarding, release discipline, and deployment readiness.
+- Extended CI to run typecheck, unit tests, perf checks, spec validation, and build.
+- Documented Microsoft OIDC deferral for the initial launch gate.
+- Ignored `.dev.vars` in `.gitignore` to avoid committing local Cloudflare tokens.
+- Updated sitemap defaults and robots.txt to point at `https://yesod.uk`.
+- Added apex-canonical redirects for `www.yesod.uk` in `public/_redirects`.
+- Added canonical link handling for marketing pages to keep OG URLs and canonical tags aligned.
 
 ## [v11.0] - 2026-01-11
 ### Future Horizons

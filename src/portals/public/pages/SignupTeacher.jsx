@@ -1,12 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import TurnstileWidget from '@/components/security/TurnstileWidget';
 
 export default function SignupTeacher() {
   const { navigateToLogin } = useAuth();
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileRequired = Boolean(turnstileSiteKey);
 
   useEffect(() => {
     try {
@@ -18,7 +22,7 @@ export default function SignupTeacher() {
 
   const handle = () => {
     const origin = window.location.origin;
-    navigateToLogin(`${origin}/teacher?loginRole=teacher`);
+    navigateToLogin(`${origin}/teacher?loginRole=teacher`, { turnstileToken });
   };
 
   return (
@@ -30,7 +34,7 @@ export default function SignupTeacher() {
 
       <Card className="border-2 shadow-sm">
         <CardHeader className="pb-4">
-          <CardTitle className="text-3xl font-bold">Join as a Teacher</CardTitle>
+          <h1 className="text-3xl font-bold">Join as a Teacher</h1>
           <CardDescription className="text-lg pt-2">
             Share your knowledge and manage your academic community.
           </CardDescription>
@@ -59,7 +63,17 @@ export default function SignupTeacher() {
             </p>
           </div>
 
-          <Button onClick={handle} className="w-full py-6 text-lg font-semibold bg-green-600 hover:bg-green-700">
+          <TurnstileWidget
+            siteKey={turnstileSiteKey}
+            action="teacher_signup"
+            onToken={setTurnstileToken}
+          />
+
+          <Button
+            onClick={handle}
+            className="w-full py-6 text-lg font-semibold bg-green-600 hover:bg-green-700"
+            disabled={turnstileRequired && !turnstileToken}
+          >
             Register as Teacher
           </Button>
 

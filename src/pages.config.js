@@ -27,7 +27,6 @@ import Feed from './pages/Feed';
 import Forums from './pages/Forums';
 import HabitTracker from './pages/HabitTracker';
 import IntegrationDetail from './pages/IntegrationDetail';
-import Integrations from './pages/Integrations';
 import IntegrationsMarketplace from './pages/IntegrationsMarketplace';
 import Integrity from './pages/Integrity';
 import InviteAccept from './pages/InviteAccept';
@@ -89,7 +88,7 @@ import oauth2callback from './pages/oauth2callback';
 
 
 export const PAGES = {
-    "AITutorPage": AITutorPage,
+    "AITutor": AITutorPage,
     "Account": Account,
     "Achievements": Achievements,
     "AdaptiveLearning": AdaptiveLearning,
@@ -118,7 +117,6 @@ export const PAGES = {
     "Forums": Forums,
     "HabitTracker": HabitTracker,
     "IntegrationDetail": IntegrationDetail,
-    "Integrations": Integrations,
     "IntegrationsMarketplace": IntegrationsMarketplace,
     "Integrity": Integrity,
     "InviteAccept": InviteAccept,
@@ -175,7 +173,7 @@ export const PAGES = {
     "TeachQuizzes": TeachQuizzes,
     "Tournaments": Tournaments,
     "Vault": Vault,
-    "VirtualBeitMidrashPage": VirtualBeitMidrashPage,
+    "VirtualBeitMidrash": VirtualBeitMidrashPage,
     "oauth2callback": oauth2callback,
 }
 

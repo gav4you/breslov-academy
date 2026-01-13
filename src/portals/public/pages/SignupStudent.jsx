@@ -1,13 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import TurnstileWidget from '@/components/security/TurnstileWidget';
 
 export default function SignupStudent() {
   const { navigateToLogin } = useAuth();
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileRequired = Boolean(turnstileSiteKey);
 
   useEffect(() => {
     try {
@@ -20,7 +24,7 @@ export default function SignupStudent() {
   const handle = () => {
     // Student signup uses the same Base44 auth but with student intent
     const origin = window.location.origin;
-    navigateToLogin(`${origin}/student?loginRole=student`);
+    navigateToLogin(`${origin}/student?loginRole=student`, { turnstileToken });
   };
 
   return (
@@ -32,7 +36,7 @@ export default function SignupStudent() {
 
       <Card className="border-2 shadow-sm">
         <CardHeader className="text-center pb-2">
-          <CardTitle className="text-3xl font-bold">Join as a Student</CardTitle>
+          <h1 className="text-3xl font-bold">Join as a Student</h1>
           <CardDescription className="text-lg pt-2">
             Register to access lessons, track your progress, and join the community.
           </CardDescription>
@@ -47,7 +51,13 @@ export default function SignupStudent() {
               </p>
             </div>
 
-            <Button onClick={handle} className="w-full py-6 text-lg font-semibold">
+            <TurnstileWidget
+              siteKey={turnstileSiteKey}
+              action="student_signup"
+              onToken={setTurnstileToken}
+            />
+
+            <Button onClick={handle} className="w-full py-6 text-lg font-semibold" disabled={turnstileRequired && !turnstileToken}>
               Register with secure SSO
             </Button>
 

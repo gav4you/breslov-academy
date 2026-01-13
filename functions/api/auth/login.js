@@ -1,5 +1,6 @@
 import { errorResponse, handleOptions, withHeaders } from '../_utils.js';
 import { buildRateLimitKey, checkRateLimit } from '../_rateLimit.js';
+import { getTurnstileTokenFromUrl, verifyTurnstileToken } from '../_turnstile.js';
 
 export async function onRequest({ request, env }) {
   const options = handleOptions(request, env);
@@ -10,10 +11,15 @@ export async function onRequest({ request, env }) {
   const authKey = buildRateLimitKey({ prefix: 'auth_login', request });
   const authCheck = await checkRateLimit(env, { key: authKey, limit: authLimit, windowSeconds: authWindow });
   if (!authCheck.allowed) {
-    return errorResponse('rate_limited', 429, 'Too many login attempts', env);
+    return errorResponse('rate_limited', 429, 'Too many login attempts', env, request);
   }
 
   const url = new URL(request.url);
+  const turnstileToken = getTurnstileTokenFromUrl(url);
+  const turnstileCheck = await verifyTurnstileToken({ env, request, token: turnstileToken });
+  if (!turnstileCheck.allowed) {
+    return errorResponse('turnstile_failed', 403, 'Security check failed', env, request);
+  }
   const next = url.searchParams.get('next') || '/';
   const provider = (url.searchParams.get('provider') || '').toLowerCase();
   const audience = url.searchParams.get('audience') || '';
@@ -36,9 +42,12 @@ export async function onRequest({ request, env }) {
     return Response.redirect(target.toString(), 302);
   }
 
-  const token = env?.DEV_TOKEN || 'dev';
+  const devToken = env?.DEV_TOKEN;
+  if (!devToken) {
+    return errorResponse('auth_not_configured', 503, 'Authentication is not configured', env, request);
+  }
   const nextUrl = new URL(next, url.origin);
-  nextUrl.searchParams.set('token', token);
+  nextUrl.searchParams.set('token', devToken);
 
   return new Response(null, {
     status: 302,

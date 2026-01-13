@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import AuthProviderButtons from '@/portals/public/components/AuthProviderButtons';
+import TurnstileWidget from '@/components/security/TurnstileWidget';
 
 export default function LoginStudent() {
   const { navigateToLogin } = useAuth();
@@ -12,6 +13,11 @@ export default function LoginStudent() {
   const schoolId = params.get('schoolId') || params.get('school_id') || '';
   const authError = params.get('authError');
   const authErrorMessage = params.get('authErrorMessage');
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+  const authLoginUrl = import.meta.env.VITE_AUTH_LOGIN_URL;
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileRequired = Boolean(turnstileSiteKey);
+  const allowFallback = Boolean(authLoginUrl);
 
   useEffect(() => {
     try {
@@ -39,7 +45,7 @@ export default function LoginStudent() {
 
   const handle = () => {
     const origin = window.location.origin;
-    navigateToLogin(`${origin}${nextPath}`);
+    navigateToLogin(`${origin}${nextPath}`, { turnstileToken });
   };
 
   return (
@@ -54,13 +60,21 @@ export default function LoginStudent() {
         </div>
       )}
       <div className="mt-8">
+        <TurnstileWidget
+          siteKey={turnstileSiteKey}
+          action="student_login"
+          onToken={setTurnstileToken}
+          className="mb-6"
+        />
         <AuthProviderButtons
           audience="student"
           schoolSlug={schoolSlug}
           schoolId={schoolId}
           nextPath={nextPath}
-          onFallback={handle}
-          fallbackLabel="Use secure login"
+          onFallback={allowFallback ? handle : null}
+          fallbackLabel={allowFallback ? 'Use secure login' : undefined}
+          turnstileToken={turnstileToken}
+          turnstileRequired={turnstileRequired}
         />
       </div>
       <div className="mt-6">

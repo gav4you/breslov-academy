@@ -20,4 +20,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:unit
+      - run: npm run perf:check
       - run: npm run spec:check
+      - run: npm run build
