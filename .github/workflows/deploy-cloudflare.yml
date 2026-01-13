@@ -25,12 +25,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate Configuration
+        run: |
+          if [ -z "${{ vars.VITE_APP_ID }}" ]; then
+            echo "Error: VITE_APP_ID is not set in GitHub Variables."
+            exit 1
+          fi
+          if [ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ]; then
+            echo "Error: CLOUDFLARE_API_TOKEN is not set in GitHub Secrets."
+            exit 1
+          fi
+
       - name: Build
         run: npm run build
         env:
-          VITE_PUBLIC_BASE_URL: ${{ vars.VITE_PUBLIC_BASE_URL || 'https://yesod.uk' }}
+          VITE_PUBLIC_BASE_URL: ${{ vars.VITE_PUBLIC_BASE_URL }}
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL || '/api' }}
-          VITE_TURNSTILE_SITE_KEY: ${{ vars.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAACMG_TyFQI6eEpoO' }}
+          VITE_TURNSTILE_SITE_KEY: ${{ vars.VITE_TURNSTILE_SITE_KEY }}
           VITE_APP_ID: ${{ vars.VITE_APP_ID }}
 
       - name: Deploy to Cloudflare Pages
