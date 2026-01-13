@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, XCircle, Volume2, ArrowRight, RefreshCcw } from 'lucide-react';
-import { toast } from 'sonner';
+import { CheckCircle, XCircle, Volume2, ArrowRight } from 'lucide-react';
 
 // Mock data for prototype
 const LESSON_DATA = [

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PageShell from '@/components/ui/PageShell';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BookOpen, CheckCircle, Calendar, ArrowRight, Book, Loader2 } from 'lucide-react';
+import { BookOpen, CheckCircle, Calendar, ArrowRight, Book } from 'lucide-react';
 import { getDafYomi } from '@/utils/jewishCalc';
 import { format } from 'date-fns';
 import { Progress } from '@/components/ui/progress';

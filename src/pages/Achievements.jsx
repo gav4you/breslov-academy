@@ -2,8 +2,7 @@ import React from 'react';
 import PageShell from '@/components/ui/PageShell';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Badge as BadgeUI } from '@/components/ui/badge';
-import { Trophy, Lock, CheckCircle, Star } from 'lucide-react';
+import { Trophy, Lock, CheckCircle } from 'lucide-react';
 import { BADGES, getRank, getNextRank, formatXP } from '@/components/gamification/gamificationEngine';
 
 export default function Achievements() {

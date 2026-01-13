@@ -3,7 +3,7 @@ import PageShell from '@/components/ui/PageShell';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingBag, Star, Lock, Gift, Loader2 } from 'lucide-react';
+import { ShoppingBag, Lock } from 'lucide-react';
 import { db } from '@/lib/db';
 import { toast } from 'sonner';
 

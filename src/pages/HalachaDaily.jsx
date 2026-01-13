@@ -1,7 +1,7 @@
 import React from 'react';
 import PageShell from '@/components/ui/PageShell';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Scroll, Info } from 'lucide-react';
+import { Scroll } from 'lucide-react';
 
 export default function HalachaDaily() {
   return (

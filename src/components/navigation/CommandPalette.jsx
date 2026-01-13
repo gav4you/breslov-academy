@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
 import { FEATURES } from '@/components/config/features';
 import { ENTITY_REGISTRY } from '@/components/api/entityRegistry';
 import { useSession } from '@/components/hooks/useSession';
@@ -13,7 +12,7 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command';
-import { Search, Vault, Settings, Home, Building2, Database, Box } from 'lucide-react';
+import { Search, Database } from 'lucide-react';
 
 export default function CommandPalette() {
   const navigate = useNavigate();

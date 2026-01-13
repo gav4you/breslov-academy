@@ -2,7 +2,6 @@ import React from 'react';
 import PageShell from '@/components/ui/PageShell';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Book } from 'lucide-react';
 
 export default function Siddur() {
   return (

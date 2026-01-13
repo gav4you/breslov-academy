@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import PageShell from '@/components/ui/PageShell';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Clock, Sun, Moon, MapPin, Flame, Timer } from 'lucide-react';
+import { Clock, Sun, Moon, MapPin, Flame } from 'lucide-react';
 import { getZmanim } from '@/utils/jewishCalc';
-import { differenceInSeconds, parse, addDays } from 'date-fns';
 
 function Countdown({ targetTime, label }) {
   const [timeLeft, setTimeLeft] = useState('');

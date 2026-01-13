@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import PageShell from '@/components/ui/PageShell';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Users, BookOpen, MessageCircle, UserPlus, Check, X } from 'lucide-react';
+import { Users, BookOpen, MessageCircle, UserPlus, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 const POTENTIAL_MATCHES = [

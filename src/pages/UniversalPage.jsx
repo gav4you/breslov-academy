@@ -6,11 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Filter, Trash2, ArrowRight, CornerDownRight, Loader2, Database } from 'lucide-react';
-import { ENTITY_REGISTRY, getEntityDefinition } from '@/components/api/entityRegistry';
+import { Search, Plus, Filter, Trash2, CornerDownRight, Loader2, Database } from 'lucide-react';
+import { getEntityDefinition } from '@/components/api/entityRegistry';
 import { db } from '@/lib/db';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
 import AutoForm from '@/components/ui/AutoForm';
 import EmptyState from '@/components/ui/EmptyState';
 

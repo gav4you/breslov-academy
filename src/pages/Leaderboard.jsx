@@ -1,10 +1,10 @@
 import React from 'react';
 import PageShell from '@/components/ui/PageShell';
 import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Trophy, Medal, Flame, Crown, ArrowUp, Minus } from 'lucide-react';
+import { Flame, Crown, ArrowUp, Minus } from 'lucide-react';
 import { getRank, formatXP } from '@/components/gamification/gamificationEngine';
 
 const LEADERBOARD_DATA = [
