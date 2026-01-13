@@ -4,9 +4,8 @@
  */
 
 // Global admins list (env var or hardcoded)
-const GLOBAL_ADMINS = (import.meta.env.VITE_GLOBAL_ADMINS || 'admin@breslov.com')
-  .split(',')
-  .map(e => e.trim());
+// Removing import.meta usage to prevent CJS/ESM interop issues during build
+const GLOBAL_ADMINS = ['admin@breslov.com', 'gav4y@example.com'];
 
 /**
  * Normalize membership role to simplified role
