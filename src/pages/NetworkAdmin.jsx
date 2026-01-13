@@ -13,8 +13,7 @@ import { createPageUrl } from '@/utils';
 import VirtualizedList from '@/components/system/VirtualizedList';
 import { scopedCreate } from '@/components/api/scoped';
 
-// GLOBAL ADMIN LIST (env var or hardcoded)
-const GLOBAL_ADMINS = (import.meta.env.VITE_GLOBAL_ADMINS || 'admin@breslov.com').split(',').map(e => e.trim());
+
 
 export default function NetworkAdmin() {
   const [user, setUser] = useState(null);
