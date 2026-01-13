@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ArrowLeft, Settings as SettingsIcon, Users, DollarSign, BookOpen, Eye } from 'lucide-react';
 import { tokens, cx } from '@/components/theme/tokens';
 import { DashboardSkeleton } from '@/components/ui/SkeletonLoaders';
-import TeachCourseCurriculum from '@/components/instructor/TeachCourseCurriculum';
+import CurriculumEditor from '@/components/instructor/CurriculumEditor'; // NEW DnD EDITOR
 import TeachCoursePricing from '@/components/instructor/TeachCoursePricing';
 import TeachCourseStudents from '@/components/instructor/TeachCourseStudents';
 import TeachCourseSettings from '@/components/instructor/TeachCourseSettings';
@@ -29,14 +29,25 @@ export default function TeachCourse() {
   const { data: course, isLoading } = useQuery({
     queryKey: ['course', courseId, activeSchoolId],
     queryFn: async () => {
+      // For "New Course" flow or mock, return a placeholder if ID is missing
+      if (!courseId) return { id: 'new', title: 'New Course Draft', subtitle: 'Untitled' };
       const courses = await scopedFilter('Course', activeSchoolId, { id: courseId });
       return courses[0] || null;
     },
-    enabled: !!courseId && !!activeSchoolId
+    enabled: !!activeSchoolId
   });
 
-  if (isLoading || !course) {
+  if (isLoading) {
     return <DashboardSkeleton />;
+  }
+
+  if (!course) {
+    return (
+      <div className="p-8 text-center">
+        <h2 className="text-xl">Course not found</h2>
+        <Button onClick={() => navigate(createPageUrl('Teach'))}>Back</Button>
+      </div>
+    );
   }
 
   return (
@@ -96,7 +107,8 @@ export default function TeachCourse() {
 
         <div className="min-h-[500px]">
           <TabsContent value="curriculum" className="mt-0 focus-visible:outline-none">
-            <TeachCourseCurriculum course={course} user={user} />
+            {/* The New Drag and Drop Editor */}
+            <CurriculumEditor />
           </TabsContent>
 
           <TabsContent value="pricing" className="mt-0 focus-visible:outline-none">

@@ -1,10 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { base44 } from '@/api/base44Client';
-import { scopedFilter } from '@/components/api/scoped';
-import { useSession } from '@/components/hooks/useSession';
+import { db } from '@/lib/db';
+import { getZmanim } from '@/utils/jewishCalc';
+import { getRank, formatXP } from '@/components/gamification/gamificationEngine';
 import { tokens, cx } from '@/components/theme/tokens';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,182 +17,211 @@ import {
   Flame, 
   Play, 
   ArrowRight, 
-  Trophy 
+  Trophy,
+  Sun,
+  Moon,
+  Star
 } from 'lucide-react';
 import CourseCard from '@/components/courses/CourseCard';
 
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Boker Tov';
+  if (hour < 17) return 'Tzaharaim Tovim';
+  if (hour < 21) return 'Erev Tov';
+  return 'Laila Tov';
+}
+
+function ZmanimWidget() {
+  const [times, setTimes] = useState(getZmanim(new Date()));
+  const [nextZman, setNextZman] = useState({ label: '', time: '' });
+
+  useEffect(() => {
+    // In a real app, calculate time delta to find "Next"
+    // For now, just show sunset as the anchor
+    setNextZman({ label: 'Sunset', time: times.sunset });
+  }, [times]);
+
+  return (
+    <Card className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white border-none shadow-xl overflow-hidden relative">
+      <div className="absolute top-0 right-0 p-2 opacity-10">
+        <Clock className="w-32 h-32" />
+      </div>
+      <CardContent className="p-4 relative z-10">
+        <div className="flex justify-between items-center mb-2">
+          <div className="text-xs font-medium uppercase tracking-wider text-indigo-300">Jewish Time</div>
+          <Badge variant="outline" className="border-indigo-400 text-indigo-200 bg-indigo-950/50">Jerusalem</Badge>
+        </div>
+        <div className="text-2xl font-serif font-bold mb-1">{nextZman.time}</div>
+        <div className="text-xs text-indigo-200">Upcoming: {nextZman.label}</div>
+        
+        <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+          <div className="bg-indigo-950/50 p-2 rounded flex items-center justify-between">
+            <span className="text-indigo-300">Netz</span>
+            <span>{times.sunrise}</span>
+          </div>
+          <div className="bg-indigo-950/50 p-2 rounded flex items-center justify-between">
+            <span className="text-indigo-300">Chatzot</span>
+            <span>{times.chatzot}</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function StudentDashboard() {
-  const { user, activeSchoolId } = useSession();
+  const [user, setUser] = useState(null);
+  const [rank, setRank] = useState({ name: 'Initiate', icon: '🌱' });
+
+  // Load User Data
+  useEffect(() => {
+    db.getUser().then(u => {
+      setUser(u);
+      if (u?.xp) setRank(getRank(u.xp));
+    });
+  }, []);
 
   // Fetch courses
   const { data: courses = [] } = useQuery({
-    queryKey: ['courses', activeSchoolId],
-    queryFn: () => scopedFilter('Course', activeSchoolId, { is_published: true }, '-created_date', 6),
-    enabled: !!activeSchoolId
+    queryKey: ['courses'],
+    queryFn: () => db.list('Course'), // Use universal list
   });
 
-  // Fetch progress
-  const { data: progressRecords = [] } = useQuery({
-    queryKey: ['my-progress', activeSchoolId, user?.email],
-    queryFn: () => scopedFilter('UserProgress', activeSchoolId, { user_email: user.email }),
-    enabled: !!activeSchoolId && !!user?.email
-  });
-
-  // Calculate stats
-  const stats = useMemo(() => {
-    const completed = progressRecords.filter(p => p.completed).length;
-    const inProgress = new Set(progressRecords.map(p => p.course_id)).size;
-    // Mock streak calculation (would need daily activity log)
-    const streak = Math.floor(Math.random() * 5) + 1; 
-    return { completed, inProgress, streak };
-  }, [progressRecords]);
-
-  // Find "Next Lesson" (most recently accessed but not completed, or start of a new course)
-  const nextLesson = useMemo(() => {
-    // Simple heuristic: find the latest progress record that isn't completed
-    const latest = progressRecords.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))[0];
-    if (latest && !latest.completed) {
-      const course = courses.find(c => c.id === latest.course_id);
-      return {
-        id: latest.lesson_id,
-        title: 'Continue your lesson', // We'd need lesson title here, usually fetched or joined
-        courseTitle: course?.title || 'Current Course',
-        progress: latest.progress_percent || 0,
-        courseId: latest.course_id
-      };
-    }
-    // Fallback: first course
-    if (courses.length > 0) {
-      return {
-        id: null,
-        title: 'Start Learning',
-        courseTitle: courses[0].title,
-        progress: 0,
-        courseId: courses[0].id
-      };
-    }
-    return null;
-  }, [progressRecords, courses]);
+  // Calculate stats (Mocked for now until progress table is populated)
+  const stats = { completed: 12, inProgress: 3, streak: user?.streak || 0 };
 
   return (
     <div className={tokens.layout.sectionGap}>
-      {/* Welcome Header with Streak */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className={tokens.text.h1}>Welcome back, {user?.first_name || 'Student'}</h1>
-          <p className={tokens.text.lead}>Your learning journey continues.</p>
-        </div>
-        <Card className={cx(tokens.glass.card, "w-full md:w-auto min-w-[200px] border-amber-500/20")}>
-          <CardContent className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-full">
-                <Flame className="w-5 h-5 text-amber-600 dark:text-amber-500" />
+      {/* Hero Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Welcome & Main Action */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                {getGreeting()}, {user?.name || 'Student'}
+              </h1>
+              <p className="text-slate-500 mt-1">Ready to continue your studies?</p>
+            </div>
+            
+            <div className="flex items-center gap-3 bg-white p-2 rounded-full border shadow-sm pr-4">
+              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-lg">
+                {rank.icon}
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Day Streak</p>
-                <p className="text-xl font-bold">{stats.streak} Days</p>
+                <p className="text-xs font-bold uppercase text-slate-400">Rank</p>
+                <p className="text-sm font-bold text-slate-800">{rank.name}</p>
+              </div>
+              <div className="h-8 w-px bg-slate-200 mx-2" />
+              <div>
+                <p className="text-xs font-bold uppercase text-slate-400">XP</p>
+                <p className="text-sm font-bold text-indigo-600">{formatXP(user?.xp || 0)}</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
 
-      {/* KPI Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className={tokens.glass.card}>
-          <CardContent className="p-6 flex items-center gap-4">
-            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-              <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Courses in Progress</p>
-              <h3 className="text-2xl font-bold">{stats.inProgress}</h3>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className={tokens.glass.card}>
-          <CardContent className="p-6 flex items-center gap-4">
-            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
-              <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Lessons Completed</p>
-              <h3 className="text-2xl font-bold">{stats.completed}</h3>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className={tokens.glass.card}>
-          <CardContent className="p-6 flex items-center gap-4">
-            <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl">
-              <Trophy className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Achievements</p>
-              <h3 className="text-2xl font-bold">0</h3>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Next Lesson Hero */}
-      {nextLesson && (
-        <Card className={cx(tokens.glass.card, "overflow-hidden border-primary/20 shadow-lg")}>
-          <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
-          <CardContent className="p-6 sm:p-8">
-            <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 border-none">
+          {/* Primary Action Card (Next Lesson) */}
+          <Card className="bg-white border-l-4 border-l-primary shadow-md overflow-hidden relative group cursor-pointer hover:shadow-lg transition-all">
+            <CardContent className="p-6">
+              <div className="flex justify-between items-start">
+                <div>
+                  <Badge className="mb-3 bg-primary/10 text-primary hover:bg-primary/20 border-none">
                     Up Next
                   </Badge>
-                  <span className="text-sm text-muted-foreground">{nextLesson.courseTitle}</span>
+                  <h2 className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">
+                    The Power of Tefillah
+                  </h2>
+                  <p className="text-slate-500 mb-6 max-w-lg">
+                    Continue exactly where you left off in Lesson 4: "Hitbodedut Basics"
+                  </p>
+                  
+                  <div className="flex items-center gap-4">
+                    <Button size="lg" className="rounded-full px-8 shadow-lg shadow-primary/20">
+                      <Play className="w-4 h-4 mr-2 fill-current" />
+                      Resume
+                    </Button>
+                    <div className="flex items-center gap-2 text-sm text-slate-500">
+                      <Clock className="w-4 h-4" />
+                      15 min remaining
+                    </div>
+                  </div>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-bold mb-3">{nextLesson.title}</h2>
-                <div className="flex items-center gap-4 max-w-md">
-                  <Progress value={nextLesson.progress} className="h-2" />
-                  <span className="text-sm font-medium whitespace-nowrap">{Math.round(nextLesson.progress)}% complete</span>
+                
+                {/* Visual Graphic */}
+                <div className="hidden md:block absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-slate-50 to-transparent">
+                  <div className="absolute inset-0 flex items-center justify-center opacity-10">
+                    <BookOpen className="w-32 h-32 text-slate-900" />
+                  </div>
                 </div>
               </div>
-              <div className="w-full md:w-auto">
-                <Button size="lg" className="w-full md:w-auto h-12 text-base shadow-md" asChild>
-                  <Link to={nextLesson.id 
-                    ? createPageUrl(`LessonViewerPremium?id=${nextLesson.id}`) 
-                    : createPageUrl(`CourseDetail?id=${nextLesson.courseId}`)
-                  }>
-                    <Play className="w-5 h-5 mr-2 fill-current" />
-                    Resume Learning
-                  </Link>
-                </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Sidebar Widgets */}
+        <div className="space-y-6">
+          <ZmanimWidget />
+          
+          {/* Streak Widget */}
+          <Card className="bg-orange-50 border-orange-100">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <div className="text-xs font-bold text-orange-400 uppercase tracking-wider mb-1">Current Streak</div>
+                <div className="text-3xl font-bold text-orange-900">{stats.streak} Days</div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+              <div className="bg-white p-3 rounded-full shadow-sm">
+                <Flame className="w-8 h-8 text-orange-500 fill-orange-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            <Link to={createPageUrl('DafYomi')} className="block">
+              <Button variant="outline" className="w-full h-auto py-4 flex flex-col gap-2 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50">
+                <BookOpen className="w-6 h-6 text-indigo-600" />
+                <span className="text-xs font-medium">Daf Yomi</span>
+              </Button>
+            </Link>
+            <Link to={createPageUrl('Forums')} className="block">
+              <Button variant="outline" className="w-full h-auto py-4 flex flex-col gap-2 border-slate-200 hover:border-green-300 hover:bg-green-50">
+                <Clock className="w-6 h-6 text-green-600" />
+                <span className="text-xs font-medium">Community</span>
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
 
       {/* Course Grid */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className={tokens.text.h2}>Your Courses</h2>
-          <Button variant="ghost" asChild className="group">
-            <Link to={createPageUrl('Courses')}>
-              View All <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Link>
+      <div className="mt-12">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">My Courses</h2>
+          <Button variant="ghost" className="text-slate-500 hover:text-slate-900">
+            View All
           </Button>
         </div>
+        
         {courses.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {courses.map(course => (
               <CourseCard key={course.id} course={course} />
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-muted/30 rounded-xl border-2 border-dashed border-border">
-            <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-            <p className="text-muted-foreground">You haven't enrolled in any courses yet.</p>
-            <Button variant="link" asChild className="mt-2 text-primary">
-              <Link to={createPageUrl('Courses')}>Browse Catalog</Link>
-            </Button>
-          </div>
+          <Card className="bg-slate-50 border-dashed border-2 border-slate-200">
+            <CardContent className="py-12 flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+                <BookOpen className="w-8 h-8 text-slate-300" />
+              </div>
+              <h3 className="text-lg font-medium text-slate-900 mb-1">Start your journey</h3>
+              <p className="text-slate-500 mb-6 max-w-sm">
+                Explore our catalog of Torah, Chassidus, and skill-building courses.
+              </p>
+              <Button>Browse Catalog</Button>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
